@@ -5,6 +5,7 @@ const InboxView: React.FC = () => {
   const [emails, setEmails] = useState<Email[]>([]);
   const [selected, setSelected] = useState<Email | null>(null);
   const [feedback, setFeedback] = useState<string>("");
+  const [score, setScore] = useState(0);
 
   useEffect(() => {
     const loadEmails = async () => {
@@ -23,6 +24,11 @@ const InboxView: React.FC = () => {
 
     const isCorrect = selected.is_phish === isPhishGuess;
     setFeedback(isCorrect ? "Correct" : "Wrong");
+    const correct = selected.is_phish === isPhishGuess;
+
+    if (isCorrect) {
+    setScore(prev => prev + 1);
+    }
 
     try {
       await submitResult("luke", isCorrect);
@@ -39,6 +45,7 @@ const InboxView: React.FC = () => {
 
   return (
     <div style={{ display: "flex", gap: "1rem" }}>
+      <h3>Score: {score}</h3>
       {/* Sidebar */}
       <div style={{ width: "250px", borderRight: "1px solid #ccc" }}>
         <h3>Inbox</h3>
