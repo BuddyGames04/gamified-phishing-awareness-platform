@@ -44,8 +44,12 @@ const InboxView: React.FC = () => {
   };
 
   return (
-    <div style={{ display: "flex", gap: "1rem" }}>
+
+    <div style={{ textAlign: "center", marginTop: "1rem" }}>
+      <h1>Inbox Simulator</h1>
       <h3>Score: {score}</h3>
+    <div style={{ display: "flex", gap: "1rem" }}>
+      
       {/* Sidebar */}
       <div style={{ width: "250px", borderRight: "1px solid #ccc" }}>
         <h3>Inbox</h3>
@@ -64,6 +68,7 @@ const InboxView: React.FC = () => {
           </div>
         ))}
       </div>
+      
 
       {/* Main email view */}
       <div style={{ flex: 1, padding: "1rem" }}>
@@ -85,6 +90,7 @@ const InboxView: React.FC = () => {
         )}
       </div>
     </div>
+  </div>
   );
 };
 
