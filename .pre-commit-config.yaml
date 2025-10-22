@@ -1,0 +1,64 @@
+repos:
+  # --- PYTHON BACKEND ---
+  - repo: https://github.com/psf/black
+    rev: 24.4.2
+    hooks:
+      - id: black
+        language_version: python3.12
+
+  - repo: https://github.com/pre-commit/mirrors-isort
+    rev: v5.9.3
+    hooks:
+      - id: isort
+        args: ["--profile", "black"]
+
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        additional_dependencies:
+          - flake8-bugbear
+          - flake8-comprehensions
+        exclude: migrations|__pycache__
+
+  # --- JAVASCRIPT / TYPESCRIPT FRONTEND ---
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v9.13.0
+    hooks:
+      - id: eslint
+        name: eslint (frontend)
+        language: node
+        types: [javascript, ts, tsx]
+        files: ^src/frontend/
+        args:
+          - "src/frontend/src/**/*.{ts,tsx,js,jsx}"
+          - "--max-warnings=0"
+          - "--fix"
+        additional_dependencies:
+          - "eslint@9.13.0"
+          - "@typescript-eslint/parser@7.8.0"
+          - "@typescript-eslint/eslint-plugin@7.8.0"
+
+
+
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.1.0
+    hooks:
+      - id: prettier
+        name: prettier (frontend)
+        language: node
+        types_or: [javascript, ts, tsx, json, css, markdown]
+        files: ^src/frontend/
+        args:
+          - "--write"
+          - "src/frontend/src/**/*.{ts,tsx,css,json,md}"
+
+
+  # --- YAML / CONFIG CHECKS ---
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace

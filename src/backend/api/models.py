@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class Email(models.Model):
     sender = models.CharField(max_length=255)
     subject = models.CharField(max_length=255)
@@ -11,6 +12,7 @@ class Email(models.Model):
 
     def __str__(self):
         return f"{self.subject} ({'Phish' if self.is_phish else 'Legit'})"
+
 
 class UserProgress(models.Model):
     user_id = models.CharField(max_length=255)  # placeholder for now (no auth)

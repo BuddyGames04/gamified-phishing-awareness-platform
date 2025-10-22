@@ -37,4 +37,3 @@ Week-by-week plan for the whole project. Update this as you go along.
 * **Week 22**
 * **Week 23 [TERM ENDS]**
 * **Week 24** Dissertation submission deadline and presentations.
-
