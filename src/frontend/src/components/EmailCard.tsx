@@ -1,5 +1,5 @@
-import React from "react";
-import { Email } from "../api";
+import React from 'react';
+import { Email } from '../api';
 
 interface EmailCardProps {
   email: Email;
@@ -12,10 +12,10 @@ const EmailCard: React.FC<EmailCardProps> = ({ email, onSelect, selected }) => {
     <div
       onClick={() => onSelect(email)}
       style={{
-        padding: "8px",
-        cursor: "pointer",
-        background: selected ? "#eef" : "white",
-        borderBottom: "1px solid #ddd",
+        padding: '8px',
+        cursor: 'pointer',
+        background: selected ? '#eef' : 'white',
+        borderBottom: '1px solid #ddd',
       }}
     >
       <strong>{email.sender}</strong>

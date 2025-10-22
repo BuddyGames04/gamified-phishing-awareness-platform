@@ -1,14 +1,16 @@
-from django.shortcuts import render
-from rest_framework.response import Response
 from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
 from .models import Email, UserProgress
 from .serializers import EmailSerializer, UserProgressSerializer
+
 
 @api_view(["GET"])
 def get_emails(request):
     emails = Email.objects.all()
     serializer = EmailSerializer(emails, many=True)
     return Response(serializer.data)
+
 
 @api_view(["POST"])
 def submit_result(request):
