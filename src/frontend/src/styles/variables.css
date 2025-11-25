@@ -1,0 +1,11 @@
+:root {
+  --color-primary: #2F4F6F;
+  --color-secondary: #00A8E8;
+  --color-success: #D4EDDA;
+  --color-danger: #F8D7DA;
+  --color-bg: #F4F6F9;
+  --color-email-bg: #FFFFFF;
+  --color-accent: #FFC107;
+  --color-text-main: #1C1C1C;
+  --color-text-muted: #5F6368;
+}
