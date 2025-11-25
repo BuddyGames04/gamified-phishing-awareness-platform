@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Email, fetchEmails, submitResult } from '../api';
-import '../App.css'; 
+import '../App.css';
 import '../styles/ArcadeMode.css';
-
 
 const ArcadeMode: React.FC = () => {
   const [emails, setEmails] = useState<Email[]>([]);

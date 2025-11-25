@@ -1,14 +1,4 @@
-:root {
-  --bg-light: #f7f9fc;
-  --text-dark: #1f2933;
-  --primary: #3f51b5;
-  --accent: #5c6bc0;
-  --positive: #d4edda;
-  --negative: #f8d7da;
-  --positive-text: #155724;
-  --negative-text: #721c24;
-}
-
+@import './styles/variables.css';
 .App {
   text-align: center;
   background-color: var(--color-bg);

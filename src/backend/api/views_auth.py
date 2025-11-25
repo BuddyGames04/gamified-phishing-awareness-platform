@@ -1,11 +1,11 @@
-from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework import status
+from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.authtoken.models import Token
-from django.views.decorators.csrf import csrf_exempt
 
 
 @csrf_exempt
@@ -25,6 +25,7 @@ def register(request):
     token, _ = Token.objects.get_or_create(user=user)
 
     return Response({"token": token.key, "username": user.username}, status=201)
+
 
 @csrf_exempt
 @api_view(["POST"])

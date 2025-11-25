@@ -1,5 +1,4 @@
-const API_BASE =
-  process.env.REACT_APP_API_BASE || 'http://localhost:8000/api';
+const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:8000/api';
 
 export async function login(username: string, password: string) {
   const res = await fetch(`${API_BASE}/login/`, {
@@ -37,11 +36,7 @@ export function authFetch(url: string, options: any = {}) {
     headers: {
       ...(options.headers || {}),
       'Content-Type': 'application/json',
-      ...(token ? { 'Authorization': `Token ${token}` } : {})
-      
+      ...(token ? { Authorization: `Token ${token}` } : {}),
     },
   });
 }
-
-
-

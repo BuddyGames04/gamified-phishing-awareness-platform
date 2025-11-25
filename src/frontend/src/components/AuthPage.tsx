@@ -20,7 +20,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
       localStorage.setItem('authToken', data.token);
       localStorage.setItem('username', data.username);
       onAuthSuccess(data.username);
-      console.log("Login succeeded, data:", data);
+      console.log('Login succeeded, data:', data);
     } catch (err) {
       setError('Authentication failed');
       console.error(err);
