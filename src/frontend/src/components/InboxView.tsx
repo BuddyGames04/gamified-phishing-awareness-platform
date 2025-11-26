@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Email, fetchEmails, submitResult } from '../api';
+import '../App.css';
+import '../styles/InboxView.css';
 
 const InboxView: React.FC = () => {
   const [emails, setEmails] = useState<Email[]>([]);
@@ -24,7 +26,6 @@ const InboxView: React.FC = () => {
 
     const isCorrect = selected.is_phish === isPhishGuess;
     setFeedback(isCorrect ? 'Correct' : 'Wrong');
-    const correct = selected.is_phish === isPhishGuess;
 
     if (isCorrect) {
       setScore((prev) => prev + 1);
@@ -36,7 +37,7 @@ const InboxView: React.FC = () => {
       console.error('Error submitting result:', err);
     }
 
-    // Reset after 1.2s
+    // Reset after delay
     setTimeout(() => {
       setSelected(null);
       setFeedback('');
@@ -47,19 +48,16 @@ const InboxView: React.FC = () => {
     <div style={{ textAlign: 'center', marginTop: '1rem' }}>
       <h1>Inbox Simulator</h1>
       <h3>Score: {score}</h3>
-      <div style={{ display: 'flex', gap: '1rem' }}>
+
+      <div className="inbox-container">
         {/* Sidebar */}
-        <div style={{ width: '250px', borderRight: '1px solid #ccc' }}>
-          <h3>Inbox</h3>
+        <div className="sidebar">
+          <h3 style={{ padding: '1rem' }}>Inbox</h3>
           {emails.map((email) => (
             <div
               key={email.id}
               onClick={() => setSelected(email)}
-              style={{
-                padding: '8px',
-                cursor: 'pointer',
-                background: selected?.id === email.id ? '#eef' : 'white',
-              }}
+              className={`sidebar-email ${selected?.id === email.id ? 'selected' : ''}`}
             >
               <strong>{email.sender}</strong>
               <div>{email.subject}</div>
@@ -67,22 +65,20 @@ const InboxView: React.FC = () => {
           ))}
         </div>
 
-        {/* Main email view */}
-        <div style={{ flex: 1, padding: '1rem' }}>
+        {/* Main content */}
+        <div className="email-body">
           {selected ? (
             <>
-              <h2>{selected.subject}</h2>
-              <p>
-                <em>From:</em> {selected.sender}
-              </p>
-              <p>{selected.body}</p>
+              <div className="email-subject">{selected.subject}</div>
+              <div className="email-from">From: {selected.sender}</div>
+              <div className="email-content">{selected.body}</div>
 
-              <div style={{ marginTop: '1rem' }}>
+              <div className="email-actions">
                 <button onClick={() => handleDecision(true)}>Report Phish</button>
                 <button onClick={() => handleDecision(false)}>Mark Safe</button>
               </div>
 
-              {feedback && <p style={{ fontSize: '1.2em' }}>{feedback}</p>}
+              {feedback && <div className="feedback">{feedback}</div>}
             </>
           ) : (
             <p>Select an email to read</p>

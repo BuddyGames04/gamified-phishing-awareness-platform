@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Email, fetchEmails, submitResult } from '../api';
+import '../App.css';
+import '../styles/ArcadeMode.css';
 
 const ArcadeMode: React.FC = () => {
   const [emails, setEmails] = useState<Email[]>([]);
@@ -32,24 +34,16 @@ const ArcadeMode: React.FC = () => {
     <div style={{ textAlign: 'center', marginTop: '2rem' }}>
       <h1>Arcade Mode</h1>
       <h3>Score: {score}</h3>
-      <div
-        style={{
-          margin: '1rem auto',
-          maxWidth: '600px',
-          border: '1px solid #ccc',
-          padding: '1rem',
-        }}
-      >
+
+      <div className="arcade-box">
         <h2>{email.subject}</h2>
-        <p>
-          <em>From:</em> {email.sender}
-        </p>
-        <p>{email.body}</p>
-        <div style={{ marginTop: '1rem' }}>
+        <div className="email-from">From: {email.sender}</div>
+        <div className="arcade-email-body">{email.body}</div>
+        <div>
           <button onClick={() => handleGuess(true)}>Phish</button>
           <button onClick={() => handleGuess(false)}>Not Phish</button>
         </div>
-        {feedback && <p style={{ fontSize: '1.2em' }}>{feedback}</p>}
+        {feedback && <div className="arcade-feedback">{feedback}</div>}
       </div>
     </div>
   );

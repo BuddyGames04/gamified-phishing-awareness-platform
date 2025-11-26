@@ -1,0 +1,52 @@
+@import './variables.css';
+
+.arcade-box {
+  margin: 1rem auto;
+  max-width: 600px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 2rem;
+  background: var(--color-email-bg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.arcade-box h2 {
+  margin-bottom: 0.5rem;
+}
+
+.arcade-box .email-from {
+  font-style: italic;
+  color: var(--color-text-muted);
+  margin-bottom: 1rem;
+}
+
+.arcade-email-body {
+  margin-bottom: 1.5rem;
+  text-align: left;
+  white-space: pre-wrap;
+}
+
+.arcade-box button {
+  margin: 0 0.5rem;
+  padding: 8px 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.arcade-box button:first-child {
+  background-color: var(--color-danger);
+  color: #a00;
+}
+
+.arcade-box button:last-child {
+  background-color: var(--color-success);
+  color: #0a0;
+}
+
+.arcade-feedback {
+  margin-top: 1rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
