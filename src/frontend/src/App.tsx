@@ -1,32 +1,26 @@
 import React, { useState } from 'react';
 import './App.css';
-import InboxView from './components/InboxView';
-import ArcadeMode from './components/ArcadeMode';
+import { InboxView } from './components/InboxView';
+import ArcadeGame from './components/ArcadeGame';
+import MenuView from './components/MenuView';
+import LevelSelectView from './components/LevelSelectView';
+
+type Screen = 'menu' | 'inbox' | 'arcade' | 'levels';
 
 const App: React.FC = () => {
-  const [mode, setMode] = useState<'inbox' | 'arcade'>('inbox');
+  const [screen, setScreen] = useState<Screen>('menu');
+
+  const handleLevelSelect = (level: number) => {
+    // Currently all levels load the same InboxView
+    setScreen('inbox');
+  };
 
   return (
     <div className="App">
-      <header className="app-header">
-        <h1 className="app-title">Phishing Awareness Platform</h1>
-        <div className="mode-switch">
-          <button
-            onClick={() => setMode('inbox')}
-            className={mode === 'inbox' ? 'active' : ''}
-          >
-            Inbox Mode
-          </button>
-          <button
-            onClick={() => setMode('arcade')}
-            className={mode === 'arcade' ? 'active' : ''}
-          >
-            Arcade Mode
-          </button>
-        </div>
-      </header>
-
-      {mode === 'inbox' ? <InboxView /> : <ArcadeMode />}
+      {screen === 'menu' && <MenuView navigate={setScreen} />}
+      {screen === 'arcade' && <ArcadeGame onExit={() => setScreen('menu')} />}
+      {screen === 'levels' && <LevelSelectView onLevelSelect={handleLevelSelect} />}
+      {screen === 'inbox' && <InboxView onExit={() => setScreen('menu')} />}
     </div>
   );
 };

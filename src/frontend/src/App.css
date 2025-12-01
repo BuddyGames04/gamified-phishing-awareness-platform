@@ -62,10 +62,53 @@
 }
 
 .mode-switch button:hover {
-  background-color: #007bbd; 
+  background-color: #007bbd;
 }
 
 .mode-switch button.active {
   background-color: var(--color-accent);
   color: #333;
+}
+
+.menu-view,
+.level-select-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 4rem;
+}
+
+.menu-view button,
+.level-select-view button {
+  margin: 1rem;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  background-color: var(--color-secondary);
+  color: white;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.menu-view button:hover:not([disabled]),
+.level-select-view button:hover {
+  background-color: #007bbd;
+}
+
+.inbox-view button,
+.arcade-mode button {
+  margin-top: 2rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.inbox-view button:hover,
+.arcade-mode button:hover {
+  background-color: #1e3a56;
 }

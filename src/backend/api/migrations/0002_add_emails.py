@@ -1,9 +1,9 @@
 from django.db import migrations
 
+
 def seed_emails(apps, schema_editor):
     Email = apps.get_model("api", "Email")
 
-    
     Email.objects.create(
         sender="security1@lloydsbank-notify.com",
         subject="Urgent: Unusual Login attempt Detected on You're Account",
@@ -17,7 +17,7 @@ def seed_emails(apps, schema_editor):
         ),
         is_phish=True,
         difficulty=2,
-        category="banking"
+        category="banking",
     )
     Email.objects.create(
         sender="ceo@yourcompany.com",
@@ -32,7 +32,7 @@ def seed_emails(apps, schema_editor):
         ),
         is_phish=False,
         difficulty=1,
-        category="internal"
+        category="internal",
     )
     Email.objects.create(
         sender="hr-department@yourcompany-payroll.com",
@@ -47,7 +47,7 @@ def seed_emails(apps, schema_editor):
         ),
         is_phish=True,
         difficulty=3,
-        category="workplace"
+        category="workplace",
     )
     Email.objects.create(
         sender="studentservices@university.edu",
@@ -61,7 +61,7 @@ def seed_emails(apps, schema_editor):
         ),
         is_phish=False,
         difficulty=1,
-        category="education"
+        category="education",
     )
     Email.objects.create(
         sender="billing@britishgas.co.uk",
@@ -76,7 +76,7 @@ def seed_emails(apps, schema_editor):
         ),
         is_phish=False,
         difficulty=2,
-        category="billing"
+        category="billing",
     )
     Email.objects.create(
         sender="notifications@dpd-tracking.uk",
@@ -90,7 +90,7 @@ def seed_emails(apps, schema_editor):
         ),
         is_phish=True,
         difficulty=2,
-        category="logistics"
+        category="logistics",
     )
     Email.objects.create(
         sender="meetings@zoom.us",
@@ -104,7 +104,7 @@ def seed_emails(apps, schema_editor):
         ),
         is_phish=False,
         difficulty=1,
-        category="calendar"
+        category="calendar",
     )
     Email.objects.create(
         sender="relief@studentaid-update.com",
@@ -118,7 +118,7 @@ def seed_emails(apps, schema_editor):
         ),
         is_phish=True,
         difficulty=3,
-        category="education"
+        category="education",
     )
     Email.objects.create(
         sender="receipts@amazon.co.uk",
@@ -135,7 +135,7 @@ def seed_emails(apps, schema_editor):
         ),
         is_phish=False,
         difficulty=2,
-        category="purchase"
+        category="purchase",
     )
     Email.objects.create(
         sender="noreply@github-security.io",
@@ -148,10 +148,9 @@ def seed_emails(apps, schema_editor):
         ),
         is_phish=True,
         difficulty=4,
-        category="developer"
+        category="developer",
     )
 
-    
 
 class Migration(migrations.Migration):
 

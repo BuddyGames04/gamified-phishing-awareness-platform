@@ -3,7 +3,11 @@ import { Email, fetchEmails, submitResult } from '../api';
 import '../App.css';
 import '../styles/InboxView.css';
 
-const InboxView: React.FC = () => {
+interface Props {
+  onExit: () => void;
+}
+
+export const InboxView: React.FC<Props> = ({ onExit }) => {
   const [emails, setEmails] = useState<Email[]>([]);
   const [selected, setSelected] = useState<Email | null>(null);
   const [feedback, setFeedback] = useState<string>('');
@@ -48,6 +52,9 @@ const InboxView: React.FC = () => {
     <div style={{ textAlign: 'center', marginTop: '1rem' }}>
       <h1>Inbox Simulator</h1>
       <h3>Score: {score}</h3>
+      <button style={{ marginBottom: '1rem' }} onClick={onExit}>
+        Exit to Main Menu
+      </button>
 
       <div className="inbox-container">
         {/* Sidebar */}
