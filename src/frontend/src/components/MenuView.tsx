@@ -18,4 +18,3 @@ const MenuView: React.FC<Props> = ({ navigate }) => {
 };
 
 export default MenuView;
-

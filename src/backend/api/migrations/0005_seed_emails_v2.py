@@ -1,5 +1,6 @@
 from django.db import migrations
 
+
 def seed_emails(apps, schema_editor):
     Email = apps.get_model("api", "Email")
 
@@ -38,8 +39,9 @@ def seed_emails(apps, schema_editor):
         attachments=[],
     )
 
-    # Add the rest here 
+    # Add the rest here
     # and add some links/attachments to the phishy ones)
+
 
 class Migration(migrations.Migration):
     dependencies = [
