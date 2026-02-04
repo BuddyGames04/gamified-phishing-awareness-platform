@@ -2,8 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Email, fetchEmails, submitResult } from '../api';
 import '../App.css';
 import '../styles/ArcadeMode.css';
+interface Props {
+  onExit: () => void;
+}
 
-const ArcadeMode: React.FC = () => {
+const ArcadeGame: React.FC<Props> = ({ onExit }) => {
   const [emails, setEmails] = useState<Email[]>([]);
   const [index, setIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -37,7 +40,9 @@ const ArcadeMode: React.FC = () => {
 
       <div className="arcade-box">
         <h2>{email.subject}</h2>
-        <div className="email-from">From: {email.sender}</div>
+        <div className="email-from">
+          From: {email.sender_name} &lt;{email.sender_email}&gt;
+        </div>
         <div className="arcade-email-body">{email.body}</div>
         <div>
           <button onClick={() => handleGuess(true)}>Phish</button>
@@ -49,4 +54,4 @@ const ArcadeMode: React.FC = () => {
   );
 };
 
-export default ArcadeMode;
+export default ArcadeGame;

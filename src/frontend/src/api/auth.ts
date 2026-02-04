@@ -31,12 +31,20 @@ export async function register(username: string, password: string) {
 export function authFetch(url: string, options: any = {}) {
   const token = localStorage.getItem('authToken');
 
+  const headers: any = {
+    ...(options.headers || {}),
+  };
+
+  if (!(options.method === 'GET')) {
+    headers['Content-Type'] = 'application/json';
+  }
+
+  if (token) {
+    headers['Authorization'] = `Token ${token}`;
+  }
+
   return fetch(url, {
     ...options,
-    headers: {
-      ...(options.headers || {}),
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Token ${token}` } : {}),
-    },
+    headers,
   });
 }

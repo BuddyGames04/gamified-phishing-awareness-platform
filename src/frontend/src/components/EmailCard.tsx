@@ -18,7 +18,7 @@ const EmailCard: React.FC<EmailCardProps> = ({ email, onSelect, selected }) => {
         borderBottom: '1px solid #ddd',
       }}
     >
-      <strong>{email.sender}</strong>
+      <strong>{email.sender_name}</strong>
       <div>{email.subject}</div>
     </div>
   );
