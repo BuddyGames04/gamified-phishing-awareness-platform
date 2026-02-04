@@ -13,7 +13,6 @@ export interface Email {
   attachments?: string[];
 }
 
-
 export interface UserProgress {
   user_id: string;
   score: number;
