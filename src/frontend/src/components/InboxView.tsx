@@ -60,13 +60,13 @@ export const InboxView: React.FC<Props> = ({ onExit }) => {
         {/* Sidebar */}
         <div className="sidebar">
           <h3 style={{ padding: '1rem' }}>Inbox</h3>
-          {emails.map((email) => (
+          {emails.map((email, i) => (
             <div
               key={email.id}
               onClick={() => setSelected(email)}
               className={`sidebar-email ${selected?.id === email.id ? 'selected' : ''}`}
             >
-              <strong>{email.sender}</strong>
+              <strong>{email.sender_name}</strong>
               <div>{email.subject}</div>
             </div>
           ))}
@@ -77,8 +77,37 @@ export const InboxView: React.FC<Props> = ({ onExit }) => {
           {selected ? (
             <>
               <div className="email-subject">{selected.subject}</div>
-              <div className="email-from">From: {selected.sender}</div>
+              <div className="email-from">
+                From: {selected.sender_name} &lt;{selected.sender_email}&gt;
+              </div>
+
               <div className="email-content">{selected.body}</div>
+
+              {selected.links && selected.links.length > 0 && (
+                <div className="email-links">
+                  <h4>Links</h4>
+                  <ul>
+                    {selected.links.map((link, i) => (
+                      <li key={i}>
+                        <a href={link} target="_blank" rel="noopener noreferrer">
+                          {link}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {selected.attachments && selected.attachments.length > 0 && (
+                <div className="email-attachments">
+                  <h4>Attachments</h4>
+                  <ul>
+                    {selected.attachments.map((file, i) => (
+                      <li key={i}>📎 {file}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
               <div className="email-actions">
                 <button onClick={() => handleDecision(true)}>Report Phish</button>

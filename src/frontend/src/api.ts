@@ -2,13 +2,17 @@ import { authFetch } from './api/auth';
 
 export interface Email {
   id: number;
-  sender: string;
+  sender_name: string;
+  sender_email: string;
   subject: string;
   body: string;
   is_phish: boolean;
   difficulty: number;
   category?: string;
+  links?: string[];
+  attachments?: string[];
 }
+
 
 export interface UserProgress {
   user_id: string;
