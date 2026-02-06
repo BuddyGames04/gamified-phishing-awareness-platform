@@ -1,8 +1,8 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from .models import Email, UserProgress
-from .serializers import EmailSerializer, UserProgressSerializer
+from .models import Email, UserProgress, InteractionEvent
+from .serializers import EmailSerializer, UserProgressSerializer, InteractionEventSerializer
 
 
 @api_view(["GET"])
@@ -29,3 +29,31 @@ def submit_result(request):
 
     serializer = UserProgressSerializer(progress)
     return Response(serializer.data)
+
+@api_view(["POST"])
+def record_interaction(request):
+    user_id = request.data.get("user_id")
+    email_id = request.data.get("email_id")
+    event_type = request.data.get("event_type")
+    value = request.data.get("value", None)
+
+    if not user_id or not email_id or not event_type:
+        return Response(
+            {"detail": "user_id, email_id, and event_type are required"},
+            status=400,
+        )
+
+    try:
+        email = Email.objects.get(id=email_id)
+    except Email.DoesNotExist:
+        return Response({"detail": "Email not found"}, status=404)
+
+    event = InteractionEvent.objects.create(
+        user_id=user_id,
+        email=email,
+        event_type=event_type,
+        value=value,
+    )
+
+    serializer = InteractionEventSerializer(event)
+    return Response(serializer.data, status=201)

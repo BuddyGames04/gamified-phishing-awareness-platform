@@ -22,6 +22,16 @@ export interface UserProgress {
   last_updated: string;
 }
 
+export interface InteractionEvent {
+  id: number;
+  user_id: string;
+  email: number; // (backend returns FK as id)
+  event_type: string;
+  value?: string | null;
+  created_at: string;
+}
+
+
 const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:8000/api';
 
 export async function fetchEmails(): Promise<Email[]> {
@@ -40,5 +50,26 @@ export async function submitResult(
     body: JSON.stringify({ user_id: userId, is_correct: isCorrect }),
   });
   if (!response.ok) throw new Error('Failed to submit result');
+  return response.json();
+}
+
+export async function submitInteraction(
+  userId: string,
+  emailId: number,
+  eventType: string,
+  value?: string
+): Promise<InteractionEvent> {
+  const response = await authFetch(`${API_BASE}/interaction/`, {
+    method: 'POST',
+    headers: {},
+    body: JSON.stringify({
+      user_id: userId,
+      email_id: emailId,
+      event_type: eventType,
+      value: value ?? null,
+    }),
+  });
+
+  if (!response.ok) throw new Error('Failed to submit interaction');
   return response.json();
 }

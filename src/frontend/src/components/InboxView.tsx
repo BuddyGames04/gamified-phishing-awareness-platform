@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Email, fetchEmails, submitResult } from '../api';
 import '../App.css';
 import '../styles/InboxView.css';
+import InteractionModal from './InteractionModal';
+
 
 interface Props {
   onExit: () => void;
@@ -12,7 +14,10 @@ export const InboxView: React.FC<Props> = ({ onExit }) => {
   const [selected, setSelected] = useState<Email | null>(null);
   const [feedback, setFeedback] = useState<string>('');
   const [score, setScore] = useState(0);
-
+  const [activeLink, setActiveLink] = useState<string | null>(null);
+  const [activeAttachment, setActiveAttachment] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  
   useEffect(() => {
     const loadEmails = async () => {
       try {
@@ -47,6 +52,18 @@ export const InboxView: React.FC<Props> = ({ onExit }) => {
       setFeedback('');
     }, 1200);
   };
+
+  const closeModal = () => {
+  setActiveLink(null);
+  setActiveAttachment(null);
+  };
+
+  const proceedModal = () => {
+    // Simulation-only: does nothing for now.
+    // Later: log a "clicked link" / "opened attachment" event.
+    closeModal();
+  };
+
 
   return (
     <div style={{ textAlign: 'center', marginTop: '1rem' }}>
@@ -89,12 +106,37 @@ export const InboxView: React.FC<Props> = ({ onExit }) => {
                   <ul>
                     {selected.links.map((link, i) => (
                       <li key={i}>
-                        <a href={link} target="_blank" rel="noopener noreferrer">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActiveLink(link);
+                            setActiveAttachment(null);
+                            setShowModal(true);
+                          }}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            padding: 0,
+                            margin: 0,
+                            color: '#06c',
+                            textDecoration: 'underline',
+                            cursor: 'pointer',
+                            font: 'inherit',
+                          }}
+                        >
                           {link}
-                        </a>
+                        </button>
                       </li>
                     ))}
                   </ul>
+                  {(activeLink || activeAttachment) && (
+                    <InteractionModal
+                      type={activeLink ? 'link' : 'attachment'}
+                      value={activeLink ?? activeAttachment ?? ''}
+                      onClose={closeModal}
+                      onProceed={proceedModal}
+                    />
+                )}
                 </div>
               )}
 
@@ -103,7 +145,26 @@ export const InboxView: React.FC<Props> = ({ onExit }) => {
                   <h4>Attachments</h4>
                   <ul>
                     {selected.attachments.map((file, i) => (
-                      <li key={i}>📎 {file}</li>
+                      <li key={i}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActiveAttachment(file);
+                            setActiveLink(null);
+                            setShowModal(true);
+                          }}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            padding: 0,
+                            margin: 0,
+                            cursor: 'pointer',
+                            font: 'inherit',
+                          }}
+                        >
+                          📎 {file}
+                        </button>
+                      </li>
                     ))}
                   </ul>
                 </div>
