@@ -1,18 +1,38 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from .models import Email, InteractionEvent, UserProgress
+from .models import Email, InteractionEvent, UserProgress, Scenario
 from .serializers import (
     EmailSerializer,
     InteractionEventSerializer,
     UserProgressSerializer,
+    ScenarioSerializer,
 )
 
 
 @api_view(["GET"])
 def get_emails(request):
+    mode = request.query_params.get("mode")  # "arcade" or "simulation"
+    scenario_id = request.query_params.get("scenario_id")
+
     emails = Email.objects.all()
+
+    if mode:
+        emails = emails.filter(mode=mode)
+
+    if scenario_id:
+        emails = emails.filter(scenario_id=scenario_id)
+
+    emails = emails.order_by("id")
+    
     serializer = EmailSerializer(emails, many=True)
+    return Response(serializer.data)
+
+
+@api_view(["GET"])
+def get_scenarios(request):
+    scenarios = Scenario.objects.all()
+    serializer = ScenarioSerializer(scenarios, many=True)
     return Response(serializer.data)
 
 

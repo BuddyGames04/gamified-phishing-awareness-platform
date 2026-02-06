@@ -20,7 +20,13 @@ const App: React.FC = () => {
       {screen === 'menu' && <MenuView navigate={setScreen} />}
       {screen === 'arcade' && <ArcadeGame onExit={() => setScreen('menu')} />}
       {screen === 'levels' && <LevelSelectView onLevelSelect={handleLevelSelect} />}
-      {screen === 'inbox' && <InboxView onExit={() => setScreen('menu')} />}
+      {screen === 'inbox' && (<InboxView
+        onExit={() => setScreen('menu')}
+        mode="simulation"
+        userId="luke"
+      />
+  )}
+
     </div>
   );
 };

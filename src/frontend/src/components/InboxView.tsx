@@ -6,9 +6,13 @@ import InteractionModal from './InteractionModal';
 
 interface Props {
   onExit: () => void;
+  mode: 'arcade' | 'simulation';
+  scenarioId?: number;
+  userId: string; // for submitResult + later username
 }
 
-export const InboxView: React.FC<Props> = ({ onExit }) => {
+
+export const InboxView: React.FC<Props> = ({ onExit, mode, scenarioId, userId }) => {
   const [emails, setEmails] = useState<Email[]>([]);
   const [selected, setSelected] = useState<Email | null>(null);
   const [feedback, setFeedback] = useState<string>('');
@@ -20,7 +24,7 @@ export const InboxView: React.FC<Props> = ({ onExit }) => {
   useEffect(() => {
     const loadEmails = async () => {
       try {
-        const data = await fetchEmails();
+        const data = await fetchEmails({ mode, scenario_id: scenarioId });
         setEmails(data);
       } catch (err) {
         console.error('Failed to load emails:', err);
@@ -40,7 +44,7 @@ export const InboxView: React.FC<Props> = ({ onExit }) => {
     }
 
     try {
-      await submitResult('luke', isCorrect);
+      await submitResult(userId, isCorrect);
     } catch (err) {
       console.error('Error submitting result:', err);
     }
