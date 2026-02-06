@@ -4,7 +4,6 @@ import '../App.css';
 import '../styles/InboxView.css';
 import InteractionModal from './InteractionModal';
 
-
 interface Props {
   onExit: () => void;
 }
@@ -17,7 +16,7 @@ export const InboxView: React.FC<Props> = ({ onExit }) => {
   const [activeLink, setActiveLink] = useState<string | null>(null);
   const [activeAttachment, setActiveAttachment] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
-  
+
   useEffect(() => {
     const loadEmails = async () => {
       try {
@@ -54,8 +53,8 @@ export const InboxView: React.FC<Props> = ({ onExit }) => {
   };
 
   const closeModal = () => {
-  setActiveLink(null);
-  setActiveAttachment(null);
+    setActiveLink(null);
+    setActiveAttachment(null);
   };
 
   const proceedModal = () => {
@@ -63,7 +62,6 @@ export const InboxView: React.FC<Props> = ({ onExit }) => {
     // Later: log a "clicked link" / "opened attachment" event.
     closeModal();
   };
-
 
   return (
     <div style={{ textAlign: 'center', marginTop: '1rem' }}>
@@ -136,7 +134,7 @@ export const InboxView: React.FC<Props> = ({ onExit }) => {
                       onClose={closeModal}
                       onProceed={proceedModal}
                     />
-                )}
+                  )}
                 </div>
               )}
 

@@ -28,10 +28,13 @@ class UserProgress(models.Model):
     def __str__(self):
         return f"Progress({self.user_id}): {self.score}pts"
 
+
 class InteractionEvent(models.Model):
     user_id = models.CharField(max_length=255)  # placeholder for now (no auth)
     email = models.ForeignKey(Email, on_delete=models.CASCADE, related_name="events")
-    event_type = models.CharField(max_length=50)  # link_click, attachment_open, open_anyway, etc
+    event_type = models.CharField(
+        max_length=50
+    )  # link_click, attachment_open, open_anyway, etc
     value = models.CharField(max_length=1024, blank=True, null=True)  # url or filename
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -21,10 +21,7 @@ const InteractionModal: React.FC<Props> = ({ type, value, onClose, onProceed }) 
       aria-modal="true"
       onClick={onClose}
     >
-      <div
-        className="interaction-modal-card"
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="interaction-modal-card" onClick={(e) => e.stopPropagation()}>
         <h3 style={{ marginTop: 0 }}>{title}</h3>
 
         <p style={{ marginBottom: '0.5rem' }}>

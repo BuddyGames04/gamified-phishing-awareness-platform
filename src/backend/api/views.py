@@ -1,8 +1,12 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from .models import Email, UserProgress, InteractionEvent
-from .serializers import EmailSerializer, UserProgressSerializer, InteractionEventSerializer
+from .models import Email, InteractionEvent, UserProgress
+from .serializers import (
+    EmailSerializer,
+    InteractionEventSerializer,
+    UserProgressSerializer,
+)
 
 
 @api_view(["GET"])
@@ -29,6 +33,7 @@ def submit_result(request):
 
     serializer = UserProgressSerializer(progress)
     return Response(serializer.data)
+
 
 @api_view(["POST"])
 def record_interaction(request):
