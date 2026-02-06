@@ -13,11 +13,21 @@ export default function ScenarioBriefing(props: {
     <div style={{ maxWidth: 720, margin: '2rem auto', textAlign: 'left' }}>
       <h1>Workday Briefing</h1>
 
-      <p><strong>Company:</strong> {scenario.company_name} ({scenario.sector})</p>
-      <p><strong>Your role:</strong> {scenario.role_title}</p>
-      <p><strong>Department:</strong> {scenario.department_name}</p>
-      <p><strong>Line manager:</strong> {scenario.line_manager_name}</p>
-      <p><strong>You are:</strong> {userDisplayName}</p>
+      <p>
+        <strong>Company:</strong> {scenario.company_name} ({scenario.sector})
+      </p>
+      <p>
+        <strong>Your role:</strong> {scenario.role_title}
+      </p>
+      <p>
+        <strong>Department:</strong> {scenario.department_name}
+      </p>
+      <p>
+        <strong>Line manager:</strong> {scenario.line_manager_name}
+      </p>
+      <p>
+        <strong>You are:</strong> {userDisplayName}
+      </p>
 
       {scenario.intro_text && (
         <>
@@ -27,9 +37,7 @@ export default function ScenarioBriefing(props: {
       )}
 
       <h3>Responsibilities</h3>
-      <ul>
-        {scenario.responsibilities?.map((r, i) => <li key={i}>{r}</li>)}
-      </ul>
+      <ul>{scenario.responsibilities?.map((r, i) => <li key={i}>{r}</li>)}</ul>
 
       <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
         <button onClick={onBack}>Back</button>

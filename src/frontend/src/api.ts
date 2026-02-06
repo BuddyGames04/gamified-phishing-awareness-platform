@@ -98,4 +98,3 @@ export async function fetchScenarios(): Promise<Scenario[]> {
   if (!response.ok) throw new Error('Failed to fetch scenarios');
   return response.json();
 }
-

@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import Email, InteractionEvent, UserProgress, Scenario
+
+from .models import Email, InteractionEvent, Scenario, UserProgress
 
 
 class EmailSerializer(serializers.ModelSerializer):
@@ -18,6 +19,7 @@ class InteractionEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = InteractionEvent
         fields = "__all__"
+
 
 class ScenarioSerializer(serializers.ModelSerializer):
     class Meta:

@@ -16,6 +16,21 @@ jobs:
         python-version: [3.12]
         node-version: [20]
 
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: phishing_game
+          POSTGRES_USER: luke
+          POSTGRES_PASSWORD: yourpassword
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U luke -d phishing_game"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
       # --- 1. Checkout code ---
       - name: Checkout repository
@@ -41,6 +56,14 @@ jobs:
 
       - name: Run Django tests
         working-directory: src/backend
+        env:
+          # If your Django app reads DATABASE_URL, this helps.
+          # Otherwise set the env vars your settings.py expects.
+          DATABASE_HOST: 127.0.0.1
+          DATABASE_PORT: "5432"
+          DATABASE_NAME: phishing_game
+          DATABASE_USER: luke
+          DATABASE_PASSWORD: yourpassword
         run: |
           python manage.py test --noinput
 
@@ -80,16 +103,3 @@ jobs:
         with:
           name: django-test-results
           path: src/backend/test-reports/
-
-  postgres:
-    image: postgres:16
-    env:
-      POSTGRES_DB: phishing_game
-      POSTGRES_USER: luke
-      POSTGRES_PASSWORD: yourpassword
-    ports: ["5432:5432"]
-    options: >-
-      --health-cmd="pg_isready -U luke -d phishing_game"
-      --health-interval=10s
-      --health-timeout=5s
-      --health-retries=5

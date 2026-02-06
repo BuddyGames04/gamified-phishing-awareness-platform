@@ -1,12 +1,12 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from .models import Email, InteractionEvent, UserProgress, Scenario
+from .models import Email, InteractionEvent, Scenario, UserProgress
 from .serializers import (
     EmailSerializer,
     InteractionEventSerializer,
-    UserProgressSerializer,
     ScenarioSerializer,
+    UserProgressSerializer,
 )
 
 
@@ -24,7 +24,7 @@ def get_emails(request):
         emails = emails.filter(scenario_id=scenario_id)
 
     emails = emails.order_by("id")
-    
+
     serializer = EmailSerializer(emails, many=True)
     return Response(serializer.data)
 

@@ -7,5 +7,4 @@ urlpatterns = [
     path("submit/", views.submit_result, name="submit_result"),
     path("interaction/", views.record_interaction),
     path("scenarios/", views.get_scenarios),
-
 ]

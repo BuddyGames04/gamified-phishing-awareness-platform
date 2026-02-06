@@ -11,7 +11,6 @@ interface Props {
   userId: string; // for submitResult + later username
 }
 
-
 export const InboxView: React.FC<Props> = ({ onExit, mode, scenarioId, userId }) => {
   const [emails, setEmails] = useState<Email[]>([]);
   const [selected, setSelected] = useState<Email | null>(null);
