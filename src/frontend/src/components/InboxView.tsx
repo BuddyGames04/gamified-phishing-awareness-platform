@@ -7,30 +7,47 @@ import InteractionModal from './InteractionModal';
 interface Props {
   onExit: () => void;
   mode: 'arcade' | 'simulation';
+  userId: string;
   scenarioId?: number;
-  userId: string; // for submitResult + later username
+  level?: number;
 }
 
-export const InboxView: React.FC<Props> = ({ onExit, mode, scenarioId, userId }) => {
+
+export const InboxView: React.FC<Props> = ({
+  onExit,
+  mode,
+  scenarioId,
+  userId,
+  level,
+}) => {
   const [emails, setEmails] = useState<Email[]>([]);
   const [selected, setSelected] = useState<Email | null>(null);
   const [feedback, setFeedback] = useState<string>('');
   const [score, setScore] = useState(0);
   const [activeLink, setActiveLink] = useState<string | null>(null);
   const [activeAttachment, setActiveAttachment] = useState<string | null>(null);
-  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const loadEmails = async () => {
       try {
-        const data = await fetchEmails({ mode, scenario_id: scenarioId });
+        const { min, max } = getDifficultyWindow(level ?? 1);
+
+        const data = await fetchEmails({
+            mode,
+            scenario_id: scenarioId,
+            level,
+            limit: 15,
+        });
+
         setEmails(data);
       } catch (err) {
         console.error('Failed to load emails:', err);
       }
     };
+
     loadEmails();
-  }, []);
+  }, [mode, scenarioId, level]);
+
 
   const handleDecision = async (isPhishGuess: boolean) => {
     if (!selected) return;
@@ -65,6 +82,10 @@ export const InboxView: React.FC<Props> = ({ onExit, mode, scenarioId, userId })
     // Later: log a "clicked link" / "opened attachment" event.
     closeModal();
   };
+
+  // Normalise backend data (protects against null / wrong types)
+  const safeLinks = selected && Array.isArray(selected.links) ? selected.links : [];
+  const safeAttachments = selected && Array.isArray(selected.attachments) ? selected.attachments : [];
 
   return (
     <div style={{ textAlign: 'center', marginTop: '1rem' }}>
@@ -101,18 +122,17 @@ export const InboxView: React.FC<Props> = ({ onExit, mode, scenarioId, userId })
 
               <div className="email-content">{selected.body}</div>
 
-              {selected.links && selected.links.length > 0 && (
+              {safeLinks.length > 0 && (
                 <div className="email-links">
                   <h4>Links</h4>
                   <ul>
-                    {selected.links.map((link, i) => (
+                    {safeLinks.map((link, i) => (
                       <li key={i}>
                         <button
                           type="button"
                           onClick={() => {
                             setActiveLink(link);
                             setActiveAttachment(null);
-                            setShowModal(true);
                           }}
                           style={{
                             background: 'none',
@@ -130,29 +150,20 @@ export const InboxView: React.FC<Props> = ({ onExit, mode, scenarioId, userId })
                       </li>
                     ))}
                   </ul>
-                  {(activeLink || activeAttachment) && (
-                    <InteractionModal
-                      type={activeLink ? 'link' : 'attachment'}
-                      value={activeLink ?? activeAttachment ?? ''}
-                      onClose={closeModal}
-                      onProceed={proceedModal}
-                    />
-                  )}
                 </div>
               )}
 
-              {selected.attachments && selected.attachments.length > 0 && (
+              {safeAttachments.length > 0 && (
                 <div className="email-attachments">
                   <h4>Attachments</h4>
                   <ul>
-                    {selected.attachments.map((file, i) => (
+                    {safeAttachments.map((file, i) => (
                       <li key={i}>
                         <button
                           type="button"
                           onClick={() => {
                             setActiveAttachment(file);
                             setActiveLink(null);
-                            setShowModal(true);
                           }}
                           style={{
                             background: 'none',
@@ -183,8 +194,26 @@ export const InboxView: React.FC<Props> = ({ onExit, mode, scenarioId, userId })
           )}
         </div>
       </div>
+
+      {(activeLink || activeAttachment) && (
+        <InteractionModal
+          type={activeLink ? 'link' : 'attachment'}
+          value={activeLink ?? activeAttachment ?? ''}
+          onClose={closeModal}
+          onProceed={proceedModal}
+        />
+      )}
     </div>
   );
 };
+
+function getDifficultyWindow(level: number) {
+  if (level <= 3) return { min: 1, max: 1 };
+  if (level <= 6) return { min: 1, max: 2 };
+  if (level <= 10) return { min: 1, max: 3 };
+  if (level <= 15) return { min: 2, max: 4 };
+  return { min: 3, max: 5 };
+}
+
 
 export default InboxView;

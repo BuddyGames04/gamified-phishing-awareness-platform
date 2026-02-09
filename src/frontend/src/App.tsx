@@ -9,9 +9,12 @@ type Screen = 'menu' | 'inbox' | 'arcade' | 'levels';
 
 const App: React.FC = () => {
   const [screen, setScreen] = useState<Screen>('menu');
+  const [selectedScenarioId, setSelectedScenarioId] = useState<number | undefined>(undefined);
+  const [selectedLevel, setSelectedLevel] = useState<number | undefined>(undefined);
 
-  const handleLevelSelect = (level: number) => {
-    // Currently all levels load the same InboxView
+  const handleStartLevel = (scenarioId: number, level: number) => {
+    setSelectedScenarioId(scenarioId);
+    setSelectedLevel(level);
     setScreen('inbox');
   };
 
@@ -19,9 +22,15 @@ const App: React.FC = () => {
     <div className="App">
       {screen === 'menu' && <MenuView navigate={setScreen} />}
       {screen === 'arcade' && <ArcadeGame onExit={() => setScreen('menu')} />}
-      {screen === 'levels' && <LevelSelectView onLevelSelect={handleLevelSelect} />}
+      {screen === 'levels' && <LevelSelectView onStartLevel={handleStartLevel} />}
       {screen === 'inbox' && (
-        <InboxView onExit={() => setScreen('menu')} mode="simulation" userId="luke" />
+        <InboxView
+          onExit={() => setScreen('menu')}
+          mode="simulation"
+          userId="luke"
+          scenarioId={selectedScenarioId}
+          level={selectedLevel}
+        />
       )}
     </div>
   );

@@ -8,8 +8,9 @@ from typing import Any, Dict, List, Optional
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils import timezone
+import random
 
-from api.models import Email, Scenario
+from api.models import Email, Scenario, Level, LevelEmail
 
 
 def _company_slug(name: str) -> str:
@@ -227,6 +228,8 @@ def _scenario_email_templates(seed: ScenarioSeed) -> List[Dict[str, Any]]:
     """
     domain = _mk_domain(seed.company_name)
     company_slug = _company_slug(seed.company_name)
+    # Clean up manager name for use in email addresses (remove special chars)
+    mgr_clean = seed.line_manager_name.replace(".", "").replace(",", "").lower().replace(" ", ".")
     mgr = seed.line_manager_name
 
     # Common “lookalike” domains for phish
@@ -263,7 +266,7 @@ def _scenario_email_templates(seed: ScenarioSeed) -> List[Dict[str, Any]]:
                 is_phish=False,
                 difficulty=2,
                 category="finance",
-                links=[],
+                links=[f"https://{domain}/finance/month-end/outstanding"],
                 attachments=[],
             ),
             dict(
@@ -313,7 +316,7 @@ def _scenario_email_templates(seed: ScenarioSeed) -> List[Dict[str, Any]]:
             ),
             dict(
                 sender_name=mgr,
-                sender_email=f"{mgr.lower().replace(' ', '.')}@{domain}",
+                sender_email=f"{mgr_clean}@{domain}",
                 subject="Quick check: supplier query",
                 body=(
                     "Hi,\n\nCan you confirm if we paid Westridge Supplies this week?\n"
@@ -323,7 +326,7 @@ def _scenario_email_templates(seed: ScenarioSeed) -> List[Dict[str, Any]]:
                 is_phish=False,
                 difficulty=2,
                 category="internal",
-                links=[],
+                links=[f"https://{domain}/finance/payments/status"],
                 attachments=[],
             ),
             dict(
@@ -371,7 +374,7 @@ def _scenario_email_templates(seed: ScenarioSeed) -> List[Dict[str, Any]]:
                 is_phish=False,
                 difficulty=1,
                 category="it",
-                links=[],
+                links=[f"https://{domain}/servicedesk/tickets/SD-11842"],
                 attachments=[],
             ),
             dict(
@@ -386,7 +389,7 @@ def _scenario_email_templates(seed: ScenarioSeed) -> List[Dict[str, Any]]:
                 is_phish=False,
                 difficulty=2,
                 category="security",
-                links=[],
+                links=[f"https://{domain}/security/alerts"],
                 attachments=[],
             ),
             dict(
@@ -406,7 +409,7 @@ def _scenario_email_templates(seed: ScenarioSeed) -> List[Dict[str, Any]]:
             ),
             dict(
                 sender_name=mgr,
-                sender_email=f"{mgr.lower().replace(' ', '.')}@{domain}",
+                sender_email=f"{mgr_clean}@{domain}",
                 subject="Laptop setup needed for new starter (Monday)",
                 body=(
                     "Hi,\n\nWe’ve got a new starter joining Monday.\n"
@@ -416,7 +419,7 @@ def _scenario_email_templates(seed: ScenarioSeed) -> List[Dict[str, Any]]:
                 is_phish=False,
                 difficulty=1,
                 category="internal",
-                links=[],
+                links=[f"https://{domain}/it/requests/new-starter"],
                 attachments=[],
             ),
             dict(
@@ -430,7 +433,7 @@ def _scenario_email_templates(seed: ScenarioSeed) -> List[Dict[str, Any]]:
                 is_phish=False,
                 difficulty=1,
                 category="it",
-                links=[],
+                links=[f"https://{domain}/it/status"],
                 attachments=[],
             ),
             dict(
@@ -458,7 +461,7 @@ def _scenario_email_templates(seed: ScenarioSeed) -> List[Dict[str, Any]]:
                 is_phish=False,
                 difficulty=1,
                 category="security",
-                links=[],
+                links=[f"https://{domain}/security/report-phishing"],
                 attachments=[],
             ),
             dict(
@@ -482,7 +485,7 @@ def _scenario_email_templates(seed: ScenarioSeed) -> List[Dict[str, Any]]:
     return [
         dict(
             sender_name=mgr,
-            sender_email=f"{mgr.lower().replace(' ', '.')}@{domain}",
+            sender_email=f"{mgr_clean}@{domain}",
             subject="Quick task for today",
             body=(
                 "Hi,\n\nCan you take a look at the item we discussed earlier and update me?\n\n"
@@ -491,7 +494,7 @@ def _scenario_email_templates(seed: ScenarioSeed) -> List[Dict[str, Any]]:
             is_phish=False,
             difficulty=1,
             category="internal",
-            links=[],
+            links=[f"https://{domain}/tasks/today"],
             attachments=[],
         ),
         dict(
@@ -532,7 +535,7 @@ def _scenario_email_templates(seed: ScenarioSeed) -> List[Dict[str, Any]]:
             is_phish=False,
             difficulty=2,
             category="external",
-            links=[],
+            links=["https://partner-services.co.uk/portal/requests"],
             attachments=[],
         ),
         dict(
@@ -561,7 +564,7 @@ def _scenario_email_templates(seed: ScenarioSeed) -> List[Dict[str, Any]]:
             is_phish=False,
             difficulty=2,
             category="it",
-            links=[],
+            links=[f"https://{domain}/it/maintenance"],
             attachments=[],
         ),
         dict(
@@ -588,7 +591,7 @@ def _scenario_email_templates(seed: ScenarioSeed) -> List[Dict[str, Any]]:
             is_phish=False,
             difficulty=1,
             category="internal",
-            links=[],
+            links=[f"https://{domain}/training/mandatory"],
             attachments=[],
         ),
     ]
@@ -611,7 +614,7 @@ def _arcade_emails() -> List[Dict[str, Any]]:
             difficulty=2,
             category="banking",
             links=["http://lloydsbank-notify.com/verify"],
-            attachments=["SecurityReport.pdf"],
+            attachments=[],
         ),
         dict(
             sender_name="Streaming Support",
@@ -636,7 +639,7 @@ def _arcade_emails() -> List[Dict[str, Any]]:
             is_phish=False,
             difficulty=1,
             category="delivery",
-            links=[],
+            links=["https://parcel-service.co.uk/track"],
             attachments=[],
         ),
         dict(
@@ -662,7 +665,7 @@ def _arcade_emails() -> List[Dict[str, Any]]:
             is_phish=False,
             difficulty=1,
             category="education",
-            links=[],
+            links=["https://university.ac.uk/portal/timetable"],
             attachments=[],
         ),
         dict(
@@ -688,7 +691,7 @@ def _arcade_emails() -> List[Dict[str, Any]]:
             is_phish=False,
             difficulty=1,
             category="subscription",
-            links=[],
+            links=["https://fitclub.co.uk/members/welcome"],
             attachments=[],
         ),
         dict(
@@ -707,6 +710,413 @@ def _arcade_emails() -> List[Dict[str, Any]]:
             attachments=[],
         ),
     ]
+
+
+def _slug(name: str) -> str:
+    return (
+        name.lower()
+        .replace("&", "and")
+        .replace(",", "")
+        .replace(".", "")
+        .replace("'", "")
+        .replace("  ", " ")
+        .strip()
+        .replace(" ", "-")
+    )
+
+
+def _domain(company_name: str) -> str:
+    return f"{_slug(company_name)}.co.uk"
+
+
+def _curated_levels_first5(scenario_by_company: dict[str, Scenario]):
+    nb = scenario_by_company["Northbridge Utilities"]
+    hl = scenario_by_company["Harbourline Logistics"]
+    ch = scenario_by_company["Crestview Health Partners"]
+
+    # Helper to clean manager names for email addresses
+    def clean_mgr_name(name: str) -> str:
+        return name.replace(".", "").replace(",", "").lower().replace(" ", ".")
+
+    nb_domain = _domain(nb.company_name)
+    hl_domain = _domain(hl.company_name)
+    ch_domain = _domain(ch.company_name)
+
+    # lookalike domains (easy cues)
+    nb_phish = "northbridge-utilities-payments.com"
+    nb_spoof = "northbridge-utilities-sharepoint.com"
+    hl_phish = "harbourline-logistics-verify.com"
+    hl_track = "harbourline-delivery-tracking.com"
+    ch_phish = "crestview-payroll-secure.com"
+
+    # Each level: title/briefing + ordered emails.
+    # RULE: exactly one of links/attachments must be non-empty.
+    return [
+        dict(
+            scenario=nb,
+            number=1,
+            title="Accounts Payable basics",
+            briefing="You're new in Accounts Payable. Expect invoices, POs, and supplier queries.",
+            emails=[
+                dict(
+                    sender_name="Procurement Team",
+                    sender_email=f"procurement@{nb_domain}",
+                    subject="PO 48391 approved (PDF attached)",
+                    body="Hi,\n\nPO 48391 has been approved. Please match any incoming invoices to this PO.\n\nThanks,\nProcurement",
+                    is_phish=False,
+                    difficulty=1,
+                    category="internal",
+                    links=[],
+                    attachments=["PO_48391.pdf"],
+                ),
+                dict(
+                    sender_name="Invoice Processing",
+                    sender_email=f"invoices@{nb_domain}",
+                    subject="New invoice received: INV-20419",
+                    body="Hi,\n\nNew supplier invoice received. Please review and process within 3 working days.\n\nRegards,\nInvoice Processing",
+                    is_phish=False,
+                    difficulty=1,
+                    category="finance",
+                    links=[],
+                    attachments=["INV-20419.pdf"],
+                ),
+                dict(
+                    sender_name=nb.line_manager_name,
+                    sender_email=f"{clean_mgr_name(nb.line_manager_name)}@{nb_domain}",
+                    subject="Quick check: supplier chasing payment",
+                    body=f"Hi,\n\nCan you confirm if Westridge Supplies was paid this week?\n\nThanks,\n{nb.line_manager_name}",
+                    is_phish=False,
+                    difficulty=1,
+                    category="internal",
+                    links=[f"https://{nb_domain}/finance/suppliers/westridge"],
+                    attachments=[],
+                ),
+                dict(
+                    sender_name="Supplier Payments",
+                    sender_email=f"payments@{nb_phish}",
+                    subject="URGENT: payment failed — re-authorise TODAY",
+                    body="Hello,\n\nPayment failed. Re-authorise today to avoid service interruption.\n\nRe-authorise:\n"
+                         f"http://{nb_phish}/reauthorise\n",
+                    is_phish=True,
+                    difficulty=1,
+                    category="phish",
+                    links=[f"http://{nb_phish}/reauthorise"],
+                    attachments=[],
+                ),
+                dict(
+                    sender_name="Voice Mail",
+                    sender_email=f"voicemail@{nb_phish}",
+                    subject="New voice message (open attachment)",
+                    body="You received a new voice message.\n\nOpen the attached file to listen.",
+                    is_phish=True,
+                    difficulty=1,
+                    category="phish",
+                    links=[],
+                    attachments=["voice_message.htm"],
+                ),
+            ],
+        ),
+        dict(
+            scenario=nb,
+            number=2,
+            title="Supplier changes and shared docs",
+            briefing="More supplier comms and shared files. Watch for fake portals.",
+            emails=[
+                dict(
+                    sender_name="Accounts Team",
+                    sender_email=f"accounts@{nb_domain}",
+                    subject="Supplier master data: update request (internal form)",
+                    body="Hi,\n\nCan you review the supplier master data update requests in the portal?\n\nThanks,\nAccounts",
+                    is_phish=False,
+                    difficulty=1,
+                    category="finance",
+                    links=[f"https://{nb_domain}/finance/supplier-master/requests"],
+                    attachments=[],
+                ),
+                dict(
+                    sender_name="Westridge Supplies",
+                    sender_email="billing@westridgesupplies.co.uk",
+                    subject="Invoice copy requested (attached)",
+                    body="Hello,\n\nAs requested, attached is the invoice copy.\n\nThank you,\nBilling",
+                    is_phish=False,
+                    difficulty=1,
+                    category="supplier",
+                    links=[],
+                    attachments=["INV-20311.pdf"],
+                ),
+                dict(
+                    sender_name=f"{nb.company_name} SharePoint",
+                    sender_email=f"no-reply@{nb_spoof}",
+                    subject="Shared file: Supplier_BankChange_Form.pdf",
+                    body="A document has been shared with you.\n\nOpen document:\n"
+                         f"http://{nb_spoof}/open?id=92831\n",
+                    is_phish=True,
+                    difficulty=2,
+                    category="phish",
+                    links=[f"http://{nb_spoof}/open?id=92831"],
+                    attachments=[],
+                ),
+                dict(
+                    sender_name="Supplier Billing",
+                    sender_email=f"billing@{nb_phish}",
+                    subject="Bank details form (attached)",
+                    body="Hello,\n\nPlease complete the attached bank details form today.\n\nRegards,\nBilling",
+                    is_phish=True,
+                    difficulty=2,
+                    category="phish",
+                    links=[],
+                    attachments=["BankDetailsForm.pdf.exe"],
+                ),
+                dict(
+                    sender_name="Procurement Team",
+                    sender_email=f"procurement@{nb_domain}",
+                    subject="Approved supplier list (Q1)",
+                    body="Hi,\n\nAttached is the approved supplier list for Q1.\n\nThanks,\nProcurement",
+                    is_phish=False,
+                    difficulty=1,
+                    category="internal",
+                    links=[],
+                    attachments=["Approved_Suppliers_Q1.pdf"],
+                ),
+            ],
+        ),
+        dict(
+            scenario=hl,
+            number=3,
+            title="Procurement: quotes and onboarding",
+            briefing="You manage quotes and suppliers. Be wary of vendor verification pressure.",
+            emails=[
+                dict(
+                    sender_name="Operations",
+                    sender_email=f"operations@{hl_domain}",
+                    subject="Request: quote for pallet wrap (specs attached)",
+                    body="Hi,\n\nCan you get a quote for pallet wrap based on the attached spec?\n\nThanks,\nOperations",
+                    is_phish=False,
+                    difficulty=1,
+                    category="internal",
+                    links=[],
+                    attachments=["Pallet_Wrap_Spec.pdf"],
+                ),
+                dict(
+                    sender_name="Vendor Onboarding",
+                    sender_email=f"onboarding@{hl_domain}",
+                    subject="New supplier onboarding checklist",
+                    body="Hi,\n\nPlease use the attached checklist for new supplier onboarding.\n\nThanks,\nProcurement Ops",
+                    is_phish=False,
+                    difficulty=1,
+                    category="internal",
+                    links=[],
+                    attachments=["Supplier_Onboarding_Checklist.pdf"],
+                ),
+                dict(
+                    sender_name="Harbourline Vendor Portal",
+                    sender_email=f"no-reply@{hl_phish}",
+                    subject="ACTION REQUIRED: Vendor details verification",
+                    body="Your vendor record requires verification.\n\nVerify now:\n"
+                         f"http://{hl_phish}/vendor/verify\n",
+                    is_phish=True,
+                    difficulty=1,
+                    category="phish",
+                    links=[f"http://{hl_phish}/vendor/verify"],
+                    attachments=[],
+                ),
+                dict(
+                    sender_name="Supplier Quotes",
+                    sender_email="sales@packaging-direct.co.uk",
+                    subject="Quote attached: pallet wrap (Ref Q-1182)",
+                    body="Hi,\n\nPlease find our quote attached.\n\nKind regards,\nSales",
+                    is_phish=False,
+                    difficulty=1,
+                    category="supplier",
+                    links=[],
+                    attachments=["Quote_Q-1182.pdf"],
+                ),
+                dict(
+                    sender_name="Packaging Direct",
+                    sender_email="sales@packaging-directs.co.uk",
+                    subject="Revised quote (open attached urgently)",
+                    body="Hi,\n\nRevised quote attached, please open and approve today.\n\nThanks",
+                    is_phish=True,
+                    difficulty=2,
+                    category="phish",
+                    links=[],
+                    attachments=["Quote_1182.xlsm"],
+                ),
+            ],
+        ),
+        dict(
+            scenario=hl,
+            number=4,
+            title="Deliveries and customs paperwork",
+            briefing="More delivery comms. Watch for fake tracking pages and weird attachments.",
+            emails=[
+                dict(
+                    sender_name="Inbound Logistics",
+                    sender_email=f"inbound@{hl_domain}",
+                    subject="Container ETA update (see portal link)",
+                    body="Hi,\n\nUpdated container ETA is available in the logistics portal.\n\nThanks,\nInbound",
+                    is_phish=False,
+                    difficulty=1,
+                    category="internal",
+                    links=[f"https://{hl_domain}/logistics/eta"],
+                    attachments=[],
+                ),
+                dict(
+                    sender_name="Supplier: SteelCo",
+                    sender_email="dispatch@steelco.co.uk",
+                    subject="Delivery note attached (DN-55219)",
+                    body="Hi,\n\nDelivery note attached.\n\nRegards,\nDispatch",
+                    is_phish=False,
+                    difficulty=1,
+                    category="supplier",
+                    links=[],
+                    attachments=["DN-55219.pdf"],
+                ),
+                dict(
+                    sender_name="Courier Updates",
+                    sender_email=f"no-reply@{hl_track}",
+                    subject="Delivery delayed — confirm slot",
+                    body="Your delivery slot needs confirmation.\n\nConfirm here:\n"
+                         f"http://{hl_track}/confirm-slot\n",
+                    is_phish=True,
+                    difficulty=2,
+                    category="phish",
+                    links=[f"http://{hl_track}/confirm-slot"],
+                    attachments=[],
+                ),
+                dict(
+                    sender_name="Customs Paperwork",
+                    sender_email=f"customs@{hl_phish}",
+                    subject="Customs invoice attached - action required",
+                    body="Customs invoice attached. Please open and confirm details.",
+                    is_phish=True,
+                    difficulty=2,
+                    category="phish",
+                    links=[],
+                    attachments=["CustomsInvoice_55219.pdf.scr"],
+                ),
+                dict(
+                    sender_name="Procurement System",
+                    sender_email=f"no-reply@{hl_domain}",
+                    subject="PO created: PO-77104 (PDF)",
+                    body="A new purchase order has been created. PDF attached for your records.",
+                    is_phish=False,
+                    difficulty=1,
+                    category="internal",
+                    links=[],
+                    attachments=["PO-77104.pdf"],
+                ),
+            ],
+        ),
+        dict(
+            scenario=ch,
+            number=5,
+            title="HR: onboarding and payroll requests",
+            briefing="You coordinate onboarding. Be cautious with payroll and secure forms.",
+            emails=[
+                dict(
+                    sender_name="Recruitment",
+                    sender_email=f"recruitment@{ch_domain}",
+                    subject="Candidate CV attached (Band 4 Admin)",
+                    body="Hi,\n\nCandidate CV attached for review ahead of interview scheduling.\n\nThanks,\nRecruitment",
+                    is_phish=False,
+                    difficulty=1,
+                    category="internal",
+                    links=[],
+                    attachments=["CV_Band4_Admin.pdf"],
+                ),
+                dict(
+                    sender_name=ch.line_manager_name,
+                    sender_email=f"{clean_mgr_name(ch.line_manager_name)}@{ch_domain}",
+                    subject="Onboarding checklist (portal link)",
+                    body=f"Hi,\n\nCan you run through the onboarding checklist in the HR portal for the new starter?\n\nThanks,\n{ch.line_manager_name}",
+                    is_phish=False,
+                    difficulty=1,
+                    category="internal",
+                    links=[f"https://{ch_domain}/hr/onboarding/checklist"],
+                    attachments=[],
+                ),
+                dict(
+                    sender_name="Payroll Team",
+                    sender_email=f"payroll@{ch_phish}",
+                    subject="IMPORTANT: Update your payroll details",
+                    body="Hi,\n\nWe need you to update payroll details to avoid a missed payment.\n\nUpdate here:\n"
+                         f"http://{ch_phish}/update\n",
+                    is_phish=True,
+                    difficulty=2,
+                    category="phish",
+                    links=[f"http://{ch_phish}/update"],
+                    attachments=[],
+                ),
+                dict(
+                    sender_name="Internal Comms",
+                    sender_email=f"comms@{ch_phish}",
+                    subject="New policy document (attached) - read today",
+                    body="Please read the attached policy update today and confirm completion.",
+                    is_phish=True,
+                    difficulty=2,
+                    category="phish",
+                    links=[],
+                    attachments=["Policy_Update_2026.pdf.exe"],
+                ),
+                dict(
+                    sender_name="IT Helpdesk",
+                    sender_email=f"it-support@{ch_domain}",
+                    subject="New starter account setup (instructions attached)",
+                    body="Hi,\n\nAttached are the steps for new starter account setup.\n\nThanks,\nIT",
+                    is_phish=False,
+                    difficulty=1,
+                    category="internal",
+                    links=[],
+                    attachments=["NewStarter_AccountSetup.pdf"],
+                ),
+            ],
+        ),
+    ]
+
+
+@transaction.atomic
+def seed_first5_levels_and_emails():
+    scenario_by_company = {s.company_name: s for s in Scenario.objects.all()}
+
+    defs = _curated_levels_first5(scenario_by_company)
+
+    for ld in defs:
+        lvl, _ = Level.objects.update_or_create(
+            scenario=ld["scenario"],
+            number=ld["number"],
+            defaults=dict(title=ld["title"], briefing=ld["briefing"]),
+        )
+
+        # Clear existing curated links for this level so re-running seed is stable.
+        LevelEmail.objects.filter(level=lvl).delete()
+
+        for idx, e in enumerate(ld["emails"]):
+            email, _ = Email.objects.update_or_create(
+                mode="simulation",
+                scenario=ld["scenario"],
+                sender_email=e["sender_email"],
+                subject=e["subject"],
+                defaults=dict(
+                    sender_name=e["sender_name"],
+                    body=e["body"],
+                    is_phish=e["is_phish"],
+                    difficulty=e.get("difficulty", 1),
+                    category=e.get("category"),
+                    links=e.get("links", []) or [],
+                    attachments=e.get("attachments", []) or [],
+                ),
+            )
+
+            # Enforce your invariants (link XOR attachment + at least one)
+            try:
+                email.full_clean()
+            except Exception as ex:
+                print(f"ERROR on email: sender_email={email.sender_email}, subject={email.subject}, error={ex}")
+                raise
+            email.save()
+
+            LevelEmail.objects.create(level=lvl, email=email, sort_order=idx)
 
 
 class Command(BaseCommand):
@@ -735,23 +1145,26 @@ class Command(BaseCommand):
         created_arcade_emails = 0
 
         # --- Scenarios + simulation emails ---
-        for s in _scenario_seeds():
+        scenario_seeds = _scenario_seeds()
+        for seed in scenario_seeds:
             scenario, s_created = Scenario.objects.update_or_create(
-                company_name=s.company_name,
-                role_title=s.role_title,
+                company_name=seed.company_name,
+                role_title=seed.role_title,
                 defaults=dict(
-                    sector=s.sector,
-                    department_name=s.department_name,
-                    line_manager_name=s.line_manager_name,
-                    responsibilities=s.responsibilities,
-                    intro_text=s.intro_text,
+                    sector=seed.sector,
+                    department_name=seed.department_name,
+                    line_manager_name=seed.line_manager_name,
+                    responsibilities=seed.responsibilities,
+                    intro_text=seed.intro_text,
                 ),
             )
             if s_created:
                 created_scenarios += 1
 
-            for e in _scenario_email_templates(s):
-                # Natural key: scenario + sender_email + subject + mode
+            # Create base simulation emails for this scenario
+            templates = _scenario_email_templates(seed)
+            pool_emails: List[Email] = []
+            for e in templates:
                 email, e_created = Email.objects.update_or_create(
                     scenario=scenario,
                     mode="simulation",
@@ -767,12 +1180,104 @@ class Command(BaseCommand):
                         attachments=e.get("attachments", []) or [],
                     ),
                 )
+
+                try:
+                    email.full_clean()
+                except Exception as ex:
+                    print(f"ERROR: {email.subject} from {email.sender_email}: {email.links}|{email.attachments}")
+                    raise
+                email.save()
                 if e_created:
                     created_sim_emails += 1
+                pool_emails.append(email)
+
+            # Ensure there are enough unique emails in the pool to compose levels
+            # If not, create "variants" by cloning templates with slightly modified subjects.
+            min_pool_size = 15
+            variant_index = 1
+            while len(pool_emails) < min_pool_size:
+                tmpl = random.choice(templates)
+                subj = f"{tmpl['subject']} (variant {variant_index})"
+                email, e_created = Email.objects.update_or_create(
+                    scenario=scenario,
+                    mode="simulation",
+                    sender_email=tmpl["sender_email"],
+                    subject=subj,
+                    defaults=dict(
+                        sender_name=tmpl["sender_name"],
+                        body=tmpl["body"],
+                        is_phish=tmpl["is_phish"],
+                        difficulty=tmpl["difficulty"],
+                        category=tmpl.get("category"),
+                        links=tmpl.get("links", []) or [],
+                        attachments=tmpl.get("attachments", []) or [],
+                    ),
+                )
+                email.full_clean()
+                email.save()
+                if e_created:
+                    created_sim_emails += 1
+                pool_emails.append(email)
+                variant_index += 1
+
+            # Create multiple levels per scenario and assign a curated set of emails to each
+            levels_count = random.randint(5, 8)
+            for lvl_num in range(1, levels_count + 1):
+                level_title = f"Week {lvl_num}: {['Settling In','Getting Busy','Controls','Escalations','Tight Deadlines','External Contacts','Policy Updates','Final Assessment'][(lvl_num-1)%8]}"
+                briefing = f"Level {lvl_num} briefing for {scenario.company_name}. Focus: {level_title}."
+                level, l_created = Level.objects.update_or_create(
+                    scenario=scenario,
+                    number=lvl_num,
+                    defaults=dict(title=level_title, briefing=briefing),
+                )
+
+                # Determine how many emails in this level and phish intensity (rises with level)
+                num_emails = random.randint(10, 15)
+                phish_ratio = min(0.1 * lvl_num, 0.6)
+                num_phish = int(round(num_emails * phish_ratio))
+
+                phish_pool = [e for e in pool_emails if e.is_phish]
+                legit_pool = [e for e in pool_emails if not e.is_phish]
+
+                chosen: List[Email] = []
+
+                # pick phish emails
+                if phish_pool:
+                    take = min(num_phish, len(phish_pool))
+                    chosen += random.sample(phish_pool, take)
+
+                # fill remaining from legit pool preferentially
+                remaining = num_emails - len(chosen)
+                available_legit = [e for e in legit_pool if e not in chosen]
+                if len(available_legit) >= remaining:
+                    chosen += random.sample(available_legit, remaining)
+                else:
+                    # not enough legit unique emails: take what's available then fill from full pool
+                    chosen += available_legit
+                    remaining = num_emails - len(chosen)
+                    leftovers = [e for e in pool_emails if e not in chosen]
+                    if len(leftovers) >= remaining:
+                        chosen += random.sample(leftovers, remaining)
+                    else:
+                        # as a last resort, allow reuse of already-chosen emails across levels
+                        while len(chosen) < num_emails:
+                            chosen.append(random.choice(pool_emails))
+
+                # Shuffle inbox order and create LevelEmail rows with sort_order
+                random.shuffle(chosen)
+                for idx, em in enumerate(chosen):
+                    le, le_created = LevelEmail.objects.update_or_create(
+                        level=level, email=em, defaults={"sort_order": idx}
+                    )
+
+        # --- Create curated levels 1-5 for primary scenarios ---
+        seed_first5_levels_and_emails()
+        self.stdout.write(self.style.SUCCESS("Seeded curated level email sets for levels 1–5."))
 
         # --- Arcade emails ---
         for e in _arcade_emails():
             email, e_created = Email.objects.update_or_create(
+                
                 scenario=None,
                 mode="arcade",
                 sender_email=e["sender_email"],
@@ -787,6 +1292,13 @@ class Command(BaseCommand):
                     attachments=e.get("attachments", []) or [],
                 ),
             )
+
+            try:
+                email.full_clean()
+            except Exception as ex:
+                print(f"ARCADE ERROR: {email.subject} -> links={email.links}, attachments={email.attachments}")
+                raise
+            email.save()
             if e_created:
                 created_arcade_emails += 1
 
