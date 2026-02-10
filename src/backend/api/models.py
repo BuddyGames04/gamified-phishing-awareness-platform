@@ -1,5 +1,5 @@
-from django.db import models
 from django.core.exceptions import ValidationError
+from django.db import models
 
 
 class Scenario(models.Model):
@@ -15,8 +15,11 @@ class Scenario(models.Model):
     def __str__(self):
         return f"{self.company_name} - {self.role_title}"
 
+
 class Level(models.Model):
-    scenario = models.ForeignKey(Scenario, on_delete=models.CASCADE, related_name="levels")
+    scenario = models.ForeignKey(
+        Scenario, on_delete=models.CASCADE, related_name="levels"
+    )
     number = models.IntegerField()  # IMPORTANT: this is the GLOBAL level number (1..10)
     title = models.CharField(max_length=255, default="")
     briefing = models.TextField(default="", blank=True)
@@ -28,7 +31,8 @@ class Level(models.Model):
 
     def __str__(self):
         return f"Level {self.number}: {self.title} ({self.scenario.company_name})"
-    
+
+
 class Email(models.Model):
     sender_name = models.CharField(max_length=255, default="")
     sender_email = models.EmailField(max_length=255, default="")
@@ -64,9 +68,13 @@ class Email(models.Model):
         has_attachments = len(attachments) > 0
 
         if has_links and has_attachments:
-            raise ValidationError("Email must have either links or attachments, not both.")
+            raise ValidationError(
+                "Email must have either links or attachments, not both."
+            )
         if not has_links and not has_attachments:
-            raise ValidationError("Email must have at least one link or one attachment.")
+            raise ValidationError(
+                "Email must have at least one link or one attachment."
+            )
 
     def __str__(self):
         return f"{self.subject} ({'Phish' if self.is_phish else 'Legit'})"
@@ -98,9 +106,11 @@ class InteractionEvent(models.Model):
 
 
 class LevelEmail(models.Model):
-    level = models.ForeignKey(Level, on_delete=models.CASCADE, related_name="level_emails")
+    level = models.ForeignKey(
+        Level, on_delete=models.CASCADE, related_name="level_emails"
+    )
     email = models.ForeignKey(Email, on_delete=models.CASCADE, related_name="in_levels")
-    sort_order = models.IntegerField(default=0) 
+    sort_order = models.IntegerField(default=0)
 
     class Meta:
         unique_together = ("level", "email")

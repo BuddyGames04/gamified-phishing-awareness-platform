@@ -1,7 +1,7 @@
 .scenario-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.55);
+  background: rgba(0, 0, 0, 0.55);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -15,6 +15,6 @@
   width: 100%;
   border-radius: 12px;
   padding: 1.25rem 1.5rem;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
   text-align: left;
 }

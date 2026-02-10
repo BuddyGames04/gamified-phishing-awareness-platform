@@ -9,7 +9,9 @@ type Screen = 'menu' | 'inbox' | 'arcade' | 'levels';
 
 const App: React.FC = () => {
   const [screen, setScreen] = useState<Screen>('menu');
-  const [selectedScenarioId, setSelectedScenarioId] = useState<number | undefined>(undefined);
+  const [selectedScenarioId, setSelectedScenarioId] = useState<number | undefined>(
+    undefined
+  );
   const [selectedLevel, setSelectedLevel] = useState<number | undefined>(undefined);
 
   const handleStartLevel = (scenarioId: number, level: number) => {

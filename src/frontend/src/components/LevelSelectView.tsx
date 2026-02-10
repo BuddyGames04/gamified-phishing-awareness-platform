@@ -27,7 +27,7 @@ const LevelSelectView: React.FC<Props> = ({ onStartLevel }) => {
     load();
   }, []);
 
-    const scenarioById = useMemo(() => {
+  const scenarioById = useMemo(() => {
     const map = new Map<number, Scenario>();
     scenarios.forEach((s) => map.set(s.id, s));
     return map;
@@ -44,7 +44,8 @@ const LevelSelectView: React.FC<Props> = ({ onStartLevel }) => {
           <button
             key={ld.level}
             onClick={() => {
-              const mapped = scenarios.find((s) => s.id === ld.scenarioId) ?? activeScenario;
+              const mapped =
+                scenarios.find((s) => s.id === ld.scenarioId) ?? activeScenario;
               if (!mapped) return;
               setActiveScenario(mapped);
               setPendingLevel(ld.level);

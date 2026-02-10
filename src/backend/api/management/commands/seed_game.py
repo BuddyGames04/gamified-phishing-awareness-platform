@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
+import random
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils import timezone
-import random
 
-from api.models import Email, Scenario, Level, LevelEmail
+from api.models import Email, Level, LevelEmail, Scenario
 
 
 def _company_slug(name: str) -> str:
@@ -229,7 +229,12 @@ def _scenario_email_templates(seed: ScenarioSeed) -> List[Dict[str, Any]]:
     domain = _mk_domain(seed.company_name)
     company_slug = _company_slug(seed.company_name)
     # Clean up manager name for use in email addresses (remove special chars)
-    mgr_clean = seed.line_manager_name.replace(".", "").replace(",", "").lower().replace(" ", ".")
+    mgr_clean = (
+        seed.line_manager_name.replace(".", "")
+        .replace(",", "")
+        .lower()
+        .replace(" ", ".")
+    )
     mgr = seed.line_manager_name
 
     # Common “lookalike” domains for phish
@@ -796,7 +801,7 @@ def _curated_levels_first5(scenario_by_company: dict[str, Scenario]):
                     sender_email=f"payments@{nb_phish}",
                     subject="URGENT: payment failed — re-authorise TODAY",
                     body="Hello,\n\nPayment failed. Re-authorise today to avoid service interruption.\n\nRe-authorise:\n"
-                         f"http://{nb_phish}/reauthorise\n",
+                    f"http://{nb_phish}/reauthorise\n",
                     is_phish=True,
                     difficulty=1,
                     category="phish",
@@ -849,7 +854,7 @@ def _curated_levels_first5(scenario_by_company: dict[str, Scenario]):
                     sender_email=f"no-reply@{nb_spoof}",
                     subject="Shared file: Supplier_BankChange_Form.pdf",
                     body="A document has been shared with you.\n\nOpen document:\n"
-                         f"http://{nb_spoof}/open?id=92831\n",
+                    f"http://{nb_spoof}/open?id=92831\n",
                     is_phish=True,
                     difficulty=2,
                     category="phish",
@@ -913,7 +918,7 @@ def _curated_levels_first5(scenario_by_company: dict[str, Scenario]):
                     sender_email=f"no-reply@{hl_phish}",
                     subject="ACTION REQUIRED: Vendor details verification",
                     body="Your vendor record requires verification.\n\nVerify now:\n"
-                         f"http://{hl_phish}/vendor/verify\n",
+                    f"http://{hl_phish}/vendor/verify\n",
                     is_phish=True,
                     difficulty=1,
                     category="phish",
@@ -977,7 +982,7 @@ def _curated_levels_first5(scenario_by_company: dict[str, Scenario]):
                     sender_email=f"no-reply@{hl_track}",
                     subject="Delivery delayed — confirm slot",
                     body="Your delivery slot needs confirmation.\n\nConfirm here:\n"
-                         f"http://{hl_track}/confirm-slot\n",
+                    f"http://{hl_track}/confirm-slot\n",
                     is_phish=True,
                     difficulty=2,
                     category="phish",
@@ -1041,7 +1046,7 @@ def _curated_levels_first5(scenario_by_company: dict[str, Scenario]):
                     sender_email=f"payroll@{ch_phish}",
                     subject="IMPORTANT: Update your payroll details",
                     body="Hi,\n\nWe need you to update payroll details to avoid a missed payment.\n\nUpdate here:\n"
-                         f"http://{ch_phish}/update\n",
+                    f"http://{ch_phish}/update\n",
                     is_phish=True,
                     difficulty=2,
                     category="phish",
@@ -1112,7 +1117,9 @@ def seed_first5_levels_and_emails():
             try:
                 email.full_clean()
             except Exception as ex:
-                print(f"ERROR on email: sender_email={email.sender_email}, subject={email.subject}, error={ex}")
+                print(
+                    f"ERROR on email: sender_email={email.sender_email}, subject={email.subject}, error={ex}"
+                )
                 raise
             email.save()
 
@@ -1184,7 +1191,9 @@ class Command(BaseCommand):
                 try:
                     email.full_clean()
                 except Exception as ex:
-                    print(f"ERROR: {email.subject} from {email.sender_email}: {email.links}|{email.attachments}")
+                    print(
+                        f"ERROR: {email.subject} from {email.sender_email}: {email.links}|{email.attachments}"
+                    )
                     raise
                 email.save()
                 if e_created:
@@ -1272,12 +1281,13 @@ class Command(BaseCommand):
 
         # --- Create curated levels 1-5 for primary scenarios ---
         seed_first5_levels_and_emails()
-        self.stdout.write(self.style.SUCCESS("Seeded curated level email sets for levels 1–5."))
+        self.stdout.write(
+            self.style.SUCCESS("Seeded curated level email sets for levels 1–5.")
+        )
 
         # --- Arcade emails ---
         for e in _arcade_emails():
             email, e_created = Email.objects.update_or_create(
-                
                 scenario=None,
                 mode="arcade",
                 sender_email=e["sender_email"],
@@ -1296,7 +1306,9 @@ class Command(BaseCommand):
             try:
                 email.full_clean()
             except Exception as ex:
-                print(f"ARCADE ERROR: {email.subject} -> links={email.links}, attachments={email.attachments}")
+                print(
+                    f"ARCADE ERROR: {email.subject} -> links={email.links}, attachments={email.attachments}"
+                )
                 raise
             email.save()
             if e_created:

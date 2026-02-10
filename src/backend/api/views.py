@@ -21,8 +21,7 @@ def get_emails(request):
     limit = int(request.query_params.get("limit", "20"))
     level = request.query_params.get("level")
 
-    # If a simulation mode with a scenario and an explicit level is requested,
-    # return the curated list for that level (preserves configured sort order).
+
     if mode == "simulation" and scenario_id and level:
         try:
             lvl = Level.objects.get(scenario_id=scenario_id, number=int(level))

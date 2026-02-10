@@ -41,16 +41,24 @@ const ScenarioIntroModal: React.FC<Props> = ({ scenario, level, onClose, onStart
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 style={{ marginTop: 0 }}>
-          Level {level}: Scenario Briefing
-        </h2>
+        <h2 style={{ marginTop: 0 }}>Level {level}: Scenario Briefing</h2>
 
         <div style={{ marginBottom: '0.75rem' }}>
-          <div><strong>Company:</strong> {scenario.company_name}</div>
-          <div><strong>Sector:</strong> {scenario.sector}</div>
-          <div><strong>Role:</strong> {scenario.role_title}</div>
-          <div><strong>Department:</strong> {scenario.department_name}</div>
-          <div><strong>Line Manager:</strong> {scenario.line_manager_name}</div>
+          <div>
+            <strong>Company:</strong> {scenario.company_name}
+          </div>
+          <div>
+            <strong>Sector:</strong> {scenario.sector}
+          </div>
+          <div>
+            <strong>Role:</strong> {scenario.role_title}
+          </div>
+          <div>
+            <strong>Department:</strong> {scenario.department_name}
+          </div>
+          <div>
+            <strong>Line Manager:</strong> {scenario.line_manager_name}
+          </div>
         </div>
 
         {scenario.intro_text && (
