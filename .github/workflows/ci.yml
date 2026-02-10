@@ -88,6 +88,8 @@ jobs:
       - name: Build frontend
         working-directory: src/frontend
         run: npm run build
+        env:
+          CI: "false"
 
       # --- 6. Upload test results or artifacts ---
       - name: Upload Django test report (optional)
