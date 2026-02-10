@@ -93,15 +93,17 @@ TEMPLATES = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # React dev server
+    "http://localhost:3000",
+    os.getenv("FRONTEND_ORIGIN", ""),
 ]
+CORS_ALLOWED_ORIGINS = [o for o in CORS_ALLOWED_ORIGINS if o]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
+    os.getenv("FRONTEND_ORIGIN", ""),
 ]
+CSRF_TRUSTED_ORIGINS = [o for o in CSRF_TRUSTED_ORIGINS if o]
 
-
-WSGI_APPLICATION = "core.wsgi.application"
 
 
 # Database
