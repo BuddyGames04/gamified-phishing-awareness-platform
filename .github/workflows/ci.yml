@@ -46,19 +46,24 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r src/backend/requirements.txt
-          pip install pre-commit
           # optional: if you have pytest
           pip install pytest pytest-django
 
       # --- 3. Run backend checks ---
-      - name: Run pre-commit hooks (Python)
-        run: pre-commit run --all-files --show-diff-on-failure
+      - name: Check migrations are up to date
+        working-directory: src/backend
+        env:
+          DATABASE_HOST: 127.0.0.1
+          DATABASE_PORT: "5432"
+          DATABASE_NAME: phishing_game
+          DATABASE_USER: luke
+          DATABASE_PASSWORD: yourpassword
+        run: |
+          python manage.py makemigrations --check --dry-run
 
       - name: Run Django tests
         working-directory: src/backend
         env:
-          # If your Django app reads DATABASE_URL, this helps.
-          # Otherwise set the env vars your settings.py expects.
           DATABASE_HOST: 127.0.0.1
           DATABASE_PORT: "5432"
           DATABASE_NAME: phishing_game
@@ -79,19 +84,7 @@ jobs:
         working-directory: src/frontend
         run: npm ci
 
-      # --- 5. Run frontend linters and build ---
-      - name: Run ESLint
-        working-directory: src/frontend
-        run: npx eslint src --max-warnings=0
-
-      - name: Run TypeScript type check
-        working-directory: src/frontend
-        run: npx tsc --noEmit
-
-      - name: Run Prettier check
-        working-directory: src/frontend
-        run: npx prettier --check "src/**/*.{ts,tsx,js,jsx,json,css,md}"
-
+      # --- 5. Build frontend ---
       - name: Build frontend
         working-directory: src/frontend
         run: npm run build

@@ -28,6 +28,3 @@ RUN chmod +x /entrypoint.sh
 # Expose Django’s default port
 EXPOSE 8000
 CMD ["/entrypoint.sh"]
-
-
-

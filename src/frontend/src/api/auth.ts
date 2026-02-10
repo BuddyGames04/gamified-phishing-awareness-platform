@@ -6,7 +6,17 @@ export async function login(username: string, password: string) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password }),
   });
-  if (!res.ok) throw new Error('Login failed');
+
+  if (!res.ok) {
+    let detail = 'Login failed';
+    try {
+      const data = await res.json();
+      detail = data?.error || data?.detail || detail;
+    } catch (e) {
+      // Ignore JSON parse errors
+    }
+    throw new Error(detail);
+  }
 
   const data = await res.json();
   localStorage.setItem('authToken', data.token);
@@ -20,13 +30,24 @@ export async function register(username: string, password: string) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username, password }),
   });
-  if (!res.ok) throw new Error('Registration failed');
+
+  if (!res.ok) {
+    let detail = 'Registration failed';
+    try {
+      const data = await res.json();
+      detail = data?.error || data?.detail || detail;
+    } catch (e) {
+      // Ignore JSON parse errors
+    }
+    throw new Error(detail);
+  }
 
   const data = await res.json();
   localStorage.setItem('authToken', data.token);
   localStorage.setItem('username', data.username);
   return data;
 }
+
 
 export function authFetch(url: string, options: any = {}) {
   const token = localStorage.getItem('authToken');

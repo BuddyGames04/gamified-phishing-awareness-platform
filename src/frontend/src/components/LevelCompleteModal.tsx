@@ -29,10 +29,18 @@ const LevelCompleteModal: React.FC<Props> = ({
         {subtitle && <p className="subtitle">{subtitle}</p>}
 
         <div className="stats">
-          <div><strong>Total:</strong> {total}</div>
-          <div><strong>Correct:</strong> {correct}</div>
-          <div><strong>Incorrect:</strong> {incorrect}</div>
-          <div><strong>Accuracy:</strong> {accuracy}%</div>
+          <div>
+            <strong>Total:</strong> {total}
+          </div>
+          <div>
+            <strong>Correct:</strong> {correct}
+          </div>
+          <div>
+            <strong>Incorrect:</strong> {incorrect}
+          </div>
+          <div>
+            <strong>Accuracy:</strong> {accuracy}%
+          </div>
         </div>
 
         <div className="actions">

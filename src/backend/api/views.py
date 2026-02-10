@@ -1,15 +1,16 @@
-from rest_framework.decorators import api_view
+import random
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .models import Email, InteractionEvent, Scenario, UserProgress, Level, LevelEmail
+from .models import Email, InteractionEvent, Level, LevelEmail, Scenario, UserProgress
 from .serializers import (
     EmailSerializer,
     InteractionEventSerializer,
     ScenarioSerializer,
     UserProgressSerializer,
 )
-
-import random
 
 
 @api_view(["GET"])
@@ -21,14 +22,15 @@ def get_emails(request):
     limit = int(request.query_params.get("limit", "20"))
     level = request.query_params.get("level")
 
-
     if mode == "simulation" and scenario_id and level:
         try:
             lvl = Level.objects.get(scenario_id=scenario_id, number=int(level))
         except Level.DoesNotExist:
             return Response({"detail": "Level not found"}, status=404)
 
-        emails = Email.objects.filter(in_levels__level=lvl).order_by("in_levels__sort_order", "id")
+        emails = Email.objects.filter(in_levels__level=lvl).order_by(
+            "in_levels__sort_order", "id"
+        )
         serializer = EmailSerializer(emails, many=True)
         return Response(serializer.data)
     emails = Email.objects.all()
@@ -54,6 +56,7 @@ def get_emails(request):
     serializer = EmailSerializer(emails, many=True)
     return Response(serializer.data)
 
+
 @api_view(["GET"])
 def get_scenarios(request):
     scenarios = Scenario.objects.all()
@@ -62,8 +65,9 @@ def get_scenarios(request):
 
 
 @api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def submit_result(request):
-    user_id = request.data.get("user_id")
+    user_id = request.user.username
     is_correct = request.data.get("is_correct")
 
     progress, _ = UserProgress.objects.get_or_create(user_id=user_id)
@@ -81,15 +85,16 @@ def submit_result(request):
 
 
 @api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def record_interaction(request):
-    user_id = request.data.get("user_id")
+    user_id = request.user.username
     email_id = request.data.get("email_id")
     event_type = request.data.get("event_type")
     value = request.data.get("value", None)
 
-    if not user_id or not email_id or not event_type:
+    if not email_id or not event_type:
         return Response(
-            {"detail": "user_id, email_id, and event_type are required"},
+            {"detail": "email_id and event_type are required"},
             status=400,
         )
 

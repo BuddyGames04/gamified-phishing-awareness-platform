@@ -34,7 +34,6 @@ export const InboxView: React.FC<Props> = ({
   // used to force a full reload on replay
   const [runKey, setRunKey] = useState(0);
 
-
   useEffect(() => {
     const loadEmails = async () => {
       try {
@@ -69,7 +68,6 @@ export const InboxView: React.FC<Props> = ({
 
     const isCorrect = selected.is_phish === isPhishGuess;
 
-    
     if (isCorrect) setRunCorrect((prev) => prev + 1);
     else setRunIncorrect((prev) => prev + 1);
 
@@ -93,28 +91,27 @@ export const InboxView: React.FC<Props> = ({
     setActiveAttachment(null);
   };
 
-
   const closeModal = () => {
     setActiveLink(null);
     setActiveAttachment(null);
   };
 
   const proceedModal = async () => {
-  if (mode === 'simulation' && selected) {
-    const eventType = activeLink ? 'link_click' : 'attachment_open';
-    const value = activeLink ?? activeAttachment ?? null;
+    if (mode === 'simulation' && selected) {
+      const eventType = activeLink ? 'link_click' : 'attachment_open';
+      const value = activeLink ?? activeAttachment ?? null;
 
-    try {
-      if (value) {
-        await submitInteraction(userId, selected.id, eventType, value);
+      try {
+        if (value) {
+          await submitInteraction(userId, selected.id, eventType, value);
+        }
+      } catch (err) {
+        console.error('Error submitting interaction:', err);
       }
-    } catch (err) {
-      console.error('Error submitting interaction:', err);
     }
-  }
 
-  closeModal();
-};
+    closeModal();
+  };
 
   const safeLinks = selected && Array.isArray(selected.links) ? selected.links : [];
   const safeAttachments =
@@ -202,17 +199,17 @@ export const InboxView: React.FC<Props> = ({
                         <button
                           type="button"
                           onClick={() => {
-                             if (mode === 'simulation') {
-                                setOpenedEmailIds((prev) => {
-                                  const next = new Set(prev);
-                                  next.add(selected.id);
-                                  return next;
-                                });
-                              }
+                            if (mode === 'simulation') {
+                              setOpenedEmailIds((prev) => {
+                                const next = new Set(prev);
+                                next.add(selected.id);
+                                return next;
+                              });
+                            }
 
-                              setActiveAttachment(file);
-                              setActiveLink(null);
-                            }}
+                            setActiveAttachment(file);
+                            setActiveLink(null);
+                          }}
                           style={{
                             background: 'none',
                             border: 'none',
@@ -254,8 +251,6 @@ export const InboxView: React.FC<Props> = ({
                   </>
                 )}
               </div>
-
-              
             </>
           ) : (
             <p>Select an email to read</p>
