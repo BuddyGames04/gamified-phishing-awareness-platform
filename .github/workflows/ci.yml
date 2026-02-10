@@ -98,3 +98,11 @@ jobs:
         with:
           name: django-test-results
           path: src/backend/test-reports/
+
+      - name: Trigger Render deploy (backend)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        env:
+          DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_BACKEND }}
+        run: |
+          curl -fsSL -X POST "$DEPLOY_HOOK"
+
