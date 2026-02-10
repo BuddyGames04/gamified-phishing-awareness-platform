@@ -69,6 +69,7 @@ const LevelSelectView: React.FC<Props> = ({ onStartLevel }) => {
             setShowScenarioModal(false);
             const level = pendingLevel;
             setPendingLevel(null);
+            console.log("START LEVEL CLICK", activeScenario.id, level);
             onStartLevel(activeScenario.id, level as number);
           }}
         />

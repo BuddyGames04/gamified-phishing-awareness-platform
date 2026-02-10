@@ -21,6 +21,7 @@ const App: React.FC = () => {
   });
 
   const handleStartLevel = (scenarioId: number, level: number) => {
+    console.log("handleStartLevel", scenarioId, level);
     setSelectedScenarioId(scenarioId);
     setSelectedLevel(level);
     setScreen('inbox');
