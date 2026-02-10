@@ -106,15 +106,20 @@ WSGI_APPLICATION = "core.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("POSTGRES_DB", "l4proj"),
-        "USER": os.getenv("POSTGRES_USER", "devuser"),
-        "PASSWORD": os.getenv("POSTGRES_PASSWORD", "devpass"),
-        "HOST": os.getenv("POSTGRES_HOST", "db"),
-        "PORT": os.getenv("POSTGRES_PORT", "5432"),
-    }
+    "default": dj_database_url.config(
+        default=(
+            "postgresql://"
+            f"{os.getenv('POSTGRES_USER','devuser')}:"
+            f"{os.getenv('POSTGRES_PASSWORD','devpass')}@"
+            f"{os.getenv('POSTGRES_HOST','db')}:"
+            f"{os.getenv('POSTGRES_PORT','5432')}/"
+            f"{os.getenv('POSTGRES_DB','l4proj')}"
+        ),
+        conn_max_age=600,
+        ssl_require=not DEBUG,
+    )
 }
+
 
 
 # Password validation
