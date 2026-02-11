@@ -19,10 +19,11 @@ const LevelSelectView: React.FC<Props> = ({ onStartLevel }) => {
   }, []);
 
   useEffect(() => {
-    const load = async () => {
+      const load = async () => {
       try {
         const data = await fetchScenarios();
         setScenarios(data);
+        console.log('Scenarios from API:', data);
         setActiveScenario(data[0] ?? null);
       } catch (e) {
         console.error('Failed to fetch scenarios', e);
@@ -59,10 +60,15 @@ const LevelSelectView: React.FC<Props> = ({ onStartLevel }) => {
           <button
             key={ld.level}
             onClick={() => {
-              const mapped =
-                scenarios.find((s) => s.id === ld.scenarioId) ?? activeScenario;
-              if (!mapped) return;
-              setActiveScenario(mapped);
+              const scenarioForLevel =
+                scenarios[Math.floor((ld.level - 1) / 2)] ?? null;
+
+              if (!scenarioForLevel) {
+                console.warn("No scenario found for level", ld.level);
+                return;
+              }
+
+              setActiveScenario(scenarioForLevel);
               setPendingLevel(ld.level);
               setShowScenarioModal(true);
             }}
