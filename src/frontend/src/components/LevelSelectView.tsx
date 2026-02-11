@@ -14,9 +14,6 @@ const LevelSelectView: React.FC<Props> = ({ onStartLevel }) => {
   const [pendingLevel, setPendingLevel] = useState<number | null>(null);
   const [showScenarioModal, setShowScenarioModal] = useState(false);
 
-  useEffect(() => {
-    console.log('LevelSelectView mounted');
-  }, []);
 
   useEffect(() => {
       const load = async () => {
@@ -43,17 +40,8 @@ const LevelSelectView: React.FC<Props> = ({ onStartLevel }) => {
   return (
     <div className="level-select-view">
       <div style={{ position: 'fixed', top: 0, left: 0, background: 'yellow', zIndex: 99999 }}>
-        LevelSelectView mounted
       </div>
       <h2>Select a Level</h2>
-      <button
-        onClick={() => {
-          alert('clicked');
-          console.log('clicked');
-        }}
-      >
-        CLICK TEST
-      </button>
 
       <div className="level-buttons" style={{ marginTop: '1rem' }}>
         {levels.map((ld) => (
