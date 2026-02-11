@@ -8,10 +8,11 @@ ENV PYTHONUNBUFFERED=1
 # Set workdir
 WORKDIR /app
 
-# Install system dependencies (for psycopg2 + build tools)
+# Install system dependencies (for psycopg + build tools + pg_isready)
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
+    postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy dependency file

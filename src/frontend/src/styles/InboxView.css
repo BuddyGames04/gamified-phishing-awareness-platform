@@ -1,80 +1,320 @@
 @import './variables.css';
-.inbox-container {
+
+.outlook-shell {
+  height: calc(100vh - 90px);
   display: flex;
-  height: 80vh;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  flex-direction: column;
+  background: var(--color-bg);
+  color: var(--color-text-main);
 }
 
-.sidebar {
+.outlook-topbar {
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  position: relative;
+}
+
+.outlook-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.outlook-topbar-title {
+  font-weight: 600;
+}
+
+/* center toolbar */
+.outlook-topbar-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* keep right side from colliding with center */
+.outlook-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 12px;
+}
+
+.fake-search {
   width: 280px;
-  border-right: 1px solid #ddd;
-  background: #f9f9f9;
-  overflow-y: auto;
+  max-width: 30vw;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #f9fafb;
+  color: #111827;
 }
 
-.sidebar-email {
-  padding: 12px;
-  border-bottom: 1px solid #eee;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.sidebar-email:hover {
-  background-color: #f0f4ff;
-}
-
-.sidebar-email.selected {
-  background-color: #dce9ff;
-}
-
-.email-body {
+.outlook-main {
   flex: 1;
-  padding: 24px;
-  text-align: left;
+  display: grid;
+  grid-template-columns: 220px 440px 1fr;
+  gap: 0;
+  min-height: 0; /* important for scroll panes */
+}
+
+/* LEFT FOLDERS */
+.folder-pane {
+  background: #ffffff;
+  border-right: 1px solid #e5e7eb;
+  padding: 10px;
+}
+
+.folder-title {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 10px 8px;
+}
+
+.folder-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.folder-item:hover {
+  background: #f3f4f6;
+}
+
+.folder-item.active {
+  background: #e8f0ff;
+}
+
+/* MIDDLE MESSAGE LIST */
+.list-pane {
+  background: #ffffff;
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.list-header {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.list-header h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.list-scroll {
   overflow-y: auto;
-  background: var(--color-email-bg);
+  min-height: 0;
+}
+
+.email-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 4px 6px;
+  border-radius: 8px;
+}
+
+.email-row:hover {
+  background: #f8fafc;
+}
+
+.email-row.selected {
+  background: #e8f0ff;
+}
+
+.email-row > div:first-child {
+  min-width: 0; /* allow the left column to shrink */
+}
+
+.email-row-topline {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  min-width: 0;
+}
+
+.email-sender {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.email-subject-mini {
+  font-weight: 500;
+  font-size: 13px;
+  color: #111827;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.email-snippet {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.email-time {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+/* RIGHT READING PANE */
+.reading-pane {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.reading-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
 }
 
 .email-subject {
-  font-size: 1.5rem;
-  font-weight: bold;
+  font-size: 18px;
+  font-weight: 700;
   margin-bottom: 8px;
 }
 
-.email-from {
-  font-style: italic;
+.email-meta {
+  font-size: 12px;
   color: var(--color-text-muted);
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .email-content {
-  margin-bottom: 24px;
+  margin-bottom: 18px;
+  line-height: 1.5;
+  white-space: pre-wrap;
 }
 
-.email-actions button {
-  margin-right: 10px;
-  padding: 8px 16px;
-  font-weight: bold;
+.section-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 14px 0 6px;
+}
+
+.link-like {
+  background: none;
   border: none;
-  border-radius: 4px;
+  padding: 0;
+  color: #2563eb;
+  text-decoration: underline;
   cursor: pointer;
+  font: inherit;
 }
 
-.email-actions button:first-child {
-  background-color: var(--color-danger);
-  color: #a00;
+.attachment-like {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
 }
 
-.email-actions button:last-child {
-  background-color: var(--color-success);
-  color: #0a0;
+.email-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
 }
 
-.feedback {
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin-top: 16px;
+.btn {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn:hover {
+  background: #f9fafb;
+}
+
+.btn-danger {
+  border-color: #fca5a5;
+  background: #fff1f2;
+}
+
+.btn-danger:hover {
+  background: #ffe4e6;
+}
+
+.btn-ok {
+  border-color: #86efac;
+  background: #ecfdf5;
+}
+
+.btn-ok:hover {
+  background: #d1fae5;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.empty-state {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  border: 2px dashed #e5e7eb;
+  border-radius: 10px;
+  background: #ffffff;
+}
+/* Remove default list indentation/bullets in reading pane */
+.reading-card ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0 0 12px;
+}
+
+.reading-card li {
+  margin: 6px 0;
+}
+
+/* Center the "Links"/"Attachments" blocks so they line up with centered email content */
+.reading-card {
+  text-align: center;
+}
+
+.email-actions {
+  justify-content: center;
 }

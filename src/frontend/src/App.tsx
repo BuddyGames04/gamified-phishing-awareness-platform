@@ -45,12 +45,6 @@ const App: React.FC = () => {
 
   return (
     <div className="App">
-      {/*tiny logout button in the corner */}
-      <div style={{ position: 'absolute', top: 10, right: 10 }}>
-        <span style={{ marginRight: '0.5rem' }}>Signed in as {username}</span>
-        <button onClick={handleLogout}>Logout</button>
-      </div>
-
       {screen === 'menu' && <MenuView navigate={setScreen} />}
       {screen === 'arcade' && <ArcadeGame onExit={() => setScreen('menu')} />}
       {screen === 'levels' && <LevelSelectView onStartLevel={handleStartLevel} />}
@@ -61,6 +55,8 @@ const App: React.FC = () => {
           userId={username}
           scenarioId={selectedScenarioId}
           level={selectedLevel}
+          username={username}
+          onLogout={handleLogout}
         />
       )}
     </div>

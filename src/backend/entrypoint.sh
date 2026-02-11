@@ -2,9 +2,7 @@
 set -e
 
 echo "Waiting for Postgres..."
-until python -c "import psycopg2; psycopg2.connect(
-    dbname='${POSTGRES_DB}', user='${POSTGRES_USER}', password='${POSTGRES_PASSWORD}', host='db', port=5432
-)" >/dev/null 2>&1; do
+until pg_isready -h "${POSTGRES_HOST:-db}" -p "${POSTGRES_PORT:-5432}" -U "${POSTGRES_USER:-devuser}" -d "${POSTGRES_DB:-l4proj}" >/dev/null 2>&1; do
   sleep 1
 done
 

@@ -11,6 +11,10 @@ interface Props {
   userId: string;
   scenarioId?: number;
   level?: number;
+
+  // NEW:
+  username: string;
+  onLogout: () => void;
 }
 
 export const InboxView: React.FC<Props> = ({
@@ -19,6 +23,8 @@ export const InboxView: React.FC<Props> = ({
   scenarioId,
   userId,
   level,
+  username,
+  onLogout,
 }) => {
   const [emails, setEmails] = useState<Email[]>([]);
   const [selected, setSelected] = useState<Email | null>(null);
@@ -117,48 +123,145 @@ export const InboxView: React.FC<Props> = ({
   const safeAttachments =
     selected && Array.isArray(selected.attachments) ? selected.attachments : [];
 
-  return (
-    <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-      <h1>Inbox Simulator</h1>
-      <button style={{ marginBottom: '1rem' }} onClick={onExit}>
-        Exit to Main Menu
-      </button>
+  const canAct = !!selected;
 
-      <div className="inbox-container">
-        {/* Sidebar */}
-        <div className="sidebar">
-          <h3 style={{ padding: '1rem' }}>Inbox</h3>
-          {emails.map((email, i) => (
-            <div
-              key={email.id}
-              onClick={() => setSelected(email)}
-              className={`sidebar-email ${selected?.id === email.id ? 'selected' : ''}`}
-            >
-              <strong>{email.sender_name}</strong>
-              <div>{email.subject}</div>
-            </div>
-          ))}
+  const canMarkSafeOrRead =
+    mode === 'arcade'
+      ? canAct
+      : canAct && selected !== null && openedEmailIds.has(selected.id);
+
+  const safeLabel = mode === 'arcade' ? 'Mark Safe' : 'Mark as Read';
+
+  return (
+    <div className="outlook-shell">
+      {/* Top bar */}
+      <div className="outlook-topbar">
+        <div className="outlook-topbar-left">
+          <button className="btn" onClick={onExit}>Back</button>
+          <div className="outlook-topbar-title">
+            {mode === 'simulation' ? `Inbox Simulator — Level ${level ?? ''}` : 'Arcade Mode'}
+          </div>
         </div>
 
-        {/* Main content */}
-        <div className="email-body">
+        {/* NEW: action toolbar in the middle */}
+        <div className="outlook-topbar-center">
+          <button
+            className="btn btn-danger"
+            disabled={!canAct}
+            title={!canAct ? 'Select an email first' : ''}
+            onClick={() => handleDecision(true)}
+          >
+            Report Phish
+          </button>
+
+          <button
+            className="btn btn-ok"
+            disabled={!canMarkSafeOrRead}
+            title={
+              !selected
+                ? 'Select an email first'
+                : mode === 'simulation' && !openedEmailIds.has(selected.id)
+                  ? 'Open the link or attachment before marking as read'
+                  : ''
+            }
+            onClick={() => handleDecision(false)}
+          >
+            {safeLabel}
+          </button>
+        </div>
+
+        <div className="outlook-topbar-actions">
+          <input className="fake-search" placeholder="Search mail (not implemented)" />
+
+          <div className="user-controls">
+            <span className="user-label">Signed in as {username}</span>
+            <button className="btn" onClick={onLogout}>Logout</button>
+          </div>
+        </div>
+      </div>
+
+      <div className="outlook-main">
+        {/* Left: folders (visual only) */}
+        <div className="folder-pane">
+          <div className="folder-title">Folders</div>
+          <div className="folder-item active">
+            <span>📥 Inbox</span>
+            <span>{emails.length}</span>
+          </div>
+          <div className="folder-item">
+            <span>📤 Sent</span>
+            <span>0</span>
+          </div>
+          <div className="folder-item">
+            <span>🗄️ Archive</span>
+            <span>0</span>
+          </div>
+
+          <div className="folder-title">Session</div>
+          <div style={{ padding: '0 10px', fontSize: 12, color: 'var(--color-text-muted)' }}>
+            Remaining: <strong>{emails.length}</strong>
+          </div>
+        </div>
+
+        {/* Middle: list */}
+        <div className="list-pane">
+          <div className="list-header">
+            <h3>Inbox</h3>
+            <div style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>
+              {emails.length} items
+            </div>
+          </div>
+
+          <div className="list-scroll">
+            {emails.map((email) => {
+              const snippet =
+                (email.body || '').replace(/\s+/g, ' ').slice(0, 80) + ((email.body || '').length > 80 ? '…' : '');
+
+              // Fake time just for UI (stable per email id)
+              const fakeHour = 9 + (email.id % 8);
+              const fakeMin = (email.id * 7) % 60;
+              const timeStr = `${String(fakeHour).padStart(2, '0')}:${String(fakeMin).padStart(2, '0')}`;
+
+              return (
+                <div
+                  key={email.id}
+                  className={`email-row ${selected?.id === email.id ? 'selected' : ''}`}
+                  onClick={() => setSelected(email)}
+                >
+                  <div>
+                    <div className="email-row-topline">
+                      <div className="email-sender">{email.sender_name}</div>
+                      <div className="email-subject-mini">— {email.subject}</div>
+                    </div>
+                    <div className="email-snippet">{snippet}</div>
+                  </div>
+                  <div className="email-time">{timeStr}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Right: reading pane */}
+        <div className="reading-pane">
           {selected ? (
-            <>
+            <div className="reading-card">
               <div className="email-subject">{selected.subject}</div>
-              <div className="email-from">
+              <div className="email-meta">
                 From: {selected.sender_name} &lt;{selected.sender_email}&gt;
               </div>
 
               <div className="email-content">{selected.body}</div>
 
               {safeLinks.length > 0 && (
-                <div className="email-links">
-                  <h4>Links</h4>
+                <>
+                  <div className="section-title">Links</div>
                   <ul>
                     {safeLinks.map((link, i) => (
                       <li key={i}>
                         <button
                           type="button"
+                          className="link-like"
                           onClick={() => {
                             if (mode === 'simulation') {
                               setOpenedEmailIds((prev) => {
@@ -167,19 +270,8 @@ export const InboxView: React.FC<Props> = ({
                                 return next;
                               });
                             }
-
                             setActiveLink(link);
                             setActiveAttachment(null);
-                          }}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            padding: 0,
-                            margin: 0,
-                            color: '#06c',
-                            textDecoration: 'underline',
-                            cursor: 'pointer',
-                            font: 'inherit',
                           }}
                         >
                           {link}
@@ -187,17 +279,18 @@ export const InboxView: React.FC<Props> = ({
                       </li>
                     ))}
                   </ul>
-                </div>
+                </>
               )}
 
               {safeAttachments.length > 0 && (
-                <div className="email-attachments">
-                  <h4>Attachments</h4>
+                <>
+                  <div className="section-title">Attachments</div>
                   <ul>
                     {safeAttachments.map((file, i) => (
                       <li key={i}>
                         <button
                           type="button"
+                          className="attachment-like"
                           onClick={() => {
                             if (mode === 'simulation') {
                               setOpenedEmailIds((prev) => {
@@ -206,17 +299,8 @@ export const InboxView: React.FC<Props> = ({
                                 return next;
                               });
                             }
-
                             setActiveAttachment(file);
                             setActiveLink(null);
-                          }}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            padding: 0,
-                            margin: 0,
-                            cursor: 'pointer',
-                            font: 'inherit',
                           }}
                         >
                           📎 {file}
@@ -224,36 +308,13 @@ export const InboxView: React.FC<Props> = ({
                       </li>
                     ))}
                   </ul>
-                </div>
+                </>
               )}
 
-              <div className="email-actions">
-                {mode === 'arcade' ? (
-                  <>
-                    <button onClick={() => handleDecision(true)}>Report Phish</button>
-                    <button onClick={() => handleDecision(false)}>Mark Safe</button>
-                  </>
-                ) : (
-                  <>
-                    <button onClick={() => handleDecision(true)}>Report Phish</button>
 
-                    <button
-                      onClick={() => handleDecision(false)}
-                      disabled={!selected || !openedEmailIds.has(selected.id)}
-                      title={
-                        !selected || openedEmailIds.has(selected.id)
-                          ? ''
-                          : 'Open the link or attachment before marking as read'
-                      }
-                    >
-                      Mark as Read
-                    </button>
-                  </>
-                )}
-              </div>
-            </>
+            </div>
           ) : (
-            <p>Select an email to read</p>
+            <div className="empty-state">Select an email to preview</div>
           )}
         </div>
       </div>
@@ -266,6 +327,7 @@ export const InboxView: React.FC<Props> = ({
           onProceed={proceedModal}
         />
       )}
+
       {showCompleteModal && mode === 'simulation' && (
         <LevelCompleteModal
           title={`Level ${level ?? ''} complete`}
@@ -273,10 +335,7 @@ export const InboxView: React.FC<Props> = ({
           correct={runCorrect}
           incorrect={runIncorrect}
           total={runTotal}
-          onReplay={() => {
-            // reload the same level; emails will reappear because we re-fetch
-            setRunKey((k) => k + 1);
-          }}
+          onReplay={() => setRunKey((k) => k + 1)}
           onExit={onExit}
         />
       )}
