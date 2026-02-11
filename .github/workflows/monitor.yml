@@ -1,0 +1,43 @@
+name: Nightly Monitor
+
+on:
+  schedule:
+    # 02:30 UTC every day
+    - cron: "30 2 * * *"
+  workflow_dispatch:
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set target URLs
+        run: |
+          echo "FRONTEND_URL=${FRONTEND_URL:-https://gamified-phishing-awareness-platform.onrender.com}" >> $GITHUB_ENV
+          echo "BACKEND_URL=${BACKEND_URL:-https://phishing-platform-backend.onrender.com}" >> $GITHUB_ENV
+
+      - name: Frontend check (GET /)
+        run: |
+          echo "Checking frontend: $FRONTEND_URL"
+          curl -fsSL \
+            --retry 3 --retry-delay 2 --retry-all-errors \
+            -o /dev/null \
+            -w "frontend_http=%{http_code} total=%{time_total}s\n" \
+            "$FRONTEND_URL/"
+
+      # Ideally this should be /api/health/ (recommended).
+      # If you don’t have that yet, /api/scenarios/ is fine as a basic liveness check.
+      - name: Backend check (GET /api/scenarios/)
+        run: |
+          echo "Checking backend: $BACKEND_URL/api/scenarios/"
+          curl -fsSL \
+            --retry 3 --retry-delay 2 --retry-all-errors \
+            -o /dev/null \
+            -w "backend_http=%{http_code} total=%{time_total}s\n" \
+            "$BACKEND_URL/api/scenarios/"
+
+      # Optional: fail if it's "up" but painfully slow
+      - name: Enforce max response time (optional)
+        run: |
+          echo "If you want, we can enforce a strict SLA here (e.g. <2.5s)."
+          echo "Leave this step as-is or remove it."
