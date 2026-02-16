@@ -5,13 +5,18 @@ import ArcadeGame from './components/ArcadeGame';
 import MenuView from './components/MenuView';
 import LevelSelectView from './components/LevelSelectView';
 import AuthPage from './components/AuthPage';
+import HamburgerMenu from './components/HamburgerMenu';
+import ProfileView from './components/ProfileView';
 
-type Screen = 'menu' | 'inbox' | 'arcade' | 'levels';
+type Screen = 'menu' | 'inbox' | 'arcade' | 'levels' | 'profile';
 
 const App: React.FC = () => {
   const [screen, setScreen] = useState<Screen>('menu');
-  const [selectedScenarioId, setSelectedScenarioId] = useState<number | undefined>(undefined);
+  const [selectedScenarioId, setSelectedScenarioId] = useState<number | undefined>(
+    undefined
+  );
   const [selectedLevel, setSelectedLevel] = useState<number | undefined>(undefined);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const [username, setUsername] = useState<string | null>(() => {
     // Restore session if token exists
@@ -21,7 +26,7 @@ const App: React.FC = () => {
   });
 
   const handleStartLevel = (scenarioId: number, level: number) => {
-    console.log("handleStartLevel", scenarioId, level);
+    console.log('handleStartLevel', scenarioId, level);
     setSelectedScenarioId(scenarioId);
     setSelectedLevel(level);
     setScreen('inbox');
@@ -45,6 +50,20 @@ const App: React.FC = () => {
 
   return (
     <div className="App">
+      <HamburgerMenu
+        open={drawerOpen}
+        username={username}
+        onClose={() => setDrawerOpen(false)}
+        onGoProfile={() => setScreen('profile')}
+        onLogout={handleLogout}
+      />
+
+      {screen !== 'inbox' && (
+        <div style={{ position: 'absolute', top: 10, right: 10 }}>
+          <button onClick={() => setDrawerOpen(true)}>☰</button>
+        </div>
+      )}
+
       {screen === 'menu' && <MenuView navigate={setScreen} />}
       {screen === 'arcade' && <ArcadeGame onExit={() => setScreen('menu')} />}
       {screen === 'levels' && <LevelSelectView onStartLevel={handleStartLevel} />}
@@ -56,9 +75,29 @@ const App: React.FC = () => {
           scenarioId={selectedScenarioId}
           level={selectedLevel}
           username={username}
-          onLogout={handleLogout}
+          onOpenMenu={() => setDrawerOpen(true)}
         />
       )}
+     {screen === 'profile' && (
+      <div className="outlook-shell">
+        <div className="outlook-topbar">
+          <div className="outlook-topbar-left">
+            <button className="btn" onClick={() => setScreen('menu')}>Back</button>
+            <div className="outlook-topbar-title">Profile</div>
+          </div>
+          <div className="outlook-topbar-actions">
+            <button className="btn" onClick={() => setDrawerOpen(true)} aria-label="Open menu">
+              ☰
+            </button>
+          </div>
+        </div>
+
+        <div style={{ overflow: 'auto', flex: 1 }}>
+          <ProfileView userId={username} />
+        </div>
+      </div>
+    )}
+
     </div>
   );
 };

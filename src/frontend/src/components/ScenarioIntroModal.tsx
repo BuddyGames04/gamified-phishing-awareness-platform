@@ -1,5 +1,5 @@
 import React from 'react';
-import '../styles/InboxView.css'; 
+import '../styles/InboxView.css';
 
 type Props = {
   scenario: {

@@ -2,6 +2,8 @@ from django.urls import path
 
 from . import views
 from . import views_auth
+from .views_metrics import StartLevelRunView, CompleteLevelRunView, CreateDecisionEventView, ProfileMetricsView
+
 
 urlpatterns = [
     path("emails/", views.get_emails, name="get_emails"),
@@ -10,4 +12,8 @@ urlpatterns = [
     path("scenarios/", views.get_scenarios),
     path("register/", views_auth.register, name="register"),
     path("login/", views_auth.login, name="login"),
+    path("metrics/level-runs/start/", StartLevelRunView.as_view()),
+    path("metrics/level-runs/<int:run_id>/complete/", CompleteLevelRunView.as_view()),
+    path("metrics/decisions/", CreateDecisionEventView.as_view()),
+    path("profile/metrics/", ProfileMetricsView.as_view()),
 ]

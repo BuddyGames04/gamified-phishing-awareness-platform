@@ -25,8 +25,6 @@ jobs:
             -w "frontend_http=%{http_code} total=%{time_total}s\n" \
             "$FRONTEND_URL/"
 
-      # Ideally this should be /api/health/ (recommended).
-      # If you don’t have that yet, /api/scenarios/ is fine as a basic liveness check.
       - name: Backend check (GET /api/scenarios/)
         run: |
           echo "Checking backend: $BACKEND_URL/api/scenarios/"
@@ -36,8 +34,8 @@ jobs:
             -w "backend_http=%{http_code} total=%{time_total}s\n" \
             "$BACKEND_URL/api/scenarios/"
 
-      # Optional: fail if it's "up" but painfully slow
-      - name: Enforce max response time (optional)
+      # Fail if it's "up" but painfully slow
+      - name: Enforce max response time 
         run: |
           echo "If you want, we can enforce a strict SLA here (e.g. <2.5s)."
           echo "Leave this step as-is or remove it."

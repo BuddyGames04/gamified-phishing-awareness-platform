@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Email, fetchEmails, submitInteraction, submitResult } from '../api';
+import {
+  Email,
+  fetchEmails,
+  submitInteraction,
+  submitResult,
+  startLevelRun,
+  completeLevelRun,
+  createDecisionEvent,
+} from '../api';
+
 import '../App.css';
 import '../styles/InboxView.css';
 import InteractionModal from './InteractionModal';
@@ -11,10 +20,8 @@ interface Props {
   userId: string;
   scenarioId?: number;
   level?: number;
-
-  // NEW:
   username: string;
-  onLogout: () => void;
+  onOpenMenu: () => void;
 }
 
 export const InboxView: React.FC<Props> = ({
@@ -24,7 +31,7 @@ export const InboxView: React.FC<Props> = ({
   userId,
   level,
   username,
-  onLogout,
+  onOpenMenu,
 }) => {
   const [emails, setEmails] = useState<Email[]>([]);
   const [selected, setSelected] = useState<Email | null>(null);
@@ -40,11 +47,13 @@ export const InboxView: React.FC<Props> = ({
   // used to force a full reload on replay
   const [runKey, setRunKey] = useState(0);
 
+  const [runId, setRunId] = useState<number | null>(null);
+  const [runCompleted, setRunCompleted] = useState(false); // prevent double-complete
+
+
   useEffect(() => {
     const loadEmails = async () => {
       try {
-        const { min, max } = getDifficultyWindow(level ?? 1);
-
         const data = await fetchEmails({
           mode,
           scenario_id: scenarioId,
@@ -53,7 +62,7 @@ export const InboxView: React.FC<Props> = ({
         });
 
         setEmails(data);
-        setOpenedEmailIds(new Set()); // reset per level run
+        setOpenedEmailIds(new Set());
         setRunTotal(data.length);
         setRunCorrect(0);
         setRunIncorrect(0);
@@ -61,34 +70,88 @@ export const InboxView: React.FC<Props> = ({
         setSelected(null);
         setActiveLink(null);
         setActiveAttachment(null);
+
+        // metrics: start a run (only for simulation; you can include arcade too later)
+        setRunCompleted(false);
+        setRunId(null);
+
+        if (mode === 'simulation') {
+          try {
+            const run = await startLevelRun({
+              user_id: userId,
+              mode,
+              scenario_id: scenarioId,
+              level_number: level ?? 1,
+              emails_total: data.length,
+            });
+            setRunId(run.id);
+          } catch (e) {
+            console.error('Failed to start level run', e);
+          }
+        }
       } catch (err) {
         console.error('Failed to load emails:', err);
       }
     };
 
     loadEmails();
-  }, [mode, scenarioId, level, runKey]);
+  }, [mode, scenarioId, level, runKey, userId]);
 
   const handleDecision = async (isPhishGuess: boolean) => {
     if (!selected) return;
 
     const isCorrect = selected.is_phish === isPhishGuess;
 
+    // Update UI counters first (snappy)
     if (isCorrect) setRunCorrect((prev) => prev + 1);
     else setRunIncorrect((prev) => prev + 1);
 
+    // existing progress endpoint (keep)
     try {
       await submitResult(userId, isCorrect);
     } catch (err) {
       console.error('Error submitting result:', err);
     }
+
+    // metrics: decision event
+    try {
+      await createDecisionEvent({
+        user_id: userId,
+        run_id: runId,
+        email_id: selected.id,
+        decision:
+          isPhishGuess
+            ? 'report_phish'
+            : mode === 'arcade'
+              ? 'mark_safe'
+              : 'mark_read',
+        was_correct: isCorrect,
+      });
+    } catch (err) {
+      console.error('Failed to create decision event:', err);
+    }
+
     const removedId = selected.id;
+
+    // Compute end-of-run + complete
     setEmails((prev) => {
       const next = prev.filter((e) => e.id !== removedId);
 
       if (next.length === 0) {
         setShowCompleteModal(true);
+
+        // complete the run once (server record)
+        if (mode === 'simulation' && runId && !runCompleted) {
+          const nextCorrect = isCorrect ? runCorrect + 1 : runCorrect;
+          const nextIncorrect = !isCorrect ? runIncorrect + 1 : runIncorrect;
+
+          setRunCompleted(true);
+          completeLevelRun(runId, { correct: nextCorrect, incorrect: nextIncorrect }).catch((e) =>
+            console.error('Failed to complete level run', e)
+          );
+        }
       }
+
       return next;
     });
 
@@ -137,9 +200,13 @@ export const InboxView: React.FC<Props> = ({
       {/* Top bar */}
       <div className="outlook-topbar">
         <div className="outlook-topbar-left">
-          <button className="btn" onClick={onExit}>Back</button>
+          <button className="btn" onClick={onExit}>
+            Back
+          </button>
           <div className="outlook-topbar-title">
-            {mode === 'simulation' ? `Inbox Simulator — Level ${level ?? ''}` : 'Arcade Mode'}
+            {mode === 'simulation'
+              ? `Inbox Simulator — Level ${level ?? ''}`
+              : 'Arcade Mode'}
           </div>
         </div>
 
@@ -175,7 +242,9 @@ export const InboxView: React.FC<Props> = ({
 
           <div className="user-controls">
             <span className="user-label">Signed in as {username}</span>
-            <button className="btn" onClick={onLogout}>Logout</button>
+             <button className="btn" onClick={onOpenMenu} aria-label="Open menu">
+              ☰
+            </button>
           </div>
         </div>
       </div>
@@ -198,7 +267,13 @@ export const InboxView: React.FC<Props> = ({
           </div>
 
           <div className="folder-title">Session</div>
-          <div style={{ padding: '0 10px', fontSize: 12, color: 'var(--color-text-muted)' }}>
+          <div
+            style={{
+              padding: '0 10px',
+              fontSize: 12,
+              color: 'var(--color-text-muted)',
+            }}
+          >
             Remaining: <strong>{emails.length}</strong>
           </div>
         </div>
@@ -215,12 +290,15 @@ export const InboxView: React.FC<Props> = ({
           <div className="list-scroll">
             {emails.map((email) => {
               const snippet =
-                (email.body || '').replace(/\s+/g, ' ').slice(0, 80) + ((email.body || '').length > 80 ? '…' : '');
+                (email.body || '').replace(/\s+/g, ' ').slice(0, 80) +
+                ((email.body || '').length > 80 ? '…' : '');
 
               // Fake time just for UI (stable per email id)
               const fakeHour = 9 + (email.id % 8);
               const fakeMin = (email.id * 7) % 60;
-              const timeStr = `${String(fakeHour).padStart(2, '0')}:${String(fakeMin).padStart(2, '0')}`;
+              const timeStr = `${String(fakeHour).padStart(2, '0')}:${String(
+                fakeMin
+              ).padStart(2, '0')}`;
 
               return (
                 <div
@@ -310,8 +388,6 @@ export const InboxView: React.FC<Props> = ({
                   </ul>
                 </>
               )}
-
-
             </div>
           ) : (
             <div className="empty-state">Select an email to preview</div>
@@ -342,13 +418,5 @@ export const InboxView: React.FC<Props> = ({
     </div>
   );
 };
-
-function getDifficultyWindow(level: number) {
-  if (level <= 3) return { min: 1, max: 1 };
-  if (level <= 6) return { min: 1, max: 2 };
-  if (level <= 10) return { min: 1, max: 3 };
-  if (level <= 15) return { min: 2, max: 4 };
-  return { min: 3, max: 5 };
-}
 
 export default InboxView;

@@ -21,14 +21,11 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
       localStorage.setItem('username', data.username);
       onAuthSuccess(data.username);
       console.log('Login succeeded, data:', data);
-      } catch (err: any) {
-        const msg =
-          err?.message ||
-          'Authentication failed';
-        setError(msg);
-        console.error(err);
-      }
-
+    } catch (err: any) {
+      const msg = err?.message || 'Authentication failed';
+      setError(msg);
+      console.error(err);
+    }
   };
 
   return (

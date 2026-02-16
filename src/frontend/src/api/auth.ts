@@ -48,7 +48,6 @@ export async function register(username: string, password: string) {
   return data;
 }
 
-
 export function authFetch(url: string, options: any = {}) {
   const token = localStorage.getItem('authToken');
 
