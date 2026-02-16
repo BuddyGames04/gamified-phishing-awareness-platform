@@ -58,15 +58,32 @@ const App: React.FC = () => {
         onLogout={handleLogout}
       />
 
-      {screen !== 'inbox' && (
+      {screen === 'menu' && (
         <div style={{ position: 'absolute', top: 10, right: 10 }}>
-          <button onClick={() => setDrawerOpen(true)}>☰</button>
+          <button
+            className="hamburger-btn"
+            onClick={() => setDrawerOpen(true)}
+            aria-label="Open menu"
+            title="Menu"
+          >
+            ☰
+          </button>
         </div>
       )}
 
       {screen === 'menu' && <MenuView navigate={setScreen} />}
-      {screen === 'arcade' && <ArcadeGame onExit={() => setScreen('menu')} />}
-      {screen === 'levels' && <LevelSelectView onStartLevel={handleStartLevel} />}
+      {screen === 'arcade' && (
+        <ArcadeGame
+          onExit={() => setScreen('menu')}
+          onOpenMenu={() => setDrawerOpen(true)}
+        />
+      )}
+      {screen === 'levels' && (
+        <LevelSelectView
+          onStartLevel={handleStartLevel}
+          onBack={() => setScreen('menu')}
+        />
+      )}
       {screen === 'inbox' && (
         <InboxView
           onExit={() => setScreen('menu')}
@@ -78,26 +95,32 @@ const App: React.FC = () => {
           onOpenMenu={() => setDrawerOpen(true)}
         />
       )}
-     {screen === 'profile' && (
-      <div className="outlook-shell">
-        <div className="outlook-topbar">
-          <div className="outlook-topbar-left">
-            <button className="btn" onClick={() => setScreen('menu')}>Back</button>
-            <div className="outlook-topbar-title">Profile</div>
+      {screen === 'profile' && (
+        <div className="outlook-shell">
+          <div className="outlook-topbar">
+            <div className="outlook-topbar-left">
+              <button className="btn" onClick={() => setScreen('menu')}>
+                Back
+              </button>
+              <div className="outlook-topbar-title">Profile</div>
+            </div>
+            <div className="outlook-topbar-actions">
+              <button
+                className="hamburger-btn"
+                onClick={() => setDrawerOpen(true)}
+                aria-label="Open menu"
+                title="Menu"
+              >
+                ☰
+              </button>
+            </div>
           </div>
-          <div className="outlook-topbar-actions">
-            <button className="btn" onClick={() => setDrawerOpen(true)} aria-label="Open menu">
-              ☰
-            </button>
+
+          <div style={{ overflow: 'auto', flex: 1 }}>
+            <ProfileView userId={username} />
           </div>
         </div>
-
-        <div style={{ overflow: 'auto', flex: 1 }}>
-          <ProfileView userId={username} />
-        </div>
-      </div>
-    )}
-
+      )}
     </div>
   );
 };

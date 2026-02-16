@@ -56,7 +56,8 @@ const ProfileView: React.FC<Props> = ({ userId }) => {
           <div className="profile-card-title">Overall performance</div>
           <div className="profile-big">{Math.round(overallAccuracyPct)}%</div>
           <div className="profile-muted">
-            Runs: {data.overall.total_runs} · Attempts: {data.overall.total_attempts} · Decisions: {data.overall.decision_events}
+            Runs: {data.overall.total_runs} · Attempts: {data.overall.total_attempts} ·
+            Decisions: {data.overall.decision_events}
           </div>
         </div>
 
@@ -65,7 +66,8 @@ const ProfileView: React.FC<Props> = ({ userId }) => {
           <div className="profile-muted">
             Link clicks before deciding: <strong>{Math.round(linkBeforePct)}%</strong>
             <br />
-            Attachment opens before deciding: <strong>{Math.round(attachBeforePct)}%</strong>
+            Attachment opens before deciding:{' '}
+            <strong>{Math.round(attachBeforePct)}%</strong>
           </div>
         </div>
       </div>
@@ -98,7 +100,11 @@ const ProfileView: React.FC<Props> = ({ userId }) => {
                     <td>{r.correct}</td>
                     <td>{r.incorrect}</td>
                     <td>{Math.round(asPercent(r.accuracy))}%</td>
-                    <td>{r.last_played_at ? new Date(r.last_played_at).toLocaleString() : '-'}</td>
+                    <td>
+                      {r.last_played_at
+                        ? new Date(r.last_played_at).toLocaleString()
+                        : '-'}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -135,7 +141,9 @@ const ProfileView: React.FC<Props> = ({ userId }) => {
                     <td>{r.emails_total ?? '-'}</td>
                     <td>{r.correct ?? '-'}</td>
                     <td>{r.incorrect ?? '-'}</td>
-                    <td>{r.completed_at ? new Date(r.completed_at).toLocaleString() : '-'}</td>
+                    <td>
+                      {r.completed_at ? new Date(r.completed_at).toLocaleString() : '-'}
+                    </td>
                   </tr>
                 ))}
               </tbody>

@@ -1,16 +1,24 @@
-from django.db.models import Count, Sum, Avg, Q
+from django.db.models import Avg, Count, Q, Sum
 from django.shortcuts import get_object_or_404
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from .models import LevelRun, EmailDecisionEvent, InteractionEvent, Level, Scenario, Email
+from .models import (
+    Email,
+    EmailDecisionEvent,
+    InteractionEvent,
+    Level,
+    LevelRun,
+    Scenario,
+)
 from .serializers_metrics import (
-    StartRunSerializer,
-    StartRunResponseSerializer,
     CompleteRunSerializer,
     DecisionCreateSerializer,
+    StartRunResponseSerializer,
+    StartRunSerializer,
 )
+
 
 def _safe_int(x, default=0):
     try:
@@ -18,11 +26,13 @@ def _safe_int(x, default=0):
     except Exception:
         return default
 
+
 class StartLevelRunView(APIView):
     """
     POST /api/metrics/level-runs/start/
     Body: { user_id, mode, scenario_id?, level_number, emails_total }
     """
+
     def post(self, request):
         ser = StartRunSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
@@ -40,7 +50,9 @@ class StartLevelRunView(APIView):
         if scenario_id is not None:
             scenario = Scenario.objects.filter(id=scenario_id).first()
             if scenario:
-                level = Level.objects.filter(scenario=scenario, number=level_number).first()
+                level = Level.objects.filter(
+                    scenario=scenario, number=level_number
+                ).first()
 
         run = LevelRun.objects.create(
             user_id=user_id,
@@ -51,7 +63,9 @@ class StartLevelRunView(APIView):
             emails_total=emails_total,
         )
 
-        return Response(StartRunResponseSerializer(run).data, status=status.HTTP_201_CREATED)
+        return Response(
+            StartRunResponseSerializer(run).data, status=status.HTTP_201_CREATED
+        )
 
 
 class CompleteLevelRunView(APIView):
@@ -59,6 +73,7 @@ class CompleteLevelRunView(APIView):
     POST /api/metrics/level-runs/<run_id>/complete/
     Body: { correct, incorrect }
     """
+
     def post(self, request, run_id: int):
         run = get_object_or_404(LevelRun, id=run_id)
         ser = CompleteRunSerializer(data=request.data)
@@ -79,6 +94,7 @@ class CreateDecisionEventView(APIView):
     Server computes:
       had_link_click / had_attachment_open from InteractionEvent between run.started_at and decision time.
     """
+
     def post(self, request):
         ser = DecisionCreateSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
@@ -135,13 +151,20 @@ class ProfileMetricsView(APIView):
       - by_level aggregates
       - trends arrays (simple)
     """
+
     def get(self, request):
         user_id = request.query_params.get("user_id")
         if not user_id:
-            return Response({"detail": "user_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "user_id is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
-        runs = LevelRun.objects.filter(user_id=user_id, mode="simulation", completed_at__isnull=False).order_by("-completed_at")
-        decisions = EmailDecisionEvent.objects.filter(user_id=user_id).order_by("-created_at")
+        runs = LevelRun.objects.filter(
+            user_id=user_id, mode="simulation", completed_at__isnull=False
+        ).order_by("-completed_at")
+        decisions = EmailDecisionEvent.objects.filter(user_id=user_id).order_by(
+            "-created_at"
+        )
 
         # Overall
         total_runs = runs.count()
@@ -154,65 +177,82 @@ class ProfileMetricsView(APIView):
         link_before = decisions.filter(had_link_click=True).count()
         attach_before = decisions.filter(had_attachment_open=True).count()
 
-        pct_link_before = (link_before / total_decisions) if total_decisions > 0 else 0.0
-        pct_attach_before = (attach_before / total_decisions) if total_decisions > 0 else 0.0
+        pct_link_before = (
+            (link_before / total_decisions) if total_decisions > 0 else 0.0
+        )
+        pct_attach_before = (
+            (attach_before / total_decisions) if total_decisions > 0 else 0.0
+        )
 
         # Recent runs (last 10)
         recent_runs = []
         for r in runs[:10]:
-            attempts = (r.correct + r.incorrect)
-            recent_runs.append({
-                "run_id": r.id,
-                "level_number": r.level_number,
-                "scenario_id": r.scenario_id,
-                "correct": r.correct,
-                "incorrect": r.incorrect,
-                "attempts": attempts,
-                "accuracy": (r.correct / attempts) if attempts > 0 else 0.0,
-                "started_at": r.started_at,
-                "completed_at": r.completed_at,
-            })
+            attempts = r.correct + r.incorrect
+            recent_runs.append(
+                {
+                    "run_id": r.id,
+                    "level_number": r.level_number,
+                    "scenario_id": r.scenario_id,
+                    "correct": r.correct,
+                    "incorrect": r.incorrect,
+                    "attempts": attempts,
+                    "accuracy": (r.correct / attempts) if attempts > 0 else 0.0,
+                    "started_at": r.started_at,
+                    "completed_at": r.completed_at,
+                }
+            )
 
         # Aggregate by level_number
-        by_level_qs = runs.values("level_number").annotate(
-            runs=Count("id"),
-            correct=Sum("correct"),
-            incorrect=Sum("incorrect"),
-        ).order_by("level_number")
+        by_level_qs = (
+            runs.values("level_number")
+            .annotate(
+                runs=Count("id"),
+                correct=Sum("correct"),
+                incorrect=Sum("incorrect"),
+            )
+            .order_by("level_number")
+        )
 
         by_level = []
         for row in by_level_qs:
             attempts = (row["correct"] or 0) + (row["incorrect"] or 0)
-            by_level.append({
-                "level_number": row["level_number"],
-                "runs": row["runs"],
-                "accuracy": ((row["correct"] or 0) / attempts) if attempts > 0 else 0.0,
-                "attempts": attempts,
-            })
+            by_level.append(
+                {
+                    "level_number": row["level_number"],
+                    "runs": row["runs"],
+                    "accuracy": (
+                        ((row["correct"] or 0) / attempts) if attempts > 0 else 0.0
+                    ),
+                    "attempts": attempts,
+                }
+            )
 
-        
         trend_accuracy = []
-        for r in reversed(list(runs[:20])):  
+        for r in reversed(list(runs[:20])):
             attempts = r.correct + r.incorrect
-            trend_accuracy.append({
-                "t": r.completed_at,
-                "accuracy": (r.correct / attempts) if attempts > 0 else 0.0,
-                "level_number": r.level_number,
-            })
+            trend_accuracy.append(
+                {
+                    "t": r.completed_at,
+                    "accuracy": (r.correct / attempts) if attempts > 0 else 0.0,
+                    "level_number": r.level_number,
+                }
+            )
 
-        return Response({
-            "user_id": user_id,
-            "overall": {
-                "total_runs": total_runs,
-                "total_attempts": total_attempts,
-                "accuracy": accuracy,
-                "decision_events": total_decisions,
-                "pct_link_click_before_decision": pct_link_before,
-                "pct_attachment_open_before_decision": pct_attach_before,
-            },
-            "recent_runs": recent_runs,
-            "by_level": by_level,
-            "trends": {
-                "accuracy": trend_accuracy,
+        return Response(
+            {
+                "user_id": user_id,
+                "overall": {
+                    "total_runs": total_runs,
+                    "total_attempts": total_attempts,
+                    "accuracy": accuracy,
+                    "decision_events": total_decisions,
+                    "pct_link_click_before_decision": pct_link_before,
+                    "pct_attachment_open_before_decision": pct_attach_before,
+                },
+                "recent_runs": recent_runs,
+                "by_level": by_level,
+                "trends": {
+                    "accuracy": trend_accuracy,
+                },
             }
-        })
+        )

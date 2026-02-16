@@ -9,7 +9,13 @@ type Props = {
   onLogout: () => void;
 };
 
-const HamburgerMenu: React.FC<Props> = ({ open, username, onClose, onGoProfile, onLogout }) => {
+const HamburgerMenu: React.FC<Props> = ({
+  open,
+  username,
+  onClose,
+  onGoProfile,
+  onLogout,
+}) => {
   if (!open) return null;
 
   return (
@@ -17,12 +23,22 @@ const HamburgerMenu: React.FC<Props> = ({ open, username, onClose, onGoProfile, 
       <div className="drawer" onClick={(e) => e.stopPropagation()}>
         <div className="drawer-header">
           <div className="drawer-title">Menu</div>
-          <button className="drawer-close" onClick={onClose}>✕</button>
+          <button className="drawer-close" onClick={onClose}>
+            ✕
+          </button>
         </div>
 
-        <div className="drawer-user">Signed in as <strong>{username}</strong></div>
+        <div className="drawer-user">
+          Signed in as <strong>{username}</strong>
+        </div>
 
-        <button className="drawer-item" onClick={() => { onGoProfile(); onClose(); }}>
+        <button
+          className="drawer-item"
+          onClick={() => {
+            onGoProfile();
+            onClose();
+          }}
+        >
           👤 Profile & metrics
         </button>
 

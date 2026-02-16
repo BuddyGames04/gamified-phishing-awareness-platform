@@ -50,7 +50,6 @@ export const InboxView: React.FC<Props> = ({
   const [runId, setRunId] = useState<number | null>(null);
   const [runCompleted, setRunCompleted] = useState(false); // prevent double-complete
 
-
   useEffect(() => {
     const loadEmails = async () => {
       try {
@@ -119,12 +118,11 @@ export const InboxView: React.FC<Props> = ({
         user_id: userId,
         run_id: runId,
         email_id: selected.id,
-        decision:
-          isPhishGuess
-            ? 'report_phish'
-            : mode === 'arcade'
-              ? 'mark_safe'
-              : 'mark_read',
+        decision: isPhishGuess
+          ? 'report_phish'
+          : mode === 'arcade'
+            ? 'mark_safe'
+            : 'mark_read',
         was_correct: isCorrect,
       });
     } catch (err) {
@@ -146,9 +144,10 @@ export const InboxView: React.FC<Props> = ({
           const nextIncorrect = !isCorrect ? runIncorrect + 1 : runIncorrect;
 
           setRunCompleted(true);
-          completeLevelRun(runId, { correct: nextCorrect, incorrect: nextIncorrect }).catch((e) =>
-            console.error('Failed to complete level run', e)
-          );
+          completeLevelRun(runId, {
+            correct: nextCorrect,
+            incorrect: nextIncorrect,
+          }).catch((e) => console.error('Failed to complete level run', e));
         }
       }
 
@@ -242,9 +241,15 @@ export const InboxView: React.FC<Props> = ({
 
           <div className="user-controls">
             <span className="user-label">Signed in as {username}</span>
-             <button className="btn" onClick={onOpenMenu} aria-label="Open menu">
+            <button
+              className="hamburger-btn"
+              onClick={onOpenMenu}
+              aria-label="Open menu"
+              title="Menu"
+            >
               ☰
             </button>
+
           </div>
         </div>
       </div>

@@ -133,12 +133,18 @@ export async function startLevelRun(params: {
   return response.json();
 }
 
-export async function completeLevelRun(runId: number, params: { correct: number; incorrect: number }) {
-  const response = await authFetch(`${API_BASE}/metrics/level-runs/${runId}/complete/`, {
-    method: 'POST',
-    headers: {},
-    body: JSON.stringify(params),
-  });
+export async function completeLevelRun(
+  runId: number,
+  params: { correct: number; incorrect: number }
+) {
+  const response = await authFetch(
+    `${API_BASE}/metrics/level-runs/${runId}/complete/`,
+    {
+      method: 'POST',
+      headers: {},
+      body: JSON.stringify(params),
+    }
+  );
 
   if (!response.ok) throw new Error('Failed to complete level run');
   return response.json();
@@ -168,7 +174,7 @@ export type ProfileMetrics = {
     total_attempts: number;
     accuracy: number; // 0..1
     decision_events: number;
-    pct_link_click_before_decision: number; // 0..100 
+    pct_link_click_before_decision: number; // 0..100
     pct_attachment_open_before_decision: number; // 0..100
   };
   recent_runs: Array<{
@@ -195,7 +201,7 @@ export type ProfileMetrics = {
     accuracy: Array<{
       date: string;
       accuracy: number; // 0..1 OR 0..100
-      risky_action_rate?: number; 
+      risky_action_rate?: number;
     }>;
   };
 };
@@ -211,4 +217,3 @@ export async function fetchProfileMetrics(userId: string): Promise<ProfileMetric
 
   return res.json();
 }
-

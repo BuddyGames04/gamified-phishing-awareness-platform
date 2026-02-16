@@ -1,54 +1,105 @@
 import React, { useEffect, useState } from 'react';
 import { Email, fetchEmails, submitResult } from '../api';
-import '../App.css';
+import '../styles/InboxView.css';
 import '../styles/ArcadeMode.css';
+
 interface Props {
   onExit: () => void;
+  onOpenMenu: () => void;
 }
 
-const ArcadeGame: React.FC<Props> = ({ onExit }) => {
+const ArcadeGame: React.FC<Props> = ({ onExit, onOpenMenu }) => {
   const [emails, setEmails] = useState<Email[]>([]);
   const [index, setIndex] = useState(0);
   const [score, setScore] = useState(0);
-  const [feedback, setFeedback] = useState('');
+  const [feedback, setFeedback] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchEmails().then(setEmails);
+    fetchEmails({ mode: 'arcade', limit: 50 }).then(setEmails).catch(console.error);
   }, []);
 
-  const handleGuess = async (guess: boolean) => {
+  const handleGuess = async (guessIsPhish: boolean) => {
     const email = emails[index];
-    const isCorrect = email.is_phish === guess;
-    setFeedback(isCorrect ? 'Correct!' : 'Wrong');
+    if (!email) return;
+
+    const isCorrect = email.is_phish === guessIsPhish;
+    setFeedback(isCorrect ? 'Correct' : 'Wrong');
     setScore((s) => s + (isCorrect ? 1 : 0));
 
-    await submitResult('luke', isCorrect);
+    try {
+      await submitResult('arcade', isCorrect);
+    } catch (e) {
+      console.error('submitResult failed', e);
+    }
 
     setTimeout(() => {
-      setFeedback('');
+      setFeedback(null);
       setIndex((i) => (i + 1 < emails.length ? i + 1 : 0));
-    }, 1200);
+    }, 900);
   };
 
-  if (emails.length === 0) return <p>Loading emails...</p>;
   const email = emails[index];
 
   return (
-    <div style={{ textAlign: 'center', marginTop: '2rem' }}>
-      <h1>Arcade Mode</h1>
-      <h3>Score: {score}</h3>
+    <div className="outlook-shell">
+      <div className="outlook-topbar">
+        <div className="outlook-topbar-left">
+          <button className="btn" onClick={onExit}>Back</button>
+          <div className="outlook-topbar-title">Arcade Mode</div>
+        </div>
 
-      <div className="arcade-box">
-        <h2>{email.subject}</h2>
-        <div className="email-from">
-          From: {email.sender_name} &lt;{email.sender_email}&gt;
+        <div className="outlook-topbar-actions">
+          <div className="arcade-score-pill">
+            Score: <strong>{score}</strong>
+          </div>
+
+          <button
+            className="hamburger-btn"
+            onClick={onOpenMenu}
+            aria-label="Open menu"
+            title="Menu"
+          >
+            ☰
+          </button>
         </div>
-        <div className="arcade-email-body">{email.body}</div>
-        <div>
-          <button onClick={() => handleGuess(true)}>Phish</button>
-          <button onClick={() => handleGuess(false)}>Not Phish</button>
-        </div>
-        {feedback && <div className="arcade-feedback">{feedback}</div>}
+      </div>
+
+      <div className="arcade-stage">
+        {emails.length === 0 || !email ? (
+          <div className="reading-pane">
+            <div className="empty-state">Loading emails…</div>
+          </div>
+        ) : (
+          <div className="reading-pane">
+            <div className="reading-card">
+              <div className="email-subject">{email.subject}</div>
+              <div className="email-meta">
+                From: {email.sender_name} &lt;{email.sender_email}&gt;
+              </div>
+
+              <div className="email-content">{email.body}</div>
+
+              <div className="arcade-actions">
+                <button className="btn btn-danger" onClick={() => handleGuess(true)}>
+                  Phish
+                </button>
+                <button className="btn btn-ok" onClick={() => handleGuess(false)}>
+                  Not Phish
+                </button>
+              </div>
+
+              {feedback && (
+                <div className={`arcade-feedback ${feedback === 'Correct' ? 'ok' : 'bad'}`}>
+                  {feedback}
+                </div>
+              )}
+
+              <div className="arcade-progress">
+                Email {index + 1} / {emails.length}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

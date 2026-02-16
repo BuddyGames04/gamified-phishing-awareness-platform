@@ -35,7 +35,7 @@ jobs:
             "$BACKEND_URL/api/scenarios/"
 
       # Fail if it's "up" but painfully slow
-      - name: Enforce max response time 
+      - name: Enforce max response time
         run: |
           echo "If you want, we can enforce a strict SLA here (e.g. <2.5s)."
           echo "Leave this step as-is or remove it."

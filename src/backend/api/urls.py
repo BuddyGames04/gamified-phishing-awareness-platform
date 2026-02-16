@@ -1,9 +1,12 @@
 from django.urls import path
 
-from . import views
-from . import views_auth
-from .views_metrics import StartLevelRunView, CompleteLevelRunView, CreateDecisionEventView, ProfileMetricsView
-
+from . import views, views_auth
+from .views_metrics import (
+    CompleteLevelRunView,
+    CreateDecisionEventView,
+    ProfileMetricsView,
+    StartLevelRunView,
+)
 
 urlpatterns = [
     path("emails/", views.get_emails, name="get_emails"),

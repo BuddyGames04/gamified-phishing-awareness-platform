@@ -50,3 +50,50 @@
   font-size: 1.2rem;
   font-weight: bold;
 }
+
+.arcade-stage {
+  flex: 1;
+  min-height: 0;
+}
+
+.arcade-score-pill {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  padding: 8px 10px;
+  border-radius: 999px;
+}
+
+.arcade-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.arcade-feedback {
+  margin-top: 12px;
+  font-weight: 800;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+}
+
+.arcade-feedback.ok {
+  background: #ecfdf5;
+  border-color: #86efac;
+}
+
+.arcade-feedback.bad {
+  background: #fff1f2;
+  border-color: #fca5a5;
+}
+
+.arcade-progress {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+

@@ -1,7 +1,7 @@
 .drawer-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.35);
+  background: rgba(0, 0, 0, 0.35);
   z-index: 99999;
   display: flex;
   justify-content: flex-end;

@@ -10,51 +10,63 @@
 
 .outlook-topbar {
   height: 52px;
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto; /* left | center | right */
   align-items: center;
-  justify-content: space-between;
   padding: 0 12px;
   background: #ffffff;
   border-bottom: 1px solid #e5e7eb;
-  position: relative;
 }
 
 .outlook-topbar-left {
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
 }
 
-.outlook-topbar-title {
-  font-weight: 600;
-}
-
-/* center toolbar */
 .outlook-topbar-center {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
+  min-width: 0;
 }
 
-/* keep right side from colliding with center */
+/* right side should align to the far right */
 .outlook-topbar-actions {
+  justify-self: end;
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 10px;
-  padding-left: 12px;
+  min-width: 0;
 }
 
 .fake-search {
-  width: 280px;
-  max-width: 30vw;
+  width: clamp(140px, 22vw, 280px);
   padding: 8px 10px;
   border: 1px solid #d1d5db;
   border-radius: 8px;
   background: #f9fafb;
   color: #111827;
+}
+
+.user-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.user-label {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hamburger-btn {
+  flex-shrink: 0;
 }
 
 .outlook-main {

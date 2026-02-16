@@ -120,6 +120,7 @@ class LevelEmail(models.Model):
     def __str__(self):
         return f"{self.level} -> {self.email.subject}"
 
+
 class LevelRun(models.Model):
     user_id = models.CharField(max_length=255)
     mode = models.CharField(
@@ -129,9 +130,15 @@ class LevelRun(models.Model):
     )
 
     # Optional but strongly recommended: tie to Level for clean aggregation
-    level = models.ForeignKey(Level, null=True, blank=True, on_delete=models.SET_NULL, related_name="runs")
-    scenario = models.ForeignKey(Scenario, null=True, blank=True, on_delete=models.SET_NULL, related_name="runs")
-    level_number = models.IntegerField(default=1)  # keep the global number for convenience
+    level = models.ForeignKey(
+        Level, null=True, blank=True, on_delete=models.SET_NULL, related_name="runs"
+    )
+    scenario = models.ForeignKey(
+        Scenario, null=True, blank=True, on_delete=models.SET_NULL, related_name="runs"
+    )
+    level_number = models.IntegerField(
+        default=1
+    )  # keep the global number for convenience
 
     emails_total = models.IntegerField(default=0)
     correct = models.IntegerField(default=0)
@@ -158,7 +165,13 @@ class EmailDecisionEvent(models.Model):
     ]
 
     user_id = models.CharField(max_length=255)
-    run = models.ForeignKey(LevelRun, null=True, blank=True, on_delete=models.SET_NULL, related_name="decisions")
+    run = models.ForeignKey(
+        LevelRun,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="decisions",
+    )
     email = models.ForeignKey(Email, on_delete=models.CASCADE, related_name="decisions")
 
     decision = models.CharField(max_length=20, choices=DECISION_CHOICES)
