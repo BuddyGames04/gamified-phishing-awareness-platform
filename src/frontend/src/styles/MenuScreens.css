@@ -3,16 +3,14 @@
 /* Shared shell for menu-like screens */
 .screen-shell {
   min-height: calc(100vh - 20px);
-  background:
-    radial-gradient(900px 500px at 20% 10%, rgba(0, 168, 232, 0.20), transparent 60%),
-    radial-gradient(900px 500px at 85% 30%, rgba(255, 193, 7, 0.18), transparent 60%),
-    linear-gradient(180deg, #ffffff 0%, var(--color-bg) 70%);
+  background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 26px 16px;
   color: var(--color-text-main);
 }
+
 
 .screen-card {
   width: min(980px, 96vw);
