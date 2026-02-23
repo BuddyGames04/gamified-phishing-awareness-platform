@@ -8,15 +8,17 @@ from .models import Email, ArcadeAttempt, ArcadeState
 from .serializers import EmailSerializer
 
 
-RECENT_WINDOW = 25          # don’t repeat last N
+RECENT_WINDOW = 25  # don’t repeat last N
 TARGET_MIN = 1.0
-TARGET_MAX = 5.0            # your Email.difficulty is 1..5
+TARGET_MAX = 5.0  # your Email.difficulty is 1..5
+
 
 def _pick_email(user_id: str, target_d: int):
     # exclude recently seen
     recent_ids = list(
-        ArcadeAttempt.objects.filter(user_id=user_id)
-        .values_list("email_id", flat=True)[:RECENT_WINDOW]
+        ArcadeAttempt.objects.filter(user_id=user_id).values_list(
+            "email_id", flat=True
+        )[:RECENT_WINDOW]
     )
 
     # Prefer exact difficulty, then +/-1 if needed
@@ -26,7 +28,9 @@ def _pick_email(user_id: str, target_d: int):
     if exact.exists():
         return exact.order_by("?").first()
 
-    band = candidates.filter(difficulty__in=[max(1, target_d - 1), min(5, target_d + 1)])
+    band = candidates.filter(
+        difficulty__in=[max(1, target_d - 1), min(5, target_d + 1)]
+    )
     if band.exists():
         return band.order_by("?").first()
 
@@ -73,7 +77,7 @@ def post_arcade_attempt(request):
     except Email.DoesNotExist:
         return Response({"detail": "Email not found"}, status=404)
 
-    was_correct = (email.is_phish == bool(guess_is_phish))
+    was_correct = email.is_phish == bool(guess_is_phish)
 
     state, _ = ArcadeState.objects.get_or_create(user_id=user_id)
     state.clamp(TARGET_MIN, TARGET_MAX)
@@ -98,13 +102,18 @@ def post_arcade_attempt(request):
         email=email,
         guess_is_phish=bool(guess_is_phish),
         was_correct=was_correct,
-        response_time_ms=response_time_ms if response_time_ms is None else int(response_time_ms),
+        response_time_ms=(
+            response_time_ms if response_time_ms is None else int(response_time_ms)
+        ),
         target_difficulty=target_before,
         email_difficulty=email.difficulty,
     )
 
-    return Response({
-        "was_correct": was_correct,
-        "new_target_difficulty": state.difficulty_float,
-        "accuracy": (state.correct / state.total) if state.total else 0,
-    }, status=201)
+    return Response(
+        {
+            "was_correct": was_correct,
+            "new_target_difficulty": state.difficulty_float,
+            "accuracy": (state.correct / state.total) if state.total else 0,
+        },
+        status=201,
+    )

@@ -46,7 +46,6 @@ class Email(models.Model):
     links = models.JSONField(default=list, blank=True)
     attachments = models.JSONField(default=list, blank=True)
 
-
     scenario = models.ForeignKey(
         Scenario,
         null=True,
@@ -185,7 +184,7 @@ class EmailDecisionEvent(models.Model):
 
     def __str__(self):
         return f"Decision({self.user_id}, {self.decision}, correct={self.was_correct})"
-    
+
 
 class ArcadeState(models.Model):
     user_id = models.CharField(max_length=255, unique=True)
@@ -193,7 +192,9 @@ class ArcadeState(models.Model):
     streak = models.IntegerField(default=0)
     total = models.IntegerField(default=0)
     correct = models.IntegerField(default=0)
-    last_email = models.ForeignKey(Email, null=True, blank=True, on_delete=models.SET_NULL)
+    last_email = models.ForeignKey(
+        Email, null=True, blank=True, on_delete=models.SET_NULL
+    )
     updated_at = models.DateTimeField(auto_now=True)
 
     def clamp(self, lo=1.0, hi=5.0):

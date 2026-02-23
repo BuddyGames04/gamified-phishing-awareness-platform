@@ -31,8 +31,18 @@ def get_emails(request):
         except Level.DoesNotExist:
             return Response({"detail": "Level not found"}, status=404)
 
-        wave_true = str(request.query_params.get("wave", "")).lower() in ("1","true","yes","y","on")
-        sort_filter = {"in_levels__sort_order__gte": 100} if wave_true else {"in_levels__sort_order__lt": 100}
+        wave_true = str(request.query_params.get("wave", "")).lower() in (
+            "1",
+            "true",
+            "yes",
+            "y",
+            "on",
+        )
+        sort_filter = (
+            {"in_levels__sort_order__gte": 100}
+            if wave_true
+            else {"in_levels__sort_order__lt": 100}
+        )
 
         emails = (
             Email.objects.filter(in_levels__level=lvl, **sort_filter)

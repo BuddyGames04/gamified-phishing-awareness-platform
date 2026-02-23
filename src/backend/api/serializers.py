@@ -9,21 +9,21 @@ class EmailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Email
         fields = [
-                "id",
-                "sender_name",
-                "sender_email",
-                "subject",
-                "body",
-                "is_phish",
-                "difficulty",
-                "category",
-                "created_at",
-                "links",
-                "attachments",
-                "mode",
-                "scenario",
-                "current_level_number",
-            ]
+            "id",
+            "sender_name",
+            "sender_email",
+            "subject",
+            "body",
+            "is_phish",
+            "difficulty",
+            "category",
+            "created_at",
+            "links",
+            "attachments",
+            "mode",
+            "scenario",
+            "current_level_number",
+        ]
 
 
 class UserProgressSerializer(serializers.ModelSerializer):
