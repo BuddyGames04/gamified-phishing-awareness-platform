@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Email, fetchEmails, submitResult } from '../api';
+import React, { useEffect, useRef, useState } from 'react';
+import { ArcadeNextEmail, fetchArcadeNext, postArcadeAttempt } from '../api';
 import '../styles/InboxView.css';
 import '../styles/ArcadeMode.css';
 
@@ -9,36 +9,54 @@ interface Props {
 }
 
 const ArcadeGame: React.FC<Props> = ({ onExit, onOpenMenu }) => {
-  const [emails, setEmails] = useState<Email[]>([]);
-  const [index, setIndex] = useState(0);
+  const [email, setEmail] = useState<ArcadeNextEmail | null>(null);
   const [score, setScore] = useState(0);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const startedAtRef = useRef<number>(Date.now());
+
+  const loadNext = async () => {
+    setLoading(true);
+    try {
+      const next = await fetchArcadeNext();
+      setEmail(next);
+      startedAtRef.current = Date.now();
+    } catch (e) {
+      console.error(e);
+      setEmail(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    fetchEmails({ mode: 'arcade', limit: 50 }).then(setEmails).catch(console.error);
+    loadNext();
   }, []);
 
   const handleGuess = async (guessIsPhish: boolean) => {
-    const email = emails[index];
     if (!email) return;
 
+    const responseTimeMs = Date.now() - startedAtRef.current;
     const isCorrect = email.is_phish === guessIsPhish;
+
     setFeedback(isCorrect ? 'Correct' : 'Wrong');
     setScore((s) => s + (isCorrect ? 1 : 0));
 
     try {
-      await submitResult('arcade', isCorrect);
+      await postArcadeAttempt({
+        email_id: email.id,
+        guess_is_phish: guessIsPhish,
+        response_time_ms: responseTimeMs,
+      });
     } catch (e) {
-      console.error('submitResult failed', e);
+      console.error('postArcadeAttempt failed', e);
     }
 
     setTimeout(() => {
       setFeedback(null);
-      setIndex((i) => (i + 1 < emails.length ? i + 1 : 0));
+      loadNext();
     }, 900);
   };
-
-  const email = emails[index];
 
   return (
     <div className="outlook-shell">
@@ -65,9 +83,11 @@ const ArcadeGame: React.FC<Props> = ({ onExit, onOpenMenu }) => {
       </div>
 
       <div className="arcade-stage">
-        {emails.length === 0 || !email ? (
+        {loading || !email ? (
           <div className="reading-pane">
-            <div className="empty-state">Loading emails…</div>
+            <div className="empty-state">
+              {loading ? 'Loading email…' : 'No arcade emails available.'}
+            </div>
           </div>
         ) : (
           <div className="reading-pane">
@@ -94,8 +114,9 @@ const ArcadeGame: React.FC<Props> = ({ onExit, onOpenMenu }) => {
                 </div>
               )}
 
+              {/*tiny debug pill (remove later) */}
               <div className="arcade-progress">
-                Email {index + 1} / {emails.length}
+                Target difficulty: {email.target_difficulty_int} ({email.target_difficulty.toFixed(1)})
               </div>
             </div>
           </div>

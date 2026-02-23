@@ -217,3 +217,34 @@ export async function fetchProfileMetrics(userId: string): Promise<ProfileMetric
 
   return res.json();
 }
+
+export type ArcadeNextEmail = Email & {
+  target_difficulty: number;
+  target_difficulty_int: number;
+};
+
+export type ArcadeAttemptResponse = {
+  was_correct: boolean;
+  new_target_difficulty: number;
+  accuracy: number; // 0..1
+};
+
+export async function fetchArcadeNext(): Promise<ArcadeNextEmail> {
+  const res = await authFetch(`${API_BASE}/arcade/next/`, { method: 'GET' });
+  if (!res.ok) throw new Error('Failed to fetch arcade next email');
+  return res.json();
+}
+
+export async function postArcadeAttempt(params: {
+  email_id: number;
+  guess_is_phish: boolean;
+  response_time_ms?: number;
+}): Promise<ArcadeAttemptResponse> {
+  const res = await authFetch(`${API_BASE}/arcade/attempt/`, {
+    method: 'POST',
+    headers: {},
+    body: JSON.stringify(params),
+  });
+  if (!res.ok) throw new Error('Failed to submit arcade attempt');
+  return res.json();
+}

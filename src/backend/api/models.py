@@ -45,7 +45,7 @@ class Email(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     links = models.JSONField(default=list, blank=True)
     attachments = models.JSONField(default=list, blank=True)
-    level_number = models.IntegerField(default=1)
+
 
     scenario = models.ForeignKey(
         Scenario,
@@ -185,3 +185,36 @@ class EmailDecisionEvent(models.Model):
 
     def __str__(self):
         return f"Decision({self.user_id}, {self.decision}, correct={self.was_correct})"
+    
+
+class ArcadeState(models.Model):
+    user_id = models.CharField(max_length=255, unique=True)
+    difficulty_float = models.FloatField(default=2.0)  # adaptive target
+    streak = models.IntegerField(default=0)
+    total = models.IntegerField(default=0)
+    correct = models.IntegerField(default=0)
+    last_email = models.ForeignKey(Email, null=True, blank=True, on_delete=models.SET_NULL)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def clamp(self, lo=1.0, hi=5.0):
+        self.difficulty_float = max(lo, min(hi, self.difficulty_float))
+
+
+class ArcadeAttempt(models.Model):
+    user_id = models.CharField(max_length=255)
+    email = models.ForeignKey(Email, on_delete=models.CASCADE)
+    guess_is_phish = models.BooleanField()
+    was_correct = models.BooleanField()
+    response_time_ms = models.IntegerField(null=True, blank=True)
+
+    target_difficulty = models.FloatField()
+    email_difficulty = models.IntegerField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["user_id", "created_at"]),
+            models.Index(fields=["user_id", "email"]),
+        ]

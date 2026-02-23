@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+// src/frontend/src/components/InboxView.tsx
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   Email,
   fetchEmails,
@@ -50,6 +51,37 @@ export const InboxView: React.FC<Props> = ({
   const [runId, setRunId] = useState<number | null>(null);
   const [runCompleted, setRunCompleted] = useState(false); // prevent double-complete
 
+  // TIMED EMAIL MECHANIC
+  const [incomingQueue, setIncomingQueue] = useState<Email[]>([]);
+  const [waveTriggered, setWaveTriggered] = useState(false);
+
+  const isHighLevel = (lvl?: number) => (lvl ?? 0) >= 3;
+
+  const triggerIncomingWave = useCallback(
+    async (removedId?: number) => {
+      setWaveTriggered(true);
+
+      const newEmails = await fetchEmails(
+        ({
+          mode,
+          scenario_id: scenarioId,
+          level,
+          limit: 5,
+          wave: true, // backend filters special wave emails
+        } as any)
+      );
+
+      setIncomingQueue(newEmails);
+      setRunTotal((t) => t + newEmails.length);
+
+      setEmails((prev) => {
+        const remaining = removedId ? prev.filter((e) => e.id !== removedId) : prev;
+        return [...newEmails, ...remaining];
+      });
+    },
+    [mode, scenarioId, level]
+  );
+
   useEffect(() => {
     const loadEmails = async () => {
       try {
@@ -69,6 +101,10 @@ export const InboxView: React.FC<Props> = ({
         setSelected(null);
         setActiveLink(null);
         setActiveAttachment(null);
+
+        // reset timed-wave state on level load/replay
+        setIncomingQueue([]);
+        setWaveTriggered(false);
 
         // metrics: start a run (only for simulation; you can include arcade too later)
         setRunCompleted(false);
@@ -95,6 +131,19 @@ export const InboxView: React.FC<Props> = ({
 
     loadEmails();
   }, [mode, scenarioId, level, runKey, userId]);
+
+  // trigger timed wave mid-level
+  useEffect(() => {
+    if (mode !== 'simulation') return;
+
+    const timer = setTimeout(() => {
+      if (!waveTriggered) {
+        triggerIncomingWave().catch((e) => console.error('triggerIncomingWave failed', e));
+      }
+    }, 60000); // 60s example
+
+    return () => clearTimeout(timer);
+  }, [runKey, mode, waveTriggered, triggerIncomingWave]);
 
   const handleDecision = async (isPhishGuess: boolean) => {
     if (!selected) return;
@@ -130,6 +179,21 @@ export const InboxView: React.FC<Props> = ({
     }
 
     const removedId = selected.id;
+
+    // Must trigger even if user finishes early (before completing)
+    const isFinalEmail = emails.length === 1;
+    if (mode === 'simulation' && isFinalEmail && !waveTriggered && isHighLevel(level)) {
+      try {
+        await triggerIncomingWave(removedId);
+      } catch (e) {
+        console.error('triggerIncomingWave failed', e);
+      }
+
+      setSelected(null);
+      setActiveLink(null);
+      setActiveAttachment(null);
+      return; // prevent completion until new emails handled
+    }
 
     // Compute end-of-run + complete
     setEmails((prev) => {

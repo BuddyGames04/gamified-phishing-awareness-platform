@@ -1,4 +1,6 @@
+# src/backend/api/views.py
 import random
+from django.db.models import F
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -16,45 +18,35 @@ from .serializers import (
 @api_view(["GET"])
 def get_emails(request):
     mode = request.query_params.get("mode")  # arcade|simulation
-    scenario_id = request.query_params.get("scenario_id")
-    min_d = request.query_params.get("min_difficulty")
-    max_d = request.query_params.get("max_difficulty")
     limit = int(request.query_params.get("limit", "20"))
-    level = request.query_params.get("level")
 
-    if mode == "simulation" and scenario_id and level:
+    if mode == "simulation":
+        scenario_id = request.query_params.get("scenario_id")
+        level = request.query_params.get("level")
+        if not (scenario_id and level):
+            return Response({"detail": "scenario_id and level required"}, status=400)
+
         try:
             lvl = Level.objects.get(scenario_id=scenario_id, number=int(level))
         except Level.DoesNotExist:
             return Response({"detail": "Level not found"}, status=404)
 
-        emails = Email.objects.filter(in_levels__level=lvl).order_by(
-            "in_levels__sort_order", "id"
+        wave_true = str(request.query_params.get("wave", "")).lower() in ("1","true","yes","y","on")
+        sort_filter = {"in_levels__sort_order__gte": 100} if wave_true else {"in_levels__sort_order__lt": 100}
+
+        emails = (
+            Email.objects.filter(in_levels__level=lvl, **sort_filter)
+            .annotate(
+                current_level_number=F("in_levels__level__number"),
+                level_sort_order=F("in_levels__sort_order"),
+            )
+            .order_by("level_sort_order", "id")[:limit]
         )
-        serializer = EmailSerializer(emails, many=True)
-        return Response(serializer.data)
-    emails = Email.objects.all()
+        return Response(EmailSerializer(emails, many=True).data)
 
-    if mode:
-        emails = emails.filter(mode=mode)
-
-    if scenario_id:
-        emails = emails.filter(scenario_id=scenario_id)
-
-    if min_d:
-        emails = emails.filter(difficulty__gte=int(min_d))
-    if max_d:
-        emails = emails.filter(difficulty__lte=int(max_d))
-
-    if level:
-        emails = emails.filter(level_number__lte=int(level) + 2)
-
-    emails = list(emails.order_by("id"))
-    random.shuffle(emails)
-    emails = emails[:limit]
-
-    serializer = EmailSerializer(emails, many=True)
-    return Response(serializer.data)
+    # arcade fallback: just return random arcade emails (until /arcade/next is ready)
+    emails = Email.objects.filter(mode="arcade").order_by("?")[:limit]
+    return Response(EmailSerializer(emails, many=True).data)
 
 
 @api_view(["GET"])

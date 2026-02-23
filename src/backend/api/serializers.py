@@ -4,9 +4,26 @@ from .models import Email, InteractionEvent, Scenario, UserProgress
 
 
 class EmailSerializer(serializers.ModelSerializer):
+    current_level_number = serializers.IntegerField(read_only=True)
+
     class Meta:
         model = Email
-        fields = "__all__"
+        fields = [
+                "id",
+                "sender_name",
+                "sender_email",
+                "subject",
+                "body",
+                "is_phish",
+                "difficulty",
+                "category",
+                "created_at",
+                "links",
+                "attachments",
+                "mode",
+                "scenario",
+                "current_level_number",
+            ]
 
 
 class UserProgressSerializer(serializers.ModelSerializer):
