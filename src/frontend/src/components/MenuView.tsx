@@ -15,14 +15,13 @@ const MenuView: React.FC<Props> = ({ navigate }) => {
             <div>
               <h1 className="screen-title">Phishing Awareness Platform</h1>
               <p className="screen-subtitle">
-                Train detection skills with realistic inbox simulations and fast-paced arcade rounds.
+                Train detection skills with realistic inbox simulations and fast-paced
+                arcade rounds.
               </p>
             </div>
           </div>
 
-          <div className="top-right-hint">
-            Tip: check your metrics via ☰
-          </div>
+          <div className="top-right-hint">Tip: check your metrics via ☰</div>
         </div>
 
         <div className="screen-body">
@@ -60,16 +59,18 @@ const MenuView: React.FC<Props> = ({ navigate }) => {
             </div>
 
             <div
-                className="action-card"
-                role="button"
-                tabIndex={0}
-                onClick={() => navigate('pvp')}
-                onKeyDown={(e) => e.key === 'Enter' && navigate('pvp')}
-              >
+              className="action-card"
+              role="button"
+              tabIndex={0}
+              onClick={() => navigate('pvp')}
+              onKeyDown={(e) => e.key === 'Enter' && navigate('pvp')}
+            >
               <div className="action-icon warning">⚔️</div>
               <div>
                 <div className="action-title">PVP</div>
-                <div className="action-desc">Create and play player-made challenge levels.</div>
+                <div className="action-desc">
+                  Create and play player-made challenge levels.
+                </div>
               </div>
             </div>
 
@@ -88,7 +89,6 @@ const MenuView: React.FC<Props> = ({ navigate }) => {
                 <div className="action-desc">Under construction (coming soon).</div>
               </div>
             </div>
-
           </div>
         </div>
       </div>

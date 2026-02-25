@@ -6,15 +6,18 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .models_pvp import PvpScenario, PvpLevel, PvpEmail
+from .models_pvp import PvpEmail, PvpLevel, PvpScenario
 from .serializers_pvp import (
-    PvpScenarioSerializer,
-    PvpLevelSerializer,
     PvpEmailSerializer,
+    PvpLevelSerializer,
+    PvpScenarioSerializer,
 )
 
+
 # Reuse existing EmailSerializer shape by returning a compatible dict
-def _pvp_email_as_email_serializer_shape(em: PvpEmail, current_level_number: int | None = None):
+def _pvp_email_as_email_serializer_shape(
+    em: PvpEmail, current_level_number: int | None = None
+):
     return {
         "id": em.id,
         "sender_name": em.sender_name,
@@ -37,6 +40,7 @@ def _pvp_email_as_email_serializer_shape(em: PvpEmail, current_level_number: int
 # -------------------------
 # Scenarios (owned CRUD)
 # -------------------------
+
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
@@ -76,10 +80,15 @@ def pvp_scenarios_detail(request, scenario_id: int):
 # Levels (owned CRUD + publish)
 # -------------------------
 
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def pvp_levels_mine(request):
-    qs = PvpLevel.objects.filter(owner=request.user).select_related("scenario").order_by("-created_at")
+    qs = (
+        PvpLevel.objects.filter(owner=request.user)
+        .select_related("scenario")
+        .order_by("-created_at")
+    )
     return Response(PvpLevelSerializer(qs, many=True).data)
 
 
@@ -87,7 +96,11 @@ def pvp_levels_mine(request):
 @permission_classes([IsAuthenticated])
 def pvp_levels_posted(request):
     # Auth-only for now. If you want public later, remove permission decorator.
-    qs = PvpLevel.objects.filter(visibility="posted").select_related("scenario").order_by("-created_at")
+    qs = (
+        PvpLevel.objects.filter(visibility="posted")
+        .select_related("scenario")
+        .order_by("-created_at")
+    )
     return Response(PvpLevelSerializer(qs, many=True).data)
 
 
@@ -119,7 +132,9 @@ def pvp_levels_create(request):
 @permission_classes([IsAuthenticated])
 def pvp_levels_detail(request, level_id: int):
     try:
-        lvl = PvpLevel.objects.select_related("scenario").get(id=level_id, owner=request.user)
+        lvl = PvpLevel.objects.select_related("scenario").get(
+            id=level_id, owner=request.user
+        )
     except PvpLevel.DoesNotExist:
         return Response({"detail": "Level not found"}, status=404)
 
@@ -171,6 +186,7 @@ def pvp_levels_publish(request, level_id: int):
 # -------------------------
 # Emails (CRUD inside a level)
 # -------------------------
+
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
@@ -239,6 +255,7 @@ def pvp_level_emails_detail(request, level_id: int, email_id: int):
 # Play endpoint (reuses InboxView)
 # -------------------------
 
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def pvp_play_emails(request):
@@ -262,10 +279,20 @@ def pvp_play_emails(request):
         return Response({"detail": "Level not found"}, status=404)
 
     limit = int(request.query_params.get("limit", "20"))
-    wave_true = str(request.query_params.get("wave", "")).lower() in ("1", "true", "yes", "y", "on")
+    wave_true = str(request.query_params.get("wave", "")).lower() in (
+        "1",
+        "true",
+        "yes",
+        "y",
+        "on",
+    )
 
-    qs = PvpEmail.objects.filter(level=lvl, is_wave=wave_true).order_by("sort_order", "id")[:limit]
+    qs = PvpEmail.objects.filter(level=lvl, is_wave=wave_true).order_by(
+        "sort_order", "id"
+    )[:limit]
 
     # Return objects in EmailSerializer-compatible shape
-    payload = [_pvp_email_as_email_serializer_shape(e, current_level_number=None) for e in qs]
+    payload = [
+        _pvp_email_as_email_serializer_shape(e, current_level_number=None) for e in qs
+    ]
     return Response(payload)

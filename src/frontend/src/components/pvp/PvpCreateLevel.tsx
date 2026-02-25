@@ -90,7 +90,8 @@ const PvpCreateLevel: React.FC<Props> = ({ onBack, onCreatedAndPlay }) => {
     return emails.map((e) => {
       if (!e.sender_name.trim()) return 'Sender name required';
       if (!e.sender_email.trim()) return 'Sender email required';
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.sender_email.trim())) return 'Sender email must be a valid email address';
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.sender_email.trim()))
+        return 'Sender email must be a valid email address';
       if (!e.subject.trim()) return 'Subject required';
       if (!e.body.trim()) return 'Body required';
       if (!e.payloadValue.trim()) return 'Link/Attachment value required';
@@ -98,7 +99,8 @@ const PvpCreateLevel: React.FC<Props> = ({ onBack, onCreatedAndPlay }) => {
       if (e.payloadType === 'attachment') {
         const v = e.payloadValue.trim();
         // disallow spaces (you can auto-normalise too)
-        if (/\s/.test(v)) return 'Attachment filename cannot contain spaces (use underscores)';
+        if (/\s/.test(v))
+          return 'Attachment filename cannot contain spaces (use underscores)';
         // basic filename.ext check
         if (!/^[A-Za-z0-9._-]+\.[A-Za-z0-9]{2,8}$/.test(v))
           return 'Attachment must look like a filename (e.g. invoice.pdf)';
@@ -108,7 +110,8 @@ const PvpCreateLevel: React.FC<Props> = ({ onBack, onCreatedAndPlay }) => {
       if (e.payloadType === 'link') {
         try {
           const u = new URL(e.payloadValue.trim());
-          if (u.protocol !== 'http:' && u.protocol !== 'https:') return 'Link must be http or https';
+          if (u.protocol !== 'http:' && u.protocol !== 'https:')
+            return 'Link must be http or https';
           if (!u.hostname.includes('.')) return 'Link must include a valid hostname';
         } catch {
           return 'Link must be a valid URL';
@@ -135,7 +138,10 @@ const PvpCreateLevel: React.FC<Props> = ({ onBack, onCreatedAndPlay }) => {
     return !!levelForm.title.trim();
   }, [levelForm.title]);
 
-  const emailsValid = useMemo(() => emailErrors.every((x) => x === null), [emailErrors]);
+  const emailsValid = useMemo(
+    () => emailErrors.every((x) => x === null),
+    [emailErrors]
+  );
 
   const countValid = totals.total >= 5 && totals.total <= 20;
 
@@ -191,7 +197,8 @@ const PvpCreateLevel: React.FC<Props> = ({ onBack, onCreatedAndPlay }) => {
         const sort_order = isWave ? 100 + waveIdx++ : baseIdx++;
 
         const links = draft.payloadType === 'link' ? [draft.payloadValue] : [];
-        const attachments = draft.payloadType === 'attachment' ? [draft.payloadValue] : [];
+        const attachments =
+          draft.payloadType === 'attachment' ? [draft.payloadValue] : [];
 
         const payload = normaliseEmailPayload({
           level_id: createdLevel.id,
@@ -218,7 +225,11 @@ const PvpCreateLevel: React.FC<Props> = ({ onBack, onCreatedAndPlay }) => {
       onCreatedAndPlay(createdLevel.id);
     } catch (e: any) {
       if (createdLevel?.id) {
-        try { await deletePvpLevel(createdLevel.id); } catch { /* ignore cleanup errors */ }
+        try {
+          await deletePvpLevel(createdLevel.id);
+        } catch {
+          /* ignore cleanup errors */
+        }
       }
       setErr(String(e?.message ?? e));
     } finally {
@@ -228,9 +239,18 @@ const PvpCreateLevel: React.FC<Props> = ({ onBack, onCreatedAndPlay }) => {
 
   return (
     <div style={{ padding: 18, maxWidth: 1200, margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: 12,
+        }}
+      >
         <h2 style={{ margin: 0 }}>Create PVP Level</h2>
-        <button className="btn" onClick={onBack} disabled={busy}>Back</button>
+        <button className="btn" onClick={onBack} disabled={busy}>
+          Back
+        </button>
       </div>
 
       {err && <div style={{ marginTop: 12, color: 'salmon' }}>{err}</div>}
@@ -239,19 +259,41 @@ const PvpCreateLevel: React.FC<Props> = ({ onBack, onCreatedAndPlay }) => {
         <button className="btn" onClick={() => setStep('scenario')} disabled={busy}>
           Step A: Scenario
         </button>
-        <button className="btn" onClick={() => setStep('level')} disabled={busy || !canProceedScenario}>
+        <button
+          className="btn"
+          onClick={() => setStep('level')}
+          disabled={busy || !canProceedScenario}
+        >
           Step B: Level
         </button>
-        <button className="btn" onClick={() => setStep('emails')} disabled={busy || !canProceedScenario || !canProceedLevel}>
+        <button
+          className="btn"
+          onClick={() => setStep('emails')}
+          disabled={busy || !canProceedScenario || !canProceedLevel}
+        >
           Step C: Emails
         </button>
       </div>
 
-      <div style={{ marginTop: 16, display: 'grid', gridTemplateColumns: '1fr 340px', gap: 14 }}>
+      <div
+        style={{
+          marginTop: 16,
+          display: 'grid',
+          gridTemplateColumns: '1fr 340px',
+          gap: 14,
+        }}
+      >
         <div style={{ display: 'grid', gap: 12 }}>
           {step === 'scenario' && (
             <div style={{ display: 'grid', gap: 10 }}>
-              <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 12,
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                }}
+              >
                 <label style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                   <input
                     type="radio"
@@ -282,7 +324,9 @@ const PvpCreateLevel: React.FC<Props> = ({ onBack, onCreatedAndPlay }) => {
                         {s.name} — {s.company_name} ({s.role_title})
                       </option>
                     ))}
-                    {scenarios.length === 0 && <option value="">No scenarios yet</option>}
+                    {scenarios.length === 0 && (
+                      <option value="">No scenarios yet</option>
+                    )}
                   </select>
                 </div>
               ) : (
@@ -291,49 +335,76 @@ const PvpCreateLevel: React.FC<Props> = ({ onBack, onCreatedAndPlay }) => {
                     className="fake-search"
                     placeholder="Scenario name (for you)"
                     value={scenarioForm.name}
-                    onChange={(e) => setScenarioForm((p) => ({ ...p, name: e.target.value }))}
+                    onChange={(e) =>
+                      setScenarioForm((p) => ({ ...p, name: e.target.value }))
+                    }
                   />
                   <input
                     className="fake-search"
                     placeholder="Company name"
                     value={scenarioForm.company_name}
-                    onChange={(e) => setScenarioForm((p) => ({ ...p, company_name: e.target.value }))}
+                    onChange={(e) =>
+                      setScenarioForm((p) => ({ ...p, company_name: e.target.value }))
+                    }
                   />
                   <input
                     className="fake-search"
                     placeholder="Sector"
                     value={scenarioForm.sector}
-                    onChange={(e) => setScenarioForm((p) => ({ ...p, sector: e.target.value }))}
+                    onChange={(e) =>
+                      setScenarioForm((p) => ({ ...p, sector: e.target.value }))
+                    }
                   />
                   <input
                     className="fake-search"
                     placeholder="Role title"
                     value={scenarioForm.role_title}
-                    onChange={(e) => setScenarioForm((p) => ({ ...p, role_title: e.target.value }))}
+                    onChange={(e) =>
+                      setScenarioForm((p) => ({ ...p, role_title: e.target.value }))
+                    }
                   />
                   <input
                     className="fake-search"
                     placeholder="Department"
                     value={scenarioForm.department_name}
-                    onChange={(e) => setScenarioForm((p) => ({ ...p, department_name: e.target.value }))}
+                    onChange={(e) =>
+                      setScenarioForm((p) => ({
+                        ...p,
+                        department_name: e.target.value,
+                      }))
+                    }
                   />
                   <input
                     className="fake-search"
                     placeholder="Line manager name"
                     value={scenarioForm.line_manager_name}
-                    onChange={(e) => setScenarioForm((p) => ({ ...p, line_manager_name: e.target.value }))}
+                    onChange={(e) =>
+                      setScenarioForm((p) => ({
+                        ...p,
+                        line_manager_name: e.target.value,
+                      }))
+                    }
                   />
                   <textarea
                     style={{ width: '100%', minHeight: 70 }}
                     placeholder="Intro text"
                     value={scenarioForm.intro_text}
-                    onChange={(e) => setScenarioForm((p) => ({ ...p, intro_text: e.target.value }))}
+                    onChange={(e) =>
+                      setScenarioForm((p) => ({ ...p, intro_text: e.target.value }))
+                    }
                   />
                   <textarea
                     style={{ width: '100%', minHeight: 90 }}
-                    placeholder={'Responsibilities (one per line)\nExample:\nProcess invoices\nHandle supplier queries'}
+                    placeholder={
+                      'Responsibilities (one per line)\nExample:\nProcess invoices\nHandle supplier queries'
+                    }
                     value={scenarioForm.responsibilitiesText}
-                    onChange={(e) => setScenarioForm((p) => ({ ...p, responsibilitiesText: e.target.value }))}
+                    onChange={(e) =>
+                      setScenarioForm((p) => ({
+                        ...p,
+                        responsibilitiesText: e.target.value,
+                      }))
+                    }
                   />
                 </div>
               )}
@@ -362,16 +433,27 @@ const PvpCreateLevel: React.FC<Props> = ({ onBack, onCreatedAndPlay }) => {
                 style={{ width: '100%', minHeight: 100 }}
                 placeholder="Briefing (shown to the player)"
                 value={levelForm.briefing}
-                onChange={(e) => setLevelForm((p) => ({ ...p, briefing: e.target.value }))}
+                onChange={(e) =>
+                  setLevelForm((p) => ({ ...p, briefing: e.target.value }))
+                }
               />
 
-              <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 10,
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                }}
+              >
                 <div style={{ fontWeight: 700 }}>Visibility:</div>
                 <label style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                   <input
                     type="radio"
                     checked={levelForm.visibility === 'unlisted'}
-                    onChange={() => setLevelForm((p) => ({ ...p, visibility: 'unlisted' }))}
+                    onChange={() =>
+                      setLevelForm((p) => ({ ...p, visibility: 'unlisted' }))
+                    }
                   />
                   Unlisted
                 </label>
@@ -379,14 +461,20 @@ const PvpCreateLevel: React.FC<Props> = ({ onBack, onCreatedAndPlay }) => {
                   <input
                     type="radio"
                     checked={levelForm.visibility === 'posted'}
-                    onChange={() => setLevelForm((p) => ({ ...p, visibility: 'posted' }))}
+                    onChange={() =>
+                      setLevelForm((p) => ({ ...p, visibility: 'posted' }))
+                    }
                   />
                   Posted
                 </label>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-                <button className="btn" onClick={() => setStep('scenario')} disabled={busy}>
+                <button
+                  className="btn"
+                  onClick={() => setStep('scenario')}
+                  disabled={busy}
+                >
                   ← Back
                 </button>
                 <button
@@ -402,11 +490,19 @@ const PvpCreateLevel: React.FC<Props> = ({ onBack, onCreatedAndPlay }) => {
 
           {step === 'emails' && (
             <div style={{ display: 'grid', gap: 12 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  gap: 12,
+                  flexWrap: 'wrap',
+                }}
+              >
                 <div>
                   <div style={{ fontWeight: 800 }}>Emails Builder</div>
                   <div style={{ fontSize: 13, opacity: 0.85 }}>
-                    Total: <strong>{totals.total}</strong> • Waves: <strong>{totals.waves}</strong>{' '}
+                    Total: <strong>{totals.total}</strong> • Waves:{' '}
+                    <strong>{totals.waves}</strong>{' '}
                     {!countValid && (
                       <span style={{ color: 'salmon', marginLeft: 8 }}>
                         Must be 5–20 emails
@@ -433,7 +529,9 @@ const PvpCreateLevel: React.FC<Props> = ({ onBack, onCreatedAndPlay }) => {
                     onChange={(next) =>
                       setEmails((prev) => prev.map((x, idx) => (idx === i ? next : x)))
                     }
-                    onDelete={() => setEmails((prev) => prev.filter((_, idx) => idx !== i))}
+                    onDelete={() =>
+                      setEmails((prev) => prev.filter((_, idx) => idx !== i))
+                    }
                     error={emailErrors[i]}
                   />
                 ))}
@@ -441,8 +539,16 @@ const PvpCreateLevel: React.FC<Props> = ({ onBack, onCreatedAndPlay }) => {
 
               <div style={{ display: 'grid', gap: 10 }}>
                 <div style={{ fontWeight: 700 }}>Preview split</div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                  <div style={{ border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10, padding: 10 }}>
+                <div
+                  style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}
+                >
+                  <div
+                    style={{
+                      border: '1px solid rgba(255,255,255,0.12)',
+                      borderRadius: 10,
+                      padding: 10,
+                    }}
+                  >
                     <div style={{ fontWeight: 800, marginBottom: 6 }}>Base emails</div>
                     <ul style={{ margin: 0, paddingLeft: 18 }}>
                       {emails
@@ -450,7 +556,8 @@ const PvpCreateLevel: React.FC<Props> = ({ onBack, onCreatedAndPlay }) => {
                         .filter(({ e }) => !e.is_wave)
                         .map(({ e, idx }) => (
                           <li key={idx} style={{ fontSize: 13 }}>
-                            {e.subject || `(no subject)`} — {e.sender_name || `(no sender)`}
+                            {e.subject || `(no subject)`} —{' '}
+                            {e.sender_name || `(no sender)`}
                           </li>
                         ))}
                       {emails.filter((e) => !e.is_wave).length === 0 && (
@@ -459,7 +566,13 @@ const PvpCreateLevel: React.FC<Props> = ({ onBack, onCreatedAndPlay }) => {
                     </ul>
                   </div>
 
-                  <div style={{ border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10, padding: 10 }}>
+                  <div
+                    style={{
+                      border: '1px solid rgba(255,255,255,0.12)',
+                      borderRadius: 10,
+                      padding: 10,
+                    }}
+                  >
                     <div style={{ fontWeight: 800, marginBottom: 6 }}>Wave emails</div>
                     <ul style={{ margin: 0, paddingLeft: 18 }}>
                       {emails
@@ -467,7 +580,8 @@ const PvpCreateLevel: React.FC<Props> = ({ onBack, onCreatedAndPlay }) => {
                         .filter(({ e }) => e.is_wave)
                         .map(({ e, idx }) => (
                           <li key={idx} style={{ fontSize: 13 }}>
-                            {e.subject || `(no subject)`} — {e.sender_name || `(no sender)`}
+                            {e.subject || `(no subject)`} —{' '}
+                            {e.sender_name || `(no sender)`}
                           </li>
                         ))}
                       {emails.filter((e) => e.is_wave).length === 0 && (
@@ -479,7 +593,11 @@ const PvpCreateLevel: React.FC<Props> = ({ onBack, onCreatedAndPlay }) => {
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-                <button className="btn" onClick={() => setStep('level')} disabled={busy}>
+                <button
+                  className="btn"
+                  onClick={() => setStep('level')}
+                  disabled={busy}
+                >
                   ← Back
                 </button>
 
@@ -498,7 +616,7 @@ const PvpCreateLevel: React.FC<Props> = ({ onBack, onCreatedAndPlay }) => {
 
         {/* Right side guidance panel */}
         <div style={{ display: 'grid', gap: 12, alignSelf: 'start' }}>
-          <AdversaryGuidancePanel onBack={onBack} onPlay={onCreatedAndPlay} />
+         <AdversaryGuidancePanel onBack={onBack} onPlay={onCreatedAndPlay} showBack={false} />
           <div style={{ fontSize: 12, opacity: 0.8 }}>
             Tip: waves should be “late arrivals” that pressure the player mid-run.
           </div>

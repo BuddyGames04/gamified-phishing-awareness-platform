@@ -11,13 +11,12 @@
   color: var(--color-text-main);
 }
 
-
 .screen-card {
   width: min(980px, 96vw);
-  background: rgba(255, 255, 255, 0.90);
+  background: rgba(255, 255, 255, 0.9);
   border: 1px solid rgba(229, 231, 235, 0.9);
   border-radius: 18px;
-  box-shadow: 0 14px 45px rgba(15, 23, 42, 0.10);
+  box-shadow: 0 14px 45px rgba(15, 23, 42, 0.1);
   overflow: hidden;
 }
 
@@ -84,7 +83,10 @@
   padding: 14px;
   cursor: pointer;
   text-align: left;
-  transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    border-color 120ms ease;
   display: grid;
   grid-template-columns: 42px 1fr;
   gap: 12px;
@@ -94,7 +96,7 @@
 .action-card:hover {
   transform: translateY(-1px);
   border-color: rgba(0, 168, 232, 0.35);
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.10);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.1);
 }
 
 .action-card:active {
@@ -191,14 +193,17 @@
   border-radius: 14px;
   padding: 12px 10px;
   cursor: pointer;
-  transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    border-color 120ms ease;
   text-align: left;
 }
 
 .level-tile:hover {
   transform: translateY(-1px);
   border-color: rgba(0, 168, 232, 0.35);
-  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.10);
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.1);
 }
 
 .level-pill {
@@ -272,7 +277,9 @@
   font-weight: 700;
   cursor: pointer;
 }
-.ms-btn:hover { background: #f9fafb; }
+.ms-btn:hover {
+  background: #f9fafb;
+}
 
 .ms-btn-ghost {
   color: var(--color-text-main);
@@ -286,10 +293,14 @@
 }
 
 @media (max-width: 900px) {
-  .level-button-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .level-button-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 @media (max-width: 520px) {
-  .level-button-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .level-button-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .level-blue-btn {
@@ -301,7 +312,9 @@
   font-weight: 900;
   letter-spacing: -0.01em;
   cursor: pointer;
-  transition: transform 120ms ease, box-shadow 120ms ease;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease;
 }
 
 .level-blue-btn:hover {
@@ -326,7 +339,9 @@
   place-items: center;
   line-height: 1;
   box-shadow: 0 10px 24px rgba(0, 168, 232, 0.18);
-  transition: transform 120ms ease, box-shadow 120ms ease;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease;
 }
 
 .hamburger-btn:hover {
@@ -387,8 +402,12 @@
   transition: transform 120ms ease;
 }
 
-.auth-submit:hover { transform: translateY(-1px); }
-.auth-submit:active { transform: translateY(0); }
+.auth-submit:hover {
+  transform: translateY(-1px);
+}
+.auth-submit:active {
+  transform: translateY(0);
+}
 
 .auth-footnote {
   text-align: center;
@@ -404,4 +423,6 @@
   cursor: pointer;
   padding: 0;
 }
-.auth-link:hover { text-decoration: underline; }
+.auth-link:hover {
+  text-decoration: underline;
+}

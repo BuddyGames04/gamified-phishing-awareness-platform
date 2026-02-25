@@ -84,7 +84,7 @@ export const InboxView: React.FC<Props> = ({
     };
   }, []);
 
-    const triggerIncomingWave = useCallback(
+  const triggerIncomingWave = useCallback(
     async (removedId?: number) => {
       // If PVP, we must have a level id
       if (mode === 'pvp' && !pvpLevelId) return;
@@ -94,9 +94,13 @@ export const InboxView: React.FC<Props> = ({
       const fetched =
         mode === 'pvp'
           ? await fetchPvpEmails({ level_id: pvpLevelId!, limit: 50, wave: true })
-          : await fetchEmails(
-              ({ mode, scenario_id: scenarioId, level, limit: 50, wave: true } as any)
-            );
+          : await fetchEmails({
+              mode,
+              scenario_id: scenarioId,
+              level,
+              limit: 50,
+              wave: true,
+            } as any);
 
       // Do NOT read `emails` from closure; use prev state instead.
       setEmails((prev) => {
@@ -187,7 +191,9 @@ export const InboxView: React.FC<Props> = ({
 
     const timer = setTimeout(() => {
       if (!waveTriggered) {
-        triggerIncomingWave().catch((e) => console.error('triggerIncomingWave failed', e));
+        triggerIncomingWave().catch((e) =>
+          console.error('triggerIncomingWave failed', e)
+        );
       }
     }, 45000);
 
@@ -346,7 +352,8 @@ export const InboxView: React.FC<Props> = ({
             title={
               !selected
                 ? 'Select an email first'
-                : (mode === 'simulation' || mode === 'pvp') && !openedEmailIds.has(selected.id)
+                : (mode === 'simulation' || mode === 'pvp') &&
+                    !openedEmailIds.has(selected.id)
                   ? 'Open the link or attachment before marking as read'
                   : ''
             }

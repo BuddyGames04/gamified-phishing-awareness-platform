@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { fetchPvpMyLevels, publishPvpLevel, PvpLevel } from '../../api';
 
 type Props = {
-  onBack: () => void;
+  onBack?: () => void;
   onPlay: (levelId: number) => void;
+  showBack?: boolean;
 };
 
-const PvpMyLevels: React.FC<Props> = ({ onBack, onPlay }) => {
+const PvpMyLevels: React.FC<Props> = ({ onBack, onPlay, showBack = true }) => {
   const [levels, setLevels] = useState<PvpLevel[]>([]);
   const [err, setErr] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
@@ -36,9 +37,19 @@ const PvpMyLevels: React.FC<Props> = ({ onBack, onPlay }) => {
 
   return (
     <div style={{ padding: 18, maxWidth: 1000, margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
         <h2 style={{ margin: 0 }}>My Levels</h2>
-        <button className="btn" onClick={onBack}>Back</button>
+        {showBack && onBack && (
+          <button className="btn" onClick={onBack}>
+            Back
+          </button>
+        )}
       </div>
 
       {err && <div style={{ marginTop: 12, color: 'salmon' }}>{err}</div>}
@@ -60,9 +71,7 @@ const PvpMyLevels: React.FC<Props> = ({ onBack, onPlay }) => {
             <div>
               <div style={{ fontWeight: 700 }}>
                 {lvl.title}{' '}
-                <span style={{ fontSize: 12, opacity: 0.7 }}>
-                  ({lvl.visibility})
-                </span>
+                <span style={{ fontSize: 12, opacity: 0.7 }}>({lvl.visibility})</span>
               </div>
               <div style={{ fontSize: 13, opacity: 0.85 }}>
                 {lvl.scenario?.company_name} — {lvl.scenario?.role_title}

@@ -62,7 +62,9 @@ const ArcadeGame: React.FC<Props> = ({ onExit, onOpenMenu }) => {
     <div className="outlook-shell">
       <div className="outlook-topbar">
         <div className="outlook-topbar-left">
-          <button className="btn" onClick={onExit}>Back</button>
+          <button className="btn" onClick={onExit}>
+            Back
+          </button>
           <div className="outlook-topbar-title">Arcade Mode</div>
         </div>
 
@@ -109,14 +111,17 @@ const ArcadeGame: React.FC<Props> = ({ onExit, onOpenMenu }) => {
               </div>
 
               {feedback && (
-                <div className={`arcade-feedback ${feedback === 'Correct' ? 'ok' : 'bad'}`}>
+                <div
+                  className={`arcade-feedback ${feedback === 'Correct' ? 'ok' : 'bad'}`}
+                >
                   {feedback}
                 </div>
               )}
 
               {/*tiny debug pill (remove later) */}
               <div className="arcade-progress">
-                Target difficulty: {email.target_difficulty_int} ({email.target_difficulty.toFixed(1)})
+                Target difficulty: {email.target_difficulty_int} (
+                {email.target_difficulty.toFixed(1)})
               </div>
             </div>
           </div>

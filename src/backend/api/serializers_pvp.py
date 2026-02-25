@@ -1,8 +1,9 @@
-from rest_framework import serializers
 import re
 from urllib.parse import urlparse
 
-from .models_pvp import PvpScenario, PvpLevel, PvpEmail
+from rest_framework import serializers
+
+from .models_pvp import PvpEmail, PvpLevel, PvpScenario
 
 # allow letters/numbers/._- and require an extension like ".pdf"
 FILENAME_RE = re.compile(r"^[A-Za-z0-9._-]+\.[A-Za-z0-9]{2,8}$")
@@ -86,7 +87,9 @@ class PvpEmailSerializer(serializers.ModelSerializer):
         if "sender_name" in attrs:
             attrs["sender_name"] = tidy_space(attrs.get("sender_name"))
             if len(attrs["sender_name"]) < 2:
-                raise serializers.ValidationError({"sender_name": "Sender name is too short."})
+                raise serializers.ValidationError(
+                    {"sender_name": "Sender name is too short."}
+                )
 
         if "sender_email" in attrs:
             attrs["sender_email"] = tidy(attrs.get("sender_email")).lower()
@@ -98,7 +101,9 @@ class PvpEmailSerializer(serializers.ModelSerializer):
 
         if "body" in attrs:
             if len(tidy(attrs["body"])) < 10:
-                raise serializers.ValidationError({"body": "Body must be at least 10 characters."})
+                raise serializers.ValidationError(
+                    {"body": "Body must be at least 10 characters."}
+                )
 
         if "category" in attrs:
             cat = attrs.get("category")
@@ -109,9 +114,13 @@ class PvpEmailSerializer(serializers.ModelSerializer):
             try:
                 d = int(attrs["difficulty"])
             except (TypeError, ValueError):
-                raise serializers.ValidationError({"difficulty": "Difficulty must be a number."})
+                raise serializers.ValidationError(
+                    {"difficulty": "Difficulty must be a number."}
+                )
             if d < 1 or d > 5:
-                raise serializers.ValidationError({"difficulty": "Difficulty must be between 1 and 5."})
+                raise serializers.ValidationError(
+                    {"difficulty": "Difficulty must be between 1 and 5."}
+                )
             attrs["difficulty"] = d
 
         # ---- list fields (PATCH-safe: only touch if present) ----
@@ -119,7 +128,9 @@ class PvpEmailSerializer(serializers.ModelSerializer):
             attrs["links"] = tidy_list(attrs.get("links"))
 
         if "attachments" in attrs:
-            attrs["attachments"] = [f.replace(" ", "_") for f in tidy_list(attrs.get("attachments"))]
+            attrs["attachments"] = [
+                f.replace(" ", "_") for f in tidy_list(attrs.get("attachments"))
+            ]
 
         # ---- determine final state for XOR (PATCH-safe) ----
         links = attrs.get("links", None)
@@ -128,7 +139,9 @@ class PvpEmailSerializer(serializers.ModelSerializer):
         if self.instance:
             final_links = links if links is not None else (self.instance.links or [])
             final_attachments = (
-                attachments if attachments is not None else (self.instance.attachments or [])
+                attachments
+                if attachments is not None
+                else (self.instance.attachments or [])
             )
         else:
             final_links = links or []
@@ -138,15 +151,19 @@ class PvpEmailSerializer(serializers.ModelSerializer):
         has_attachments = len(final_attachments) > 0
 
         if has_links and has_attachments:
-            raise serializers.ValidationError({
-                "links": "Choose either links or attachments (not both).",
-                "attachments": "Choose either links or attachments (not both).",
-            })
+            raise serializers.ValidationError(
+                {
+                    "links": "Choose either links or attachments (not both).",
+                    "attachments": "Choose either links or attachments (not both).",
+                }
+            )
         if not has_links and not has_attachments:
-            raise serializers.ValidationError({
-                "links": "Provide at least one link or one attachment.",
-                "attachments": "Provide at least one link or one attachment.",
-            })
+            raise serializers.ValidationError(
+                {
+                    "links": "Provide at least one link or one attachment.",
+                    "attachments": "Provide at least one link or one attachment.",
+                }
+            )
 
         # ---- link validation ----
         if has_links:
@@ -154,17 +171,23 @@ class PvpEmailSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({"links": "Maximum 5 links allowed."})
             for u in final_links:
                 p = urlparse(u)
-                if p.scheme not in ("http", "https") or not p.netloc or "." not in p.netloc:
+                if (
+                    p.scheme not in ("http", "https")
+                    or not p.netloc
+                    or "." not in p.netloc
+                ):
                     raise serializers.ValidationError({"links": f"Invalid URL: {u}"})
 
         # ---- attachment validation ----
         if has_attachments:
             if len(final_attachments) > 5:
-                raise serializers.ValidationError({"attachments": "Maximum 5 attachments allowed."})
+                raise serializers.ValidationError(
+                    {"attachments": "Maximum 5 attachments allowed."}
+                )
             for f in final_attachments:
                 if not FILENAME_RE.match(f):
-                    raise serializers.ValidationError({
-                        "attachments": f"Invalid filename: {f} (example: invoice.pdf)"
-                    })
+                    raise serializers.ValidationError(
+                        {"attachments": f"Invalid filename: {f} (example: invoice.pdf)"}
+                    )
 
         return attrs

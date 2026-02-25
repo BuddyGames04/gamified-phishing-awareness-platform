@@ -390,23 +390,26 @@ export async function createPvpEmail(params: {
   is_wave: boolean;
   sort_order: number;
 }): Promise<PvpEmail> {
-  const res = await authFetch(`${API_BASE}/pvp/levels/${params.level_id}/emails/create/`, {
-    method: 'POST',
-    headers: {},
-    body: JSON.stringify({
-      sender_name: params.sender_name,
-      sender_email: params.sender_email,
-      subject: params.subject,
-      body: params.body,
-      is_phish: params.is_phish,
-      difficulty: params.difficulty,
-      category: params.category ?? null,
-      links: params.links ?? [],
-      attachments: params.attachments ?? [],
-      is_wave: params.is_wave,
-      sort_order: params.sort_order,
-    }),
-  });
+  const res = await authFetch(
+    `${API_BASE}/pvp/levels/${params.level_id}/emails/create/`,
+    {
+      method: 'POST',
+      headers: {},
+      body: JSON.stringify({
+        sender_name: params.sender_name,
+        sender_email: params.sender_email,
+        subject: params.subject,
+        body: params.body,
+        is_phish: params.is_phish,
+        difficulty: params.difficulty,
+        category: params.category ?? null,
+        links: params.links ?? [],
+        attachments: params.attachments ?? [],
+        is_wave: params.is_wave,
+        sort_order: params.sort_order,
+      }),
+    }
+  );
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`Failed to create PVP email: ${text}`);
@@ -431,7 +434,10 @@ export async function fetchPvpEmails(params: {
 }
 
 export function normaliseEmailPayload(email: any) {
-  const tidy = (s: any) => String(s ?? '').trim().replace(/\s+/g, ' ');
+  const tidy = (s: any) =>
+    String(s ?? '')
+      .trim()
+      .replace(/\s+/g, ' ');
   const tidyList = (xs: any) =>
     Array.isArray(xs) ? xs.map((x) => String(x).trim()).filter(Boolean) : [];
 

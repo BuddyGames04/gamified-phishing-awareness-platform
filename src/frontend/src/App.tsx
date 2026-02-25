@@ -122,7 +122,7 @@ const App: React.FC = () => {
           </div>
         </div>
       )}
-     {screen === 'pvp' && (
+      {screen === 'pvp' && (
         <PvpRoot
           onExitPvp={() => setScreen('menu')}
           userId={username}

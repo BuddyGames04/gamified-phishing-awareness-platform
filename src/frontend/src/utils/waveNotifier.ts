@@ -2,7 +2,7 @@ let audio: HTMLAudioElement | null = null;
 
 export function primeWaveAudio() {
   if (!audio) {
-    audio = new Audio("/sfx/new-mail.mp3");
+    audio = new Audio('/sfx/new-mail.mp3');
     audio.volume = 0.6;
   }
 }

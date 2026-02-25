@@ -21,7 +21,13 @@ type Props = {
   error?: string | null;
 };
 
-const EmailEditorRow: React.FC<Props> = ({ index, value, onChange, onDelete, error }) => {
+const EmailEditorRow: React.FC<Props> = ({
+  index,
+  value,
+  onChange,
+  onDelete,
+  error,
+}) => {
   const set = (patch: Partial<EmailDraft>) => onChange({ ...value, ...patch });
 
   return (
@@ -34,9 +40,18 @@ const EmailEditorRow: React.FC<Props> = ({ index, value, onChange, onDelete, err
         gap: 10,
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: 10,
+        }}
+      >
         <div style={{ fontWeight: 800 }}>Email #{index + 1}</div>
-        <button className="btn" onClick={onDelete}>Delete</button>
+        <button className="btn" onClick={onDelete}>
+          Delete
+        </button>
       </div>
 
       {error && <div style={{ color: 'salmon', fontSize: 13 }}>{error}</div>}
@@ -115,7 +130,9 @@ const EmailEditorRow: React.FC<Props> = ({ index, value, onChange, onDelete, err
       <div style={{ display: 'grid', gap: 8 }}>
         <div style={{ fontWeight: 700 }}>Payload (XOR)</div>
 
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+        <div
+          style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}
+        >
           <label style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
             <input
               type="radio"
@@ -137,7 +154,9 @@ const EmailEditorRow: React.FC<Props> = ({ index, value, onChange, onDelete, err
 
         <input
           className="fake-search"
-          placeholder={value.payloadType === 'link' ? 'https://example.com/...' : 'Invoice_123.pdf'}
+          placeholder={
+            value.payloadType === 'link' ? 'https://example.com/...' : 'Invoice_123.pdf'
+          }
           value={value.payloadValue}
           onChange={(e) => set({ payloadValue: e.target.value })}
         />

@@ -7,8 +7,11 @@ VISIBILITY_CHOICES = [
     ("posted", "Posted"),
 ]
 
+
 class PvpScenario(models.Model):
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="pvp_scenarios")
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="pvp_scenarios"
+    )
     name = models.CharField(max_length=255)
     company_name = models.CharField(max_length=255, default="")
     sector = models.CharField(max_length=255, default="")
@@ -22,14 +25,21 @@ class PvpScenario(models.Model):
     class Meta:
         ordering = ["-created_at"]
 
+
 class PvpLevel(models.Model):
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="pvp_levels")
-    scenario = models.ForeignKey(PvpScenario, on_delete=models.CASCADE, related_name="levels")
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="pvp_levels"
+    )
+    scenario = models.ForeignKey(
+        PvpScenario, on_delete=models.CASCADE, related_name="levels"
+    )
 
     title = models.CharField(max_length=255, default="")
     briefing = models.TextField(default="", blank=True)
 
-    visibility = models.CharField(max_length=20, choices=VISIBILITY_CHOICES, default="unlisted")
+    visibility = models.CharField(
+        max_length=20, choices=VISIBILITY_CHOICES, default="unlisted"
+    )
 
     # optional: later for leaderboards
     plays = models.IntegerField(default=0)
@@ -39,6 +49,7 @@ class PvpLevel(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+
 
 class PvpEmail(models.Model):
     level = models.ForeignKey(PvpLevel, on_delete=models.CASCADE, related_name="emails")
@@ -72,6 +83,10 @@ class PvpEmail(models.Model):
 
         # XOR requirement
         if has_links and has_attachments:
-            raise ValidationError("Email must have either links or attachments, not both.")
+            raise ValidationError(
+                "Email must have either links or attachments, not both."
+            )
         if not has_links and not has_attachments:
-            raise ValidationError("Email must have at least one link or one attachment.")
+            raise ValidationError(
+                "Email must have at least one link or one attachment."
+            )
