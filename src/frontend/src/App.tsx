@@ -8,8 +8,9 @@ import AuthPage from './components/AuthPage';
 import HamburgerMenu from './components/HamburgerMenu';
 import ProfileView from './components/ProfileView';
 import PvpRoot from './components/pvp/PvpRoot';
+import InfoView from './components/InfoView';
 
-type Screen = 'menu' | 'inbox' | 'arcade' | 'levels' | 'profile' | 'pvp';
+type Screen = 'menu' | 'inbox' | 'arcade' | 'levels' | 'profile' | 'pvp' | 'info';
 
 const App: React.FC = () => {
   const [screen, setScreen] = useState<Screen>('menu');
@@ -130,7 +131,14 @@ const App: React.FC = () => {
           onOpenMenu={() => setDrawerOpen(true)}
         />
       )}
+      {screen === 'info' && (
+      <InfoView
+        onBack={() => setScreen('menu')}
+        onOpenMenu={() => setDrawerOpen(true)}
+      />
+    )}
     </div>
+    
   );
 };
 

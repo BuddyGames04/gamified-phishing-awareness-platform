@@ -2,7 +2,7 @@ import React from 'react';
 import '../styles/MenuScreens.css';
 
 interface Props {
-  navigate: (screen: 'menu' | 'inbox' | 'arcade' | 'levels' | 'pvp') => void;
+  navigate: (screen: 'menu' | 'inbox' | 'arcade' | 'levels' | 'pvp' | 'info') => void;
 }
 
 const MenuView: React.FC<Props> = ({ navigate }) => {
@@ -82,11 +82,19 @@ const MenuView: React.FC<Props> = ({ navigate }) => {
               </div>
             </div>
 
-            <div className="action-card disabled" aria-disabled="true">
+            <div
+              className="action-card"
+              role="button"
+              tabIndex={0}
+              onClick={() => navigate('info')}
+              onKeyDown={(e) => e.key === 'Enter' && navigate('info')}
+            >
               <div className="action-icon secondary">ℹ️</div>
               <div>
                 <div className="action-title">Info</div>
-                <div className="action-desc">Under construction (coming soon).</div>
+                <div className="action-desc">
+                  A practical tutorial on phishing and how to spot it — from beginner to advanced.
+                </div>
               </div>
             </div>
           </div>
