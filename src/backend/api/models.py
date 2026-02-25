@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
+from .models_pvp import PvpScenario, PvpLevel, PvpEmail  # noqa
 
 
 class Scenario(models.Model):

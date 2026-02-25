@@ -250,3 +250,209 @@ export async function postArcadeAttempt(params: {
   if (!res.ok) throw new Error('Failed to submit arcade attempt');
   return res.json();
 }
+
+export type PvpVisibility = 'unlisted' | 'posted';
+
+export type PvpScenario = {
+  id: number;
+  name: string;
+  company_name: string;
+  sector: string;
+  role_title: string;
+  department_name: string;
+  line_manager_name: string;
+  responsibilities: string[];
+  intro_text: string;
+  created_at: string;
+};
+
+export type PvpLevel = {
+  id: number;
+  scenario: PvpScenario;
+  title: string;
+  briefing: string;
+  visibility: PvpVisibility;
+  plays: number;
+  avg_accuracy: number;
+  created_at: string;
+};
+
+export type PvpEmail = {
+  id: number;
+  sender_name: string;
+  sender_email: string;
+  subject: string;
+  body: string;
+  is_phish: boolean;
+  difficulty: number;
+  category?: string;
+  links?: string[];
+  attachments?: string[];
+  is_wave: boolean;
+  sort_order: number;
+  created_at: string;
+};
+
+// ---- PVP Endpoints ----
+
+export async function fetchPvpPostedLevels(): Promise<PvpLevel[]> {
+  const res = await authFetch(`${API_BASE}/pvp/levels/posted/`, { method: 'GET' });
+  if (!res.ok) throw new Error('Failed to fetch posted PVP levels');
+  return res.json();
+}
+
+export async function fetchPvpMyLevels(): Promise<PvpLevel[]> {
+  const res = await authFetch(`${API_BASE}/pvp/levels/mine/`, { method: 'GET' });
+  if (!res.ok) throw new Error('Failed to fetch my PVP levels');
+  return res.json();
+}
+
+export async function fetchPvpMyScenarios(): Promise<PvpScenario[]> {
+  const res = await authFetch(`${API_BASE}/pvp/scenarios/mine/`, { method: 'GET' });
+  if (!res.ok) throw new Error('Failed to fetch my PVP scenarios');
+  return res.json();
+}
+
+export async function createPvpScenario(params: {
+  name: string;
+  company_name: string;
+  sector: string;
+  role_title: string;
+  department_name: string;
+  line_manager_name: string;
+  responsibilities: string[];
+  intro_text: string;
+}): Promise<PvpScenario> {
+  const res = await authFetch(`${API_BASE}/pvp/scenarios/`, {
+    method: 'POST',
+    headers: {},
+    body: JSON.stringify(params),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to create PVP scenario: ${text}`);
+  }
+  return res.json();
+}
+
+export async function createPvpLevel(params: {
+  scenario_id: number;
+  title: string;
+  briefing: string;
+  visibility?: PvpVisibility;
+}): Promise<PvpLevel> {
+  const res = await authFetch(`${API_BASE}/pvp/levels/`, {
+    method: 'POST',
+    headers: {},
+    body: JSON.stringify(params),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to create PVP level: ${text}`);
+  }
+  return res.json();
+}
+
+export async function publishPvpLevel(levelId: number): Promise<PvpLevel> {
+  const res = await authFetch(`${API_BASE}/pvp/levels/${levelId}/publish/`, {
+    method: 'PATCH',
+    headers: {},
+    body: JSON.stringify({}),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to publish PVP level: ${text}`);
+  }
+  return res.json();
+}
+
+export async function deletePvpLevel(levelId: number): Promise<void> {
+  const res = await authFetch(`${API_BASE}/pvp/levels/${levelId}/`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to delete PVP level: ${text}`);
+  }
+}
+
+export async function createPvpEmail(params: {
+  level_id: number;
+  sender_name: string;
+  sender_email: string;
+  subject: string;
+  body: string;
+  is_phish: boolean;
+  difficulty: number;
+  category?: string | null;
+  links?: string[];
+  attachments?: string[];
+  is_wave: boolean;
+  sort_order: number;
+}): Promise<PvpEmail> {
+  const res = await authFetch(`${API_BASE}/pvp/levels/${params.level_id}/emails/create/`, {
+    method: 'POST',
+    headers: {},
+    body: JSON.stringify({
+      sender_name: params.sender_name,
+      sender_email: params.sender_email,
+      subject: params.subject,
+      body: params.body,
+      is_phish: params.is_phish,
+      difficulty: params.difficulty,
+      category: params.category ?? null,
+      links: params.links ?? [],
+      attachments: params.attachments ?? [],
+      is_wave: params.is_wave,
+      sort_order: params.sort_order,
+    }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to create PVP email: ${text}`);
+  }
+  return res.json();
+}
+
+export async function fetchPvpEmails(params: {
+  level_id: number;
+  limit?: number;
+  wave?: boolean;
+}): Promise<Email[]> {
+  const qs = new URLSearchParams();
+  qs.set('level_id', String(params.level_id));
+  if (params.limit) qs.set('limit', String(params.limit));
+  if (params.wave) qs.set('wave', String(params.wave));
+
+  const url = `${API_BASE}/pvp/play/emails/?${qs.toString()}`;
+  const res = await authFetch(url, { method: 'GET' });
+  if (!res.ok) throw new Error('Failed to fetch PVP play emails');
+  return res.json();
+}
+
+export function normaliseEmailPayload(email: any) {
+  const tidy = (s: any) => String(s ?? '').trim().replace(/\s+/g, ' ');
+  const tidyList = (xs: any) =>
+    Array.isArray(xs) ? xs.map((x) => String(x).trim()).filter(Boolean) : [];
+
+  const sender_name = tidy(email.sender_name);
+  const sender_email = tidy(email.sender_email).toLowerCase();
+  const subject = tidy(email.subject);
+  const body = String(email.body ?? '');
+
+  const links = tidyList(email.links);
+  const attachments = tidyList(email.attachments).map((f) =>
+    //make filenames safe-ish
+    f.replace(/\s+/g, '_')
+  );
+
+  return {
+    ...email,
+    sender_name,
+    sender_email,
+    subject,
+    body,
+    links,
+    attachments,
+  };
+}

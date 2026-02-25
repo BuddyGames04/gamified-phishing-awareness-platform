@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Email,
   fetchEmails,
+  fetchPvpEmails,
   submitInteraction,
   submitResult,
   startLevelRun,
@@ -15,18 +16,18 @@ import '../styles/InboxView.css';
 import InteractionModal from './InteractionModal';
 import LevelCompleteModal from './LevelCompleteModal';
 
-// NEW:
 import WaveToast from './WaveToast';
 import { playWaveChime, primeWaveAudio } from '../utils/waveNotifier';
 
 interface Props {
   onExit: () => void;
-  mode: 'arcade' | 'simulation';
+  mode: 'arcade' | 'simulation' | 'pvp';
   userId: string;
   scenarioId?: number;
   level?: number;
   username: string;
   onOpenMenu: () => void;
+  pvpLevelId?: number;
 }
 
 export const InboxView: React.FC<Props> = ({
@@ -37,6 +38,7 @@ export const InboxView: React.FC<Props> = ({
   level,
   username,
   onOpenMenu,
+  pvpLevelId,
 }) => {
   const [emails, setEmails] = useState<Email[]>([]);
   const [selected, setSelected] = useState<Email | null>(null);
@@ -82,64 +84,53 @@ export const InboxView: React.FC<Props> = ({
     };
   }, []);
 
-  const triggerIncomingWave = useCallback(
+    const triggerIncomingWave = useCallback(
     async (removedId?: number) => {
+      // If PVP, we must have a level id
+      if (mode === 'pvp' && !pvpLevelId) return;
+
       setWaveTriggered(true);
 
-      const newEmails = await fetchEmails(
-        ({
-          mode,
-          scenario_id: scenarioId,
-          level,
-          limit: 50, // bump so longer waves don’t get cut off
-          wave: true, // backend filters special wave emails
-        } as any)
-      );
+      const fetched =
+        mode === 'pvp'
+          ? await fetchPvpEmails({ level_id: pvpLevelId!, limit: 50, wave: true })
+          : await fetchEmails(
+              ({ mode, scenario_id: scenarioId, level, limit: 50, wave: true } as any)
+            );
 
-      // Filter out anything we already have (or already saw via earlier wave call)
-      const existingIds = new Set(emails.map((e) => e.id));
-      const unseen = newEmails.filter((e) => {
-        if (seenEmailIdsRef.current.has(e.id)) return false;
-        if (existingIds.has(e.id)) return false;
-        return true;
-      });
+      // Do NOT read `emails` from closure; use prev state instead.
+      setEmails((prev) => {
+        const existingIds = new Set(prev.map((e) => e.id));
 
-      // Mark unseen as seen (so subsequent calls don’t re-notify)
-      unseen.forEach((e) => seenEmailIdsRef.current.add(e.id));
-
-      setIncomingQueue(unseen);
-
-      if (unseen.length > 0) {
-        setRunTotal((t) => t + unseen.length);
-
-        setEmails((prev) => {
-          const remaining = removedId ? prev.filter((e) => e.id !== removedId) : prev;
-          // Prepend new emails like a real inbox “new mail arrives at top”
-          return [...unseen, ...remaining];
+        const unseen = fetched.filter((e) => {
+          if (seenEmailIdsRef.current.has(e.id)) return false;
+          if (existingIds.has(e.id)) return false;
+          return true;
         });
 
-        // NEW: notify (visual + audio)
-        setWaveToastCount(unseen.length);
-        playWaveChime();
-      } else {
-        // still remove the selected email if needed
-        if (removedId) {
-          setEmails((prev) => prev.filter((e) => e.id !== removedId));
+        unseen.forEach((e) => seenEmailIdsRef.current.add(e.id));
+        setIncomingQueue(unseen);
+
+        if (unseen.length > 0) {
+          setRunTotal((t) => t + unseen.length);
+          setWaveToastCount(unseen.length);
+          playWaveChime();
         }
-      }
+
+        const remaining = removedId ? prev.filter((e) => e.id !== removedId) : prev;
+        return unseen.length > 0 ? [...unseen, ...remaining] : remaining;
+      });
     },
-    [mode, scenarioId, level, emails]
+    [mode, scenarioId, level, pvpLevelId]
   );
 
   useEffect(() => {
     const loadEmails = async () => {
       try {
-        const data = await fetchEmails({
-          mode,
-          scenario_id: scenarioId,
-          level,
-          limit: 15,
-        });
+        const data =
+          mode === 'pvp'
+            ? await fetchPvpEmails({ level_id: pvpLevelId!, limit: 15, wave: false })
+            : await fetchEmails({ mode, scenario_id: scenarioId, level, limit: 15 });
 
         setEmails(data);
 
@@ -188,11 +179,11 @@ export const InboxView: React.FC<Props> = ({
     };
 
     loadEmails();
-  }, [mode, scenarioId, level, runKey, userId]);
+  }, [mode, scenarioId, level, runKey, userId, pvpLevelId]);
 
   // trigger timed wave mid-level
   useEffect(() => {
-    if (mode !== 'simulation') return;
+    if (mode !== 'simulation' && mode !== 'pvp') return;
 
     const timer = setTimeout(() => {
       if (!waveTriggered) {
@@ -332,7 +323,9 @@ export const InboxView: React.FC<Props> = ({
           <div className="outlook-topbar-title">
             {mode === 'simulation'
               ? `Inbox Simulator — Level ${level ?? ''}`
-              : 'Arcade Mode'}
+              : mode === 'pvp'
+                ? 'PVP — Player Level'
+                : 'Arcade Mode'}
           </div>
         </div>
 
@@ -353,7 +346,7 @@ export const InboxView: React.FC<Props> = ({
             title={
               !selected
                 ? 'Select an email first'
-                : mode === 'simulation' && !openedEmailIds.has(selected.id)
+                : (mode === 'simulation' || mode === 'pvp') && !openedEmailIds.has(selected.id)
                   ? 'Open the link or attachment before marking as read'
                   : ''
             }

@@ -7,8 +7,9 @@ import LevelSelectView from './components/LevelSelectView';
 import AuthPage from './components/AuthPage';
 import HamburgerMenu from './components/HamburgerMenu';
 import ProfileView from './components/ProfileView';
+import PvpRoot from './components/pvp/PvpRoot';
 
-type Screen = 'menu' | 'inbox' | 'arcade' | 'levels' | 'profile';
+type Screen = 'menu' | 'inbox' | 'arcade' | 'levels' | 'profile' | 'pvp';
 
 const App: React.FC = () => {
   const [screen, setScreen] = useState<Screen>('menu');
@@ -120,6 +121,14 @@ const App: React.FC = () => {
             <ProfileView userId={username} />
           </div>
         </div>
+      )}
+     {screen === 'pvp' && (
+        <PvpRoot
+          onExitPvp={() => setScreen('menu')}
+          userId={username}
+          username={username}
+          onOpenMenu={() => setDrawerOpen(true)}
+        />
       )}
     </div>
   );

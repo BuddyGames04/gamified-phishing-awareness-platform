@@ -2,7 +2,7 @@ import React from 'react';
 import '../styles/MenuScreens.css';
 
 interface Props {
-  navigate: (screen: 'menu' | 'inbox' | 'arcade' | 'levels') => void;
+  navigate: (screen: 'menu' | 'inbox' | 'arcade' | 'levels' | 'pvp') => void;
 }
 
 const MenuView: React.FC<Props> = ({ navigate }) => {
@@ -59,11 +59,17 @@ const MenuView: React.FC<Props> = ({ navigate }) => {
               </div>
             </div>
 
-            <div className="action-card disabled" aria-disabled="true">
+            <div
+                className="action-card"
+                role="button"
+                tabIndex={0}
+                onClick={() => navigate('pvp')}
+                onKeyDown={(e) => e.key === 'Enter' && navigate('pvp')}
+              >
               <div className="action-icon warning">⚔️</div>
               <div>
                 <div className="action-title">PVP</div>
-                <div className="action-desc">Under construction (coming soon).</div>
+                <div className="action-desc">Create and play player-made challenge levels.</div>
               </div>
             </div>
 
