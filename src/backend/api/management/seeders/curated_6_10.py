@@ -439,7 +439,9 @@ def curated_levels_6_10(scenario_by_company) -> list[dict[str, Any]]:
                             is_phish=False,
                             difficulty=4,
                             category="finance",
-                            links=[f"https://{dom}/finance/payments/approvals?reopen=1"],
+                            links=[
+                                f"https://{dom}/finance/payments/approvals?reopen=1"
+                            ],
                             attachments=[],
                         ),
                         e(
@@ -805,7 +807,9 @@ def curated_levels_6_10(scenario_by_company) -> list[dict[str, Any]]:
                         is_phish=True,
                         difficulty=5,
                         category="phish",
-                        links=[f"http://{sharepoint_spoof}/open?id=incident-exceptions"],
+                        links=[
+                            f"http://{sharepoint_spoof}/open?id=incident-exceptions"
+                        ],
                         attachments=[],
                     ),
                     e(

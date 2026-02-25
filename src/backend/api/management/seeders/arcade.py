@@ -49,7 +49,9 @@ def arcade_emails() -> List[Dict[str, Any]]:
         if not url:
             return body
         if not url_in_body(diff):
-            return body + "\n\nOpen the link using the button above in the email client.\n"
+            return (
+                body + "\n\nOpen the link using the button above in the email client.\n"
+            )
         return body + f"\n\nLink:\n{url}\n"
 
     def make_legit(diff: int) -> Dict[str, Any]:
@@ -92,10 +94,17 @@ def arcade_emails() -> List[Dict[str, Any]]:
             brand = random.choice(CLOUD)
             dom = LEGIT_PORTAL["cloud"]
             doc = random.choice(
-                ["Policy_Update.pdf", "Meeting_Notes.pdf", "Project_Brief.pdf", "Budget_Summary.pdf"]
+                [
+                    "Policy_Update.pdf",
+                    "Meeting_Notes.pdf",
+                    "Project_Brief.pdf",
+                    "Budget_Summary.pdf",
+                ]
             )
             url = f"https://{dom}/files/view/{slug(doc)}?ref={ref}"
-            body = f"A file has been shared with you.\n\nFile: {doc}\n\nThanks,\n{brand}"
+            body = (
+                f"A file has been shared with you.\n\nFile: {doc}\n\nThanks,\n{brand}"
+            )
             if maybe(0.25):
                 e = dict(
                     sender_name=brand,
@@ -185,7 +194,12 @@ def arcade_emails() -> List[Dict[str, Any]]:
             return ensure_xor_links_attachments(e)
 
         vendor = random.choice(
-            ["BrightCables Ltd", "Westridge Supplies", "Greenlight Maintenance", "OfficeMart"]
+            [
+                "BrightCables Ltd",
+                "Westridge Supplies",
+                "Greenlight Maintenance",
+                "OfficeMart",
+            ]
         )
         dom = f"{slug(vendor).replace('-ltd','')}.co.uk"
         inv = f"INV-{random.randint(10000, 99999)}"
@@ -304,7 +318,12 @@ def arcade_emails() -> List[Dict[str, Any]]:
             legit_dom = LEGIT_PORTAL["cloud"]
             look = lookalike_domain(legit_dom, diff)
             doc = random.choice(
-                ["Shared_Document.pdf", "Policy_Update.pdf", "AccessReview_Q1.xlsx", "Invoice_Copy.pdf"]
+                [
+                    "Shared_Document.pdf",
+                    "Policy_Update.pdf",
+                    "AccessReview_Q1.xlsx",
+                    "Invoice_Copy.pdf",
+                ]
             )
             subject = f"{brand}: shared document"
             if diff <= 2:
@@ -319,7 +338,9 @@ def arcade_emails() -> List[Dict[str, Any]]:
                 url = f"http://{look}/open?id={ref}"
             else:
                 url = bad_url_variants(f"https://{look}/open?id={ref}")
-            body = f"A document has been shared with you.\nFile: {doc}\nSign in to view.\n"
+            body = (
+                f"A document has been shared with you.\nFile: {doc}\nSign in to view.\n"
+            )
             e = dict(
                 sender_name=brand,
                 sender_email=f"no-reply@{look}",
@@ -341,7 +362,9 @@ def arcade_emails() -> List[Dict[str, Any]]:
             if diff <= 2:
                 subject = f"{brand} ACCOUNT LOCKED - VERIFY NOW"
             if diff == 5:
-                url = userinfo_trick(legit_dom, evil_root, f"restore/{brand.lower()}/{ref}")
+                url = userinfo_trick(
+                    legit_dom, evil_root, f"restore/{brand.lower()}/{ref}"
+                )
             elif diff == 4:
                 url = f"https://{evil_root}/account/restore/{ref}"
             elif diff == 3:
@@ -367,9 +390,13 @@ def arcade_emails() -> List[Dict[str, Any]]:
             )
             return ensure_xor_links_attachments(e)
 
-        vendor = random.choice(["BrightCables", "OfficeMart", "Greenlight", "Westridge"])
+        vendor = random.choice(
+            ["BrightCables", "OfficeMart", "Greenlight", "Westridge"]
+        )
         inv = f"INV-{random.randint(10000, 99999)}"
-        sender_dom = f"{slug(vendor)}.co.uk" if diff >= 4 else f"{slug(vendor)}-billing.co"
+        sender_dom = (
+            f"{slug(vendor)}.co.uk" if diff >= 4 else f"{slug(vendor)}-billing.co"
+        )
         subject = f"Invoice attached: {inv}"
         if diff <= 2:
             subject = f"OVERDUE {inv}!!! OPEN ATTACHMENT"
@@ -396,7 +423,9 @@ def arcade_emails() -> List[Dict[str, Any]]:
 
     for _ in range(10):
         real_dom = LEGIT_PORTAL["bank"]
-        evil_dom = random.choice(["login-review.co", "secure-casework.com", "identity-checks.co"])
+        evil_dom = random.choice(
+            ["login-review.co", "secure-casework.com", "identity-checks.co"]
+        )
         ref = random.randint(100000, 999999)
 
         if maybe(0.5):

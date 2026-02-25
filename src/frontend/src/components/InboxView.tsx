@@ -1,5 +1,5 @@
 // src/frontend/src/components/InboxView.tsx
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Email,
   fetchEmails,
@@ -14,6 +14,10 @@ import '../App.css';
 import '../styles/InboxView.css';
 import InteractionModal from './InteractionModal';
 import LevelCompleteModal from './LevelCompleteModal';
+
+// NEW:
+import WaveToast from './WaveToast';
+import { playWaveChime, primeWaveAudio } from '../utils/waveNotifier';
 
 interface Props {
   onExit: () => void;
@@ -55,7 +59,28 @@ export const InboxView: React.FC<Props> = ({
   const [incomingQueue, setIncomingQueue] = useState<Email[]>([]);
   const [waveTriggered, setWaveTriggered] = useState(false);
 
+  // NEW: wave notification UI
+  const [waveToastCount, setWaveToastCount] = useState<number>(0);
+
+  // NEW: track emails we’ve already seen so wave fetch can’t double-add + double-notify
+  const seenEmailIdsRef = useRef<Set<number>>(new Set());
+
   const isHighLevel = (lvl?: number) => (lvl ?? 0) >= 3;
+
+  // NEW: prime audio after first user gesture (browser autoplay rules)
+  useEffect(() => {
+    const prime = () => {
+      primeWaveAudio();
+      window.removeEventListener('pointerdown', prime);
+      window.removeEventListener('keydown', prime);
+    };
+    window.addEventListener('pointerdown', prime);
+    window.addEventListener('keydown', prime);
+    return () => {
+      window.removeEventListener('pointerdown', prime);
+      window.removeEventListener('keydown', prime);
+    };
+  }, []);
 
   const triggerIncomingWave = useCallback(
     async (removedId?: number) => {
@@ -66,20 +91,44 @@ export const InboxView: React.FC<Props> = ({
           mode,
           scenario_id: scenarioId,
           level,
-          limit: 5,
+          limit: 50, // bump so longer waves don’t get cut off
           wave: true, // backend filters special wave emails
         } as any)
       );
 
-      setIncomingQueue(newEmails);
-      setRunTotal((t) => t + newEmails.length);
-
-      setEmails((prev) => {
-        const remaining = removedId ? prev.filter((e) => e.id !== removedId) : prev;
-        return [...newEmails, ...remaining];
+      // Filter out anything we already have (or already saw via earlier wave call)
+      const existingIds = new Set(emails.map((e) => e.id));
+      const unseen = newEmails.filter((e) => {
+        if (seenEmailIdsRef.current.has(e.id)) return false;
+        if (existingIds.has(e.id)) return false;
+        return true;
       });
+
+      // Mark unseen as seen (so subsequent calls don’t re-notify)
+      unseen.forEach((e) => seenEmailIdsRef.current.add(e.id));
+
+      setIncomingQueue(unseen);
+
+      if (unseen.length > 0) {
+        setRunTotal((t) => t + unseen.length);
+
+        setEmails((prev) => {
+          const remaining = removedId ? prev.filter((e) => e.id !== removedId) : prev;
+          // Prepend new emails like a real inbox “new mail arrives at top”
+          return [...unseen, ...remaining];
+        });
+
+        // NEW: notify (visual + audio)
+        setWaveToastCount(unseen.length);
+        playWaveChime();
+      } else {
+        // still remove the selected email if needed
+        if (removedId) {
+          setEmails((prev) => prev.filter((e) => e.id !== removedId));
+        }
+      }
     },
-    [mode, scenarioId, level]
+    [mode, scenarioId, level, emails]
   );
 
   useEffect(() => {
@@ -93,6 +142,12 @@ export const InboxView: React.FC<Props> = ({
         });
 
         setEmails(data);
+
+        // Reset “seen” tracking for this run
+        const nextSeen = new Set<number>();
+        data.forEach((e) => nextSeen.add(e.id));
+        seenEmailIdsRef.current = nextSeen;
+
         setOpenedEmailIds(new Set());
         setRunTotal(data.length);
         setRunCorrect(0);
@@ -105,6 +160,9 @@ export const InboxView: React.FC<Props> = ({
         // reset timed-wave state on level load/replay
         setIncomingQueue([]);
         setWaveTriggered(false);
+
+        // NEW: clear wave toast
+        setWaveToastCount(0);
 
         // metrics: start a run (only for simulation; you can include arcade too later)
         setRunCompleted(false);
@@ -140,7 +198,7 @@ export const InboxView: React.FC<Props> = ({
       if (!waveTriggered) {
         triggerIncomingWave().catch((e) => console.error('triggerIncomingWave failed', e));
       }
-    }, 60000); // 60s example
+    }, 45000);
 
     return () => clearTimeout(timer);
   }, [runKey, mode, waveTriggered, triggerIncomingWave]);
@@ -260,6 +318,11 @@ export const InboxView: React.FC<Props> = ({
 
   return (
     <div className="outlook-shell">
+      {/* NEW: Wave arrival toast */}
+      {waveToastCount > 0 && (
+        <WaveToast count={waveToastCount} onClose={() => setWaveToastCount(0)} />
+      )}
+
       {/* Top bar */}
       <div className="outlook-topbar">
         <div className="outlook-topbar-left">
@@ -273,7 +336,7 @@ export const InboxView: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* NEW: action toolbar in the middle */}
+        {/* action toolbar */}
         <div className="outlook-topbar-center">
           <button
             className="btn btn-danger"
@@ -313,13 +376,12 @@ export const InboxView: React.FC<Props> = ({
             >
               ☰
             </button>
-
           </div>
         </div>
       </div>
 
       <div className="outlook-main">
-        {/* Left: folders (visual only) */}
+        {/* Left: folders */}
         <div className="folder-pane">
           <div className="folder-title">Folders</div>
           <div className="folder-item active">

@@ -30,5 +30,9 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS("Seed complete."))
         self.stdout.write(f"- Scenarios: {Scenario.objects.count()}")
-        self.stdout.write(f"- Simulation emails: {Email.objects.filter(mode='simulation').count()}")
-        self.stdout.write(f"- Arcade emails: {Email.objects.filter(mode='arcade').count()}")
+        self.stdout.write(
+            f"- Simulation emails: {Email.objects.filter(mode='simulation').count()}"
+        )
+        self.stdout.write(
+            f"- Arcade emails: {Email.objects.filter(mode='arcade').count()}"
+        )

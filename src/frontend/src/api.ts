@@ -51,6 +51,7 @@ export async function fetchEmails(params?: {
   max_difficulty?: number;
   limit?: number;
   level?: number;
+  wave?: boolean;
 }): Promise<Email[]> {
   const qs = new URLSearchParams();
   if (params?.mode) qs.set('mode', params.mode);
@@ -59,6 +60,7 @@ export async function fetchEmails(params?: {
   if (params?.max_difficulty) qs.set('max_difficulty', String(params.max_difficulty));
   if (params?.limit) qs.set('limit', String(params.limit));
   if (params?.level) qs.set('level', String(params.level));
+  if (params?.wave) qs.set('wave', 'true');
 
   const url = `${API_BASE}/emails/${qs.toString() ? `?${qs.toString()}` : ''}`;
   const response = await authFetch(url);

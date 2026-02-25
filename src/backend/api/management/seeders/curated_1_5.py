@@ -6,7 +6,9 @@ from api.management.seeders.common import domain
 from api.models import Scenario
 
 
-def curated_levels_1_5(scenario_by_company: dict[str, Scenario]) -> list[dict[str, Any]]:
+def curated_levels_1_5(
+    scenario_by_company: dict[str, Scenario]
+) -> list[dict[str, Any]]:
     nb = scenario_by_company["Northbridge Utilities"]
     hl = scenario_by_company["Harbourline Logistics"]
     ch = scenario_by_company["Crestview Health Partners"]
@@ -300,7 +302,11 @@ def curated_levels_1_5(scenario_by_company: dict[str, Scenario]) -> list[dict[st
                 ),
                 dict(
                     sender_name=ch.line_manager_name,
-                    sender_email=f"{domain(ch.company_name)}/{clean_mgr_name(ch.line_manager_name)}@{ch_domain}".split("/", 1)[1],
+                    sender_email=f"{domain(ch.company_name)}/{clean_mgr_name(ch.line_manager_name)}@{ch_domain}".split(
+                        "/", 1
+                    )[
+                        1
+                    ],
                     subject="Onboarding checklist (portal link)",
                     body=f"Hi,\n\nCan you run through the onboarding checklist in the HR portal for the new starter?\n\nThanks,\n{ch.line_manager_name}",
                     is_phish=False,

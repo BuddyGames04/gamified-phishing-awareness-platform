@@ -121,15 +121,23 @@ def attachment_for(diff: int, is_phish: bool) -> str:
 
     if diff == 1:
         return random.choice(
-            ["FREE_GIFT_CARD.exe", "invoiceeeee.pdf.exe", "voicemail.htm", "open_me_now.scr"]
+            [
+                "FREE_GIFT_CARD.exe",
+                "invoiceeeee.pdf.exe",
+                "voicemail.htm",
+                "open_me_now.scr",
+            ]
         )
     if diff == 2:
         return random.choice(risky)
     if diff == 3:
         return random.choice(risky + ["Invoice_2026-02.pdf.iso", "PaymentAdvice.docm"])
     if diff == 4:
-        return random.choice(["Invoice.pdf.iso", "RemittanceAdvice.docm", "Statement.pdf.exe"])
+        return random.choice(
+            ["Invoice.pdf.iso", "RemittanceAdvice.docm", "Statement.pdf.exe"]
+        )
     return random.choice(safe_pdfs)
+
 
 def slugify_company(name: str) -> str:
     return (
