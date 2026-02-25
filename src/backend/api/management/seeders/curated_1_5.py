@@ -1,0 +1,348 @@
+from __future__ import annotations
+
+from typing import Any
+
+from api.management.seeders.common import domain
+from api.models import Scenario
+
+
+def curated_levels_1_5(scenario_by_company: dict[str, Scenario]) -> list[dict[str, Any]]:
+    nb = scenario_by_company["Northbridge Utilities"]
+    hl = scenario_by_company["Harbourline Logistics"]
+    ch = scenario_by_company["Crestview Health Partners"]
+
+    def clean_mgr_name(name: str) -> str:
+        return name.replace(".", "").replace(",", "").lower().replace(" ", ".")
+
+    nb_domain = domain(nb.company_name)
+    hl_domain = domain(hl.company_name)
+    ch_domain = domain(ch.company_name)
+
+    nb_phish = "northbridge-utilities-payments.com"
+    nb_spoof = "northbridge-utilities-sharepoint.com"
+    hl_phish = "harbourline-logistics-verify.com"
+    hl_track = "harbourline-delivery-tracking.com"
+    ch_phish = "crestview-payroll-secure.com"
+
+    return [
+        dict(
+            scenario=nb,
+            number=1,
+            title="Accounts Payable basics",
+            briefing="You're new in Accounts Payable. Expect invoices, POs, and supplier queries.",
+            emails=[
+                dict(
+                    sender_name="Procurement Team",
+                    sender_email=f"procurement@{nb_domain}",
+                    subject="PO 48391 approved (PDF attached)",
+                    body="Hi,\n\nPO 48391 has been approved. Please match any incoming invoices to this PO.\n\nThanks,\nProcurement",
+                    is_phish=False,
+                    difficulty=1,
+                    category="internal",
+                    links=[],
+                    attachments=["PO_48391.pdf"],
+                ),
+                dict(
+                    sender_name="Invoice Processing",
+                    sender_email=f"invoices@{nb_domain}",
+                    subject="New invoice received: INV-20419",
+                    body="Hi,\n\nNew supplier invoice received. Please review and process within 3 working days.\n\nRegards,\nInvoice Processing",
+                    is_phish=False,
+                    difficulty=1,
+                    category="finance",
+                    links=[],
+                    attachments=["INV-20419.pdf"],
+                ),
+                dict(
+                    sender_name=nb.line_manager_name,
+                    sender_email=f"{clean_mgr_name(nb.line_manager_name)}@{nb_domain}",
+                    subject="Quick check: supplier chasing payment",
+                    body=f"Hi,\n\nCan you confirm if Westridge Supplies was paid this week?\n\nThanks,\n{nb.line_manager_name}",
+                    is_phish=False,
+                    difficulty=1,
+                    category="internal",
+                    links=[f"https://{nb_domain}/finance/suppliers/westridge"],
+                    attachments=[],
+                ),
+                dict(
+                    sender_name="Supplier Payments",
+                    sender_email=f"payments@{nb_phish}",
+                    subject="URGENT: payment failed — re-authorise TODAY",
+                    body="Hello,\n\nPayment failed. Re-authorise today to avoid service interruption.\n\nRe-authorise:\n"
+                    f"http://{nb_phish}/reauthorise\n",
+                    is_phish=True,
+                    difficulty=1,
+                    category="phish",
+                    links=[f"http://{nb_phish}/reauthorise"],
+                    attachments=[],
+                ),
+                dict(
+                    sender_name="Voice Mail",
+                    sender_email=f"voicemail@{nb_phish}",
+                    subject="New voice message (open attachment)",
+                    body="You received a new voice message.\n\nOpen the attached file to listen.",
+                    is_phish=True,
+                    difficulty=1,
+                    category="phish",
+                    links=[],
+                    attachments=["voice_message.htm"],
+                ),
+            ],
+        ),
+        dict(
+            scenario=nb,
+            number=2,
+            title="Supplier changes and shared docs",
+            briefing="More supplier comms and shared files. Watch for fake portals.",
+            emails=[
+                dict(
+                    sender_name="Accounts Team",
+                    sender_email=f"accounts@{nb_domain}",
+                    subject="Supplier master data: update request (internal form)",
+                    body="Hi,\n\nCan you review the supplier master data update requests in the portal?\n\nThanks,\nAccounts",
+                    is_phish=False,
+                    difficulty=1,
+                    category="finance",
+                    links=[f"https://{nb_domain}/finance/supplier-master/requests"],
+                    attachments=[],
+                ),
+                dict(
+                    sender_name="Westridge Supplies",
+                    sender_email="billing@westridgesupplies.co.uk",
+                    subject="Invoice copy requested (attached)",
+                    body="Hello,\n\nAs requested, attached is the invoice copy.\n\nThank you,\nBilling",
+                    is_phish=False,
+                    difficulty=1,
+                    category="supplier",
+                    links=[],
+                    attachments=["INV-20311.pdf"],
+                ),
+                dict(
+                    sender_name=f"{nb.company_name} SharePoint",
+                    sender_email=f"no-reply@{nb_spoof}",
+                    subject="Shared file: Supplier_BankChange_Form.pdf",
+                    body="A document has been shared with you.\n\nOpen document:\n"
+                    f"http://{nb_spoof}/open?id=92831\n",
+                    is_phish=True,
+                    difficulty=2,
+                    category="phish",
+                    links=[f"http://{nb_spoof}/open?id=92831"],
+                    attachments=[],
+                ),
+                dict(
+                    sender_name="Supplier Billing",
+                    sender_email=f"billing@{nb_phish}",
+                    subject="Bank details form (attached)",
+                    body="Hello,\n\nPlease complete the attached bank details form today.\n\nRegards,\nBilling",
+                    is_phish=True,
+                    difficulty=2,
+                    category="phish",
+                    links=[],
+                    attachments=["BankDetailsForm.pdf.exe"],
+                ),
+                dict(
+                    sender_name="Procurement Team",
+                    sender_email=f"procurement@{nb_domain}",
+                    subject="Approved supplier list (Q1)",
+                    body="Hi,\n\nAttached is the approved supplier list for Q1.\n\nThanks,\nProcurement",
+                    is_phish=False,
+                    difficulty=1,
+                    category="internal",
+                    links=[],
+                    attachments=["Approved_Suppliers_Q1.pdf"],
+                ),
+            ],
+        ),
+        dict(
+            scenario=hl,
+            number=3,
+            title="Procurement: quotes and onboarding",
+            briefing="You manage quotes and suppliers. Be wary of vendor verification pressure.",
+            emails=[
+                dict(
+                    sender_name="Operations",
+                    sender_email=f"operations@{hl_domain}",
+                    subject="Request: quote for pallet wrap (specs attached)",
+                    body="Hi,\n\nCan you get a quote for pallet wrap based on the attached spec?\n\nThanks,\nOperations",
+                    is_phish=False,
+                    difficulty=1,
+                    category="internal",
+                    links=[],
+                    attachments=["Pallet_Wrap_Spec.pdf"],
+                ),
+                dict(
+                    sender_name="Vendor Onboarding",
+                    sender_email=f"onboarding@{hl_domain}",
+                    subject="New supplier onboarding checklist",
+                    body="Hi,\n\nPlease use the attached checklist for new supplier onboarding.\n\nThanks,\nProcurement Ops",
+                    is_phish=False,
+                    difficulty=1,
+                    category="internal",
+                    links=[],
+                    attachments=["Supplier_Onboarding_Checklist.pdf"],
+                ),
+                dict(
+                    sender_name="Harbourline Vendor Portal",
+                    sender_email=f"no-reply@{hl_phish}",
+                    subject="ACTION REQUIRED: Vendor details verification",
+                    body="Your vendor record requires verification.\n\nVerify now:\n"
+                    f"http://{hl_phish}/vendor/verify\n",
+                    is_phish=True,
+                    difficulty=1,
+                    category="phish",
+                    links=[f"http://{hl_phish}/vendor/verify"],
+                    attachments=[],
+                ),
+                dict(
+                    sender_name="Supplier Quotes",
+                    sender_email="sales@packaging-direct.co.uk",
+                    subject="Quote attached: pallet wrap (Ref Q-1182)",
+                    body="Hi,\n\nPlease find our quote attached.\n\nKind regards,\nSales",
+                    is_phish=False,
+                    difficulty=1,
+                    category="supplier",
+                    links=[],
+                    attachments=["Quote_Q-1182.pdf"],
+                ),
+                dict(
+                    sender_name="Packaging Direct",
+                    sender_email="sales@packaging-directs.co.uk",
+                    subject="Revised quote (open attached urgently)",
+                    body="Hi,\n\nRevised quote attached, please open and approve today.\n\nThanks",
+                    is_phish=True,
+                    difficulty=2,
+                    category="phish",
+                    links=[],
+                    attachments=["Quote_1182.xlsm"],
+                ),
+            ],
+        ),
+        dict(
+            scenario=hl,
+            number=4,
+            title="Deliveries and customs paperwork",
+            briefing="More delivery comms. Watch for fake tracking pages and weird attachments.",
+            emails=[
+                dict(
+                    sender_name="Inbound Logistics",
+                    sender_email=f"inbound@{hl_domain}",
+                    subject="Container ETA update (see portal link)",
+                    body="Hi,\n\nUpdated container ETA is available in the logistics portal.\n\nThanks,\nInbound",
+                    is_phish=False,
+                    difficulty=1,
+                    category="internal",
+                    links=[f"https://{hl_domain}/logistics/eta"],
+                    attachments=[],
+                ),
+                dict(
+                    sender_name="Supplier: SteelCo",
+                    sender_email="dispatch@steelco.co.uk",
+                    subject="Delivery note attached (DN-55219)",
+                    body="Hi,\n\nDelivery note attached.\n\nRegards,\nDispatch",
+                    is_phish=False,
+                    difficulty=1,
+                    category="supplier",
+                    links=[],
+                    attachments=["DN-55219.pdf"],
+                ),
+                dict(
+                    sender_name="Courier Updates",
+                    sender_email=f"no-reply@{hl_track}",
+                    subject="Delivery delayed — confirm slot",
+                    body="Your delivery slot needs confirmation.\n\nConfirm here:\n"
+                    f"http://{hl_track}/confirm-slot\n",
+                    is_phish=True,
+                    difficulty=2,
+                    category="phish",
+                    links=[f"http://{hl_track}/confirm-slot"],
+                    attachments=[],
+                ),
+                dict(
+                    sender_name="Customs Paperwork",
+                    sender_email=f"customs@{hl_phish}",
+                    subject="Customs invoice attached - action required",
+                    body="Customs invoice attached. Please open and confirm details.",
+                    is_phish=True,
+                    difficulty=2,
+                    category="phish",
+                    links=[],
+                    attachments=["CustomsInvoice_55219.pdf.scr"],
+                ),
+                dict(
+                    sender_name="Procurement System",
+                    sender_email=f"no-reply@{hl_domain}",
+                    subject="PO created: PO-77104 (PDF)",
+                    body="A new purchase order has been created. PDF attached for your records.",
+                    is_phish=False,
+                    difficulty=1,
+                    category="internal",
+                    links=[],
+                    attachments=["PO-77104.pdf"],
+                ),
+            ],
+        ),
+        dict(
+            scenario=ch,
+            number=5,
+            title="HR: onboarding and payroll requests",
+            briefing="You coordinate onboarding. Be cautious with payroll and secure forms.",
+            emails=[
+                dict(
+                    sender_name="Recruitment",
+                    sender_email=f"recruitment@{ch_domain}",
+                    subject="Candidate CV attached (Band 4 Admin)",
+                    body="Hi,\n\nCandidate CV attached for review ahead of interview scheduling.\n\nThanks,\nRecruitment",
+                    is_phish=False,
+                    difficulty=1,
+                    category="internal",
+                    links=[],
+                    attachments=["CV_Band4_Admin.pdf"],
+                ),
+                dict(
+                    sender_name=ch.line_manager_name,
+                    sender_email=f"{domain(ch.company_name)}/{clean_mgr_name(ch.line_manager_name)}@{ch_domain}".split("/", 1)[1],
+                    subject="Onboarding checklist (portal link)",
+                    body=f"Hi,\n\nCan you run through the onboarding checklist in the HR portal for the new starter?\n\nThanks,\n{ch.line_manager_name}",
+                    is_phish=False,
+                    difficulty=1,
+                    category="internal",
+                    links=[f"https://{ch_domain}/hr/onboarding/checklist"],
+                    attachments=[],
+                ),
+                dict(
+                    sender_name="Payroll Team",
+                    sender_email=f"payroll@{ch_phish}",
+                    subject="IMPORTANT: Update your payroll details",
+                    body="Hi,\n\nWe need you to update payroll details to avoid a missed payment.\n\nUpdate here:\n"
+                    f"http://{ch_phish}/update\n",
+                    is_phish=True,
+                    difficulty=2,
+                    category="phish",
+                    links=[f"http://{ch_phish}/update"],
+                    attachments=[],
+                ),
+                dict(
+                    sender_name="Internal Comms",
+                    sender_email=f"comms@{ch_phish}",
+                    subject="New policy document (attached) - read today",
+                    body="Please read the attached policy update today and confirm completion.",
+                    is_phish=True,
+                    difficulty=2,
+                    category="phish",
+                    links=[],
+                    attachments=["Policy_Update_2026.pdf.exe"],
+                ),
+                dict(
+                    sender_name="IT Helpdesk",
+                    sender_email=f"it-support@{ch_domain}",
+                    subject="New starter account setup (instructions attached)",
+                    body="Hi,\n\nAttached are the steps for new starter account setup.\n\nThanks,\nIT",
+                    is_phish=False,
+                    difficulty=1,
+                    category="internal",
+                    links=[],
+                    attachments=["NewStarter_AccountSetup.pdf"],
+                ),
+            ],
+        ),
+    ]

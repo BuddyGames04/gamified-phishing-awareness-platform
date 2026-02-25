@@ -23,13 +23,26 @@ def get_emails(request):
     if mode == "simulation":
         scenario_id = request.query_params.get("scenario_id")
         level = request.query_params.get("level")
-        if not (scenario_id and level):
-            return Response({"detail": "scenario_id and level required"}, status=400)
+        if not level:
+            return Response({"detail": "level required"}, status=400)
 
         try:
-            lvl = Level.objects.get(scenario_id=scenario_id, number=int(level))
-        except Level.DoesNotExist:
-            return Response({"detail": "Level not found"}, status=404)
+            level_num = int(level)
+        except ValueError:
+            return Response({"detail": "level must be an integer"}, status=400)
+
+        lvl = None
+        if scenario_id:
+            try:
+                lvl = Level.objects.get(scenario_id=scenario_id, number=level_num)
+            except Level.DoesNotExist:
+                lvl = None
+
+        if lvl is None:
+            try:
+                lvl = Level.objects.get(number=level_num)
+            except Level.DoesNotExist:
+                return Response({"detail": "Level not found"}, status=404)
 
         wave_true = str(request.query_params.get("wave", "")).lower() in (
             "1",
