@@ -616,7 +616,11 @@ const PvpCreateLevel: React.FC<Props> = ({ onBack, onCreatedAndPlay }) => {
 
         {/* Right side guidance panel */}
         <div style={{ display: 'grid', gap: 12, alignSelf: 'start' }}>
-         <AdversaryGuidancePanel onBack={onBack} onPlay={onCreatedAndPlay} showBack={false} />
+          <AdversaryGuidancePanel
+            onBack={onBack}
+            onPlay={onCreatedAndPlay}
+            showBack={false}
+          />
           <div style={{ fontSize: 12, opacity: 0.8 }}>
             Tip: waves should be “late arrivals” that pressure the player mid-run.
           </div>

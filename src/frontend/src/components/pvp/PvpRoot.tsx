@@ -23,6 +23,19 @@ const PvpRoot: React.FC<Props> = ({ onExitPvp, userId, username, onOpenMenu }) =
     setScreen('play');
   };
 
+  const PvpHamburgerButton = (
+    <div style={{ position: 'absolute', top: 10, right: 10, zIndex: 50 }}>
+      <button
+        className="hamburger-btn"
+        onClick={onOpenMenu}
+        aria-label="Open menu"
+        title="Menu"
+      >
+        ☰
+      </button>
+    </div>
+  );
+
   if (screen === 'play' && playingLevelId) {
     return (
       <InboxView
@@ -37,29 +50,45 @@ const PvpRoot: React.FC<Props> = ({ onExitPvp, userId, username, onOpenMenu }) =
   }
 
   if (screen === 'posted') {
-    return <PvpBrowsePosted onBack={() => setScreen('menu')} onPlay={play} />;
+    return (
+      <>
+        {PvpHamburgerButton}
+        <PvpBrowsePosted onBack={() => setScreen('menu')} onPlay={play} />
+      </>
+    );
   }
 
   if (screen === 'mine') {
-    return <PvpMyLevels onBack={() => setScreen('menu')} onPlay={play} />;
+    return (
+      <>
+        {PvpHamburgerButton}
+        <PvpMyLevels onBack={() => setScreen('menu')} onPlay={play} />
+      </>
+    );
   }
 
   if (screen === 'create') {
     return (
-      <PvpCreateLevel
-        onBack={() => setScreen('menu')}
-        onCreatedAndPlay={(levelId) => play(levelId)}
-      />
+      <>
+        {PvpHamburgerButton}
+        <PvpCreateLevel
+          onBack={() => setScreen('menu')}
+          onCreatedAndPlay={(levelId) => play(levelId)}
+        />
+      </>
     );
   }
 
   return (
-    <PvpMenu
-      onBack={onExitPvp}
-      onBrowsePosted={() => setScreen('posted')}
-      onMyLevels={() => setScreen('mine')}
-      onCreate={() => setScreen('create')}
-    />
+    <>
+      {PvpHamburgerButton}
+      <PvpMenu
+        onBack={onExitPvp}
+        onBrowsePosted={() => setScreen('posted')}
+        onMyLevels={() => setScreen('mine')}
+        onCreate={() => setScreen('create')}
+      />
+    </>
   );
 };
 
