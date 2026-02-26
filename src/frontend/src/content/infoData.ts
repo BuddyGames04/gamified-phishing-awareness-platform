@@ -1,16 +1,16 @@
 // src/frontend/src/content/infoData.ts
 
 export type InfoRule = {
-  id: string;              // e.g. "links.mismatch"
-  title: string;           // short heading
-  summary: string;         // 1–2 lines
-  details: string[];       // bullet points
-  examples?: string[];     // optional examples
-  tags: string[];          // for filtering later (hints/metrics)
+  id: string; // e.g. "links.mismatch"
+  title: string; // short heading
+  summary: string; // 1–2 lines
+  details: string[]; // bullet points
+  examples?: string[]; // optional examples
+  tags: string[]; // for filtering later (hints/metrics)
 };
 
 export type InfoSection = {
-  id: string;              // e.g. "basics"
+  id: string; // e.g. "basics"
   title: string;
   intro: string;
   rules: InfoRule[];
@@ -40,8 +40,7 @@ export const infoSections: InfoSection[] = [
       {
         id: 'about.arcade',
         title: 'Arcade mode',
-        summary:
-          'Quick-fire practice. You build speed and baseline instincts.',
+        summary: 'Quick-fire practice. You build speed and baseline instincts.',
         details: [
           'You see one email at a time and make a fast decision.',
           'It is ideal for beginners and warm-ups.',
@@ -94,7 +93,7 @@ export const infoSections: InfoSection[] = [
           'Malware delivery (attachments, drive-by downloads, fake updates).',
           'Account takeover (reset links, “verify your account” prompts).',
         ],
-        tags: ['basics', 'phishing'],
+        tags: ['basics', 'phishing', 'arcade-hint'],
       },
       {
         id: 'phish.social-engineering',
@@ -106,7 +105,7 @@ export const infoSections: InfoSection[] = [
           'They add time pressure to reduce careful checking.',
           'They rely on you “doing the normal thing” (clicking, replying, opening attachments).',
         ],
-        tags: ['basics', 'psychology'],
+        tags: ['basics', 'psychology', 'arcade-hint'],
       },
       {
         id: 'phish.not-just-email',
@@ -143,43 +142,40 @@ export const infoSections: InfoSection[] = [
         examples: [
           '“IT Support <support@it-helpdesk.example>” asking for your Microsoft password.',
         ],
-        tags: ['basics', 'sender'],
+        tags: ['basics', 'sender', 'arcade-hint'],
       },
       {
         id: 'basic.urgency',
         title: 'Spot urgency and pressure',
-        summary:
-          '“Act now” language is often used to override your judgement.',
+        summary: '“Act now” language is often used to override your judgement.',
         details: [
           'Threats: “account will be closed”, “final warning”, “disciplinary action”.',
           'Rewards: “you’ve won”, “refund available”, “bonus approved”.',
           'Time traps: “in the next 30 minutes”, “today only”.',
         ],
-        tags: ['basics', 'psychology'],
+        tags: ['basics', 'psychology', 'arcade-hint'],
       },
       {
         id: 'basic.links',
         title: 'Treat links as untrusted by default',
-        summary:
-          'A normal-looking link can still be dangerous.',
+        summary: 'A normal-looking link can still be dangerous.',
         details: [
           'Check the domain and the full address, not just the text.',
           'Shortened links hide the destination.',
           'Be wary of login pages reached from emails - prefer navigating yourself.',
         ],
-        tags: ['basics', 'links'],
+        tags: ['basics', 'links', 'arcade-hint'],
       },
       {
         id: 'basic.attachments',
         title: 'Be cautious with attachments',
-        summary:
-          'Attachments are a common malware route, especially if unexpected.',
+        summary: 'Attachments are a common malware route, especially if unexpected.',
         details: [
           'Ask: were you expecting this file from this person?',
           'Watch for double extensions (e.g. “invoice.pdf.exe”).',
           'Be cautious with macro-enabled documents or requests to “enable editing/content”.',
         ],
-        tags: ['basics', 'attachments'],
+        tags: ['basics', 'attachments', 'arcade-hint'],
       },
       {
         id: 'basic.language',
@@ -191,7 +187,7 @@ export const infoSections: InfoSection[] = [
           'Inconsistent tone: too formal, too pushy, or oddly casual for the sender.',
           'Errors are a clue, but not proof - advanced attackers can write well.',
         ],
-        tags: ['basics', 'content'],
+        tags: ['basics', 'content', 'arcade-hint'],
       },
     ],
   },
@@ -212,19 +208,18 @@ export const infoSections: InfoSection[] = [
           'Is the signature consistent with the sender’s claimed role?',
           'Do the details line up (dates, reference numbers, project names, teams)?',
         ],
-        tags: ['intermediate', 'context'],
+        tags: ['intermediate', 'context', 'sim-hint'],
       },
       {
         id: 'intermediate.reply-chain',
         title: 'Be wary of “reply chain” tricks',
-        summary:
-          'Attackers sometimes fake conversation history to look legitimate.',
+        summary: 'Attackers sometimes fake conversation history to look legitimate.',
         details: [
           'Quoted text can be fabricated.',
           'Look for mismatched subject lines vs the supposed conversation.',
-          'If in doubt, verify via a known channel (phone, internal chat, direct navigation).',
+          'IRL - If in doubt, verify via a known channel (phone, internal chat, direct navigation).',
         ],
-        tags: ['intermediate', 'spoofing'],
+        tags: ['intermediate', 'spoofing', 'sim-hint'],
       },
       {
         id: 'intermediate.login-path',
@@ -236,11 +231,11 @@ export const infoSections: InfoSection[] = [
           'If the email claims “your session expired”, open a new tab and log in normally.',
           'Treat MFA prompts as suspicious if you did not initiate a login.',
         ],
-        tags: ['intermediate', 'links', 'account'],
+        tags: ['intermediate', 'links', 'account', 'sim-hint'],
       },
       {
         id: 'intermediate.secondary-channel',
-        title: 'Verify using a second channel',
+        title: 'IRL- Verify using a second channel',
         summary:
           'A quick independent check stops many high-quality social engineering attempts.',
         details: [
@@ -248,19 +243,18 @@ export const infoSections: InfoSection[] = [
           'If it is “IT”, open the IT portal you already know or call the helpdesk number you trust.',
           'If it is a supplier, use the phone number on record - not the one in the email.',
         ],
-        tags: ['intermediate', 'verification'],
+        tags: ['intermediate', 'verification', 'sim-hint'],
       },
       {
         id: 'intermediate.workflow',
         title: 'Think about workplace context',
-        summary:
-          'Ask: “Would I realistically receive this email in this role, today?”',
+        summary: 'Ask: “Would I realistically receive this email in this role, today?”',
         details: [
           'Does it match your department’s responsibilities?',
           'Is the timing plausible (e.g. “urgent invoice” on a Sunday night)?',
           'Is the requested action normal (gift cards, personal email replies, secrecy)?',
         ],
-        tags: ['intermediate', 'context'],
+        tags: ['intermediate', 'context', 'sim-hint'],
       },
     ],
   },
@@ -282,7 +276,7 @@ export const infoSections: InfoSection[] = [
           'Supplier impersonation: invoice changes, updated payment details, or “overdue” pressure.',
           'The language may be clean and professional - rely on process verification, not grammar.',
         ],
-        tags: ['advanced', 'finance', 'impersonation'],
+        tags: ['advanced', 'finance', 'impersonation', 'sim-hint'],
       },
       {
         id: 'advanced.subtle-links',
@@ -330,7 +324,7 @@ export const infoSections: InfoSection[] = [
           'Follow approval steps for payments and sensitive changes.',
           'If something is “urgent”, that is exactly when you should slow down.',
         ],
-        tags: ['advanced', 'verification', 'context'],
+        tags: ['advanced', 'verification', 'context', 'sim-hint'],
       },
     ],
   },
@@ -356,8 +350,7 @@ export const infoSections: InfoSection[] = [
       {
         id: 'adversary.pressure',
         title: 'Pressure is the tool',
-        summary:
-          'The email’s goal is usually to reduce your checking behaviour.',
+        summary: 'The email’s goal is usually to reduce your checking behaviour.',
         details: [
           'Urgency, fear, reward, curiosity, or “confidentiality”.',
           'Small requests first (“quick check”) then bigger ones (credentials/payment).',

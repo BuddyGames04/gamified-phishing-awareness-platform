@@ -1,12 +1,16 @@
+// src/frontend/src/components/ArcadeGame.tsx
 import React, { useEffect, useRef, useState } from 'react';
 import { ArcadeNextEmail, fetchArcadeNext, postArcadeAttempt } from '../api';
 import '../styles/InboxView.css';
 import '../styles/ArcadeMode.css';
+import { getHintLines } from '../content/infoLookup';
 
 interface Props {
   onExit: () => void;
   onOpenMenu: () => void;
 }
+
+type Phase = 'answer' | 'review';
 
 const ArcadeGame: React.FC<Props> = ({ onExit, onOpenMenu }) => {
   const [email, setEmail] = useState<ArcadeNextEmail | null>(null);
@@ -15,12 +19,25 @@ const ArcadeGame: React.FC<Props> = ({ onExit, onOpenMenu }) => {
   const [loading, setLoading] = useState(true);
   const startedAtRef = useRef<number>(Date.now());
 
+  const [hintTitle, setHintTitle] = useState<string | null>(null);
+  const [hintRules, setHintRules] = useState<string[]>([]);
+
+  const [phase, setPhase] = useState<Phase>('answer');
+  const [answering, setAnswering] = useState(false);
+
   const loadNext = async () => {
     setLoading(true);
     try {
       const next = await fetchArcadeNext();
       setEmail(next);
       startedAtRef.current = Date.now();
+
+      // reset UI state for the next email
+      setFeedback(null);
+      setHintTitle(null);
+      setHintRules([]);
+      setPhase('answer');
+      setAnswering(false);
     } catch (e) {
       console.error(e);
       setEmail(null);
@@ -35,6 +52,9 @@ const ArcadeGame: React.FC<Props> = ({ onExit, onOpenMenu }) => {
 
   const handleGuess = async (guessIsPhish: boolean) => {
     if (!email) return;
+    if (answering || phase !== 'answer') return;
+
+    setAnswering(true);
 
     const responseTimeMs = Date.now() - startedAtRef.current;
     const isCorrect = email.is_phish === guessIsPhish;
@@ -43,20 +63,27 @@ const ArcadeGame: React.FC<Props> = ({ onExit, onOpenMenu }) => {
     setScore((s) => s + (isCorrect ? 1 : 0));
 
     try {
-      await postArcadeAttempt({
+      const attempt: any = await postArcadeAttempt({
         email_id: email.id,
         guess_is_phish: guessIsPhish,
         response_time_ms: responseTimeMs,
       });
+
+      setHintTitle(attempt?.hint_title ?? null);
+      setHintRules(Array.isArray(attempt?.hint_rule_ids) ? attempt.hint_rule_ids : []);
     } catch (e) {
       console.error('postArcadeAttempt failed', e);
+      // still allow review/next even if hints fail
+      setHintTitle(null);
+      setHintRules([]);
+    } finally {
+      setPhase('review');
+      setAnswering(false);
     }
-
-    setTimeout(() => {
-      setFeedback(null);
-      loadNext();
-    }, 900);
   };
+
+  const canAnswer = phase === 'answer' && !answering && !loading && !!email;
+  const canNext = phase === 'review' && !loading;
 
   return (
     <div className="outlook-shell">
@@ -99,29 +126,82 @@ const ArcadeGame: React.FC<Props> = ({ onExit, onOpenMenu }) => {
                 From: {email.sender_name} &lt;{email.sender_email}&gt;
               </div>
 
+              {(email.attachments?.length || email.links?.length) ? (
+                <div style={{ marginTop: 8, fontSize: 13, opacity: 0.9 }}>
+                  {email.attachments && email.attachments.length > 0 && (
+                    <div>
+                      <strong>Attachments:</strong> {email.attachments.join(', ')}
+                    </div>
+                  )}
+                  {email.links && email.links.length > 0 && (
+                    <div>
+                      <strong>Links:</strong> {email.links.join(', ')}
+                    </div>
+                  )}
+                </div>
+              ) : null}
+
               <div className="email-content">{email.body}</div>
 
               <div className="arcade-actions">
-                <button className="btn btn-danger" onClick={() => handleGuess(true)}>
+                <button
+                  className="btn btn-danger"
+                  onClick={() => handleGuess(true)}
+                  disabled={!canAnswer}
+                >
                   Phish
                 </button>
-                <button className="btn btn-ok" onClick={() => handleGuess(false)}>
+                <button
+                  className="btn btn-ok"
+                  onClick={() => handleGuess(false)}
+                  disabled={!canAnswer}
+                >
                   Not Phish
+                </button>
+
+                <button
+                  className="btn"
+                  onClick={loadNext}
+                  disabled={!canNext}
+                  title={phase !== 'review' ? 'Answer first to continue' : 'Next email'}
+                >
+                  Next →
                 </button>
               </div>
 
               {feedback && (
-                <div
-                  className={`arcade-feedback ${feedback === 'Correct' ? 'ok' : 'bad'}`}
-                >
+                <div className={`arcade-feedback ${feedback === 'Correct' ? 'ok' : 'bad'}`}>
                   {feedback}
                 </div>
               )}
 
-              {/*tiny debug pill (remove later) */}
+              {/* Show hints in review phase (so they persist until Next) */}
+              {phase === 'review' && feedback === 'Wrong' && hintRules.length > 0 && (
+                <div style={{ marginTop: 10, fontSize: 13, opacity: 0.95 }}>
+                  <div style={{ fontWeight: 800, marginBottom: 6 }}>
+                    {hintTitle ?? 'Hint'}
+                  </div>
+
+                  {!email.is_phish && (
+                    <div style={{ marginBottom: 6, opacity: 0.9 }}>
+                      Being cautious is good — aim to verify rather than guess.
+                    </div>
+                  )}
+
+                  <ul style={{ margin: 0, paddingLeft: 18 }}>
+                    {getHintLines(hintRules).map((h) => (
+                      <li key={h.id}>
+                        <strong>{h.title}</strong>
+                        {h.summary ? ` — ${h.summary}` : ''}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* tiny debug pill (remove later) */}
               <div className="arcade-progress">
-                Target difficulty: {email.target_difficulty_int} (
-                {email.target_difficulty.toFixed(1)})
+                Target difficulty: {email.target_difficulty_int} ({email.target_difficulty.toFixed(1)})
               </div>
             </div>
           </div>

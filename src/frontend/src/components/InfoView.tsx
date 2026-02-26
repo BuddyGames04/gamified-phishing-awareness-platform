@@ -100,8 +100,8 @@ const InfoView: React.FC<Props> = ({ onBack, onOpenMenu }) => {
           </div>
 
           <div style={{ marginTop: 12, fontSize: 12, opacity: 0.8 }}>
-            Info: this page is designed to be reused for feedback hints in the game, so sections are written as
-            small “rules”.
+            Info: this page is designed to be reused for feedback hints in the game, so
+            sections are written as small “rules”.
           </div>
         </div>
 
@@ -147,7 +147,9 @@ const InfoView: React.FC<Props> = ({ onBack, onOpenMenu }) => {
                         aria-expanded={open}
                         aria-controls={`rule-${rule.id}`}
                       >
-                        <span style={{ fontWeight: 800, textAlign: 'left' }}>{rule.title}</span>
+                        <span style={{ fontWeight: 800, textAlign: 'left' }}>
+                          {rule.title}
+                        </span>
                         <span style={{ opacity: 0.75 }}>{open ? '–' : '+'}</span>
                       </button>
 
@@ -172,10 +174,15 @@ const InfoView: React.FC<Props> = ({ onBack, onOpenMenu }) => {
 
                         {rule.examples && rule.examples.length > 0 && (
                           <div style={{ marginTop: 10 }}>
-                            <div style={{ fontWeight: 800, marginBottom: 6 }}>Examples</div>
+                            <div style={{ fontWeight: 800, marginBottom: 6 }}>
+                              Examples
+                            </div>
                             <ul style={{ margin: 0, paddingLeft: 18, opacity: 0.95 }}>
                               {rule.examples.map((ex, i) => (
-                                <li key={i} style={{ marginBottom: 6, lineHeight: 1.35 }}>
+                                <li
+                                  key={i}
+                                  style={{ marginBottom: 6, lineHeight: 1.35 }}
+                                >
                                   {ex}
                                 </li>
                               ))}
@@ -195,8 +202,8 @@ const InfoView: React.FC<Props> = ({ onBack, onOpenMenu }) => {
           ))}
 
           <div style={{ marginTop: 20, fontSize: 12, opacity: 0.75 }}>
-            Reminder: if an email pressures you to move quickly, that is usually the moment you should slow
-            down and verify.
+            Reminder: if an email pressures you to move quickly, that is usually the
+            moment you should slow down and verify.
           </div>
         </div>
       </div>

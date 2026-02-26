@@ -93,7 +93,8 @@ const MenuView: React.FC<Props> = ({ navigate }) => {
               <div>
                 <div className="action-title">Info</div>
                 <div className="action-desc">
-                  A practical tutorial on phishing and how to spot it — from beginner to advanced.
+                  A practical tutorial on phishing and how to spot it — from beginner to
+                  advanced.
                 </div>
               </div>
             </div>

@@ -132,13 +132,12 @@ const App: React.FC = () => {
         />
       )}
       {screen === 'info' && (
-      <InfoView
-        onBack={() => setScreen('menu')}
-        onOpenMenu={() => setDrawerOpen(true)}
-      />
-    )}
+        <InfoView
+          onBack={() => setScreen('menu')}
+          onOpenMenu={() => setDrawerOpen(true)}
+        />
+      )}
     </div>
-    
   );
 };
 

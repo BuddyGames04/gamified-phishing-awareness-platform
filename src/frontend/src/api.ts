@@ -229,6 +229,8 @@ export type ArcadeAttemptResponse = {
   was_correct: boolean;
   new_target_difficulty: number;
   accuracy: number; // 0..1
+  hint_title?: string | null;
+  hint_rule_ids?: string[];
 };
 
 export async function fetchArcadeNext(): Promise<ArcadeNextEmail> {
