@@ -1,6 +1,8 @@
 import React from 'react';
 import '../styles/LevelCompleteModal.css';
 
+type HintLine = { id: string; title: string; summary?: string };
+
 interface Props {
   title: string;
   subtitle?: string;
@@ -9,6 +11,9 @@ interface Props {
   total: number;
   onReplay: () => void;
   onExit: () => void;
+
+  // NEW
+  hints?: HintLine[];
 }
 
 const LevelCompleteModal: React.FC<Props> = ({
@@ -19,6 +24,7 @@ const LevelCompleteModal: React.FC<Props> = ({
   total,
   onReplay,
   onExit,
+  hints,
 }) => {
   const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
 
@@ -42,6 +48,23 @@ const LevelCompleteModal: React.FC<Props> = ({
             <strong>Accuracy:</strong> {accuracy}%
           </div>
         </div>
+
+        {/* NEW: Hints */}
+        {hints && hints.length > 0 && (
+          <div style={{ marginTop: 14, textAlign: 'left' }}>
+            <div style={{ fontWeight: 800, marginBottom: 6 }}>
+              What to watch for next time
+            </div>
+            <ul style={{ margin: 0, paddingLeft: 18 }}>
+              {hints.map((h) => (
+                <li key={h.id} style={{ marginBottom: 6 }}>
+                  <strong>{h.title}</strong>
+                  {h.summary ? ` — ${h.summary}` : ''}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         <div className="actions">
           <button onClick={onReplay}>Replay level</button>

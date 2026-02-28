@@ -11,6 +11,10 @@ import {
   createDecisionEvent,
 } from '../api';
 
+// hint support
+import { getHintLines } from '../content/infoLookup';
+import { getSimulationHintRuleIds } from '../content/hintEngine';
+
 import '../App.css';
 import '../styles/InboxView.css';
 import InteractionModal from './InteractionModal';
@@ -56,6 +60,9 @@ export const InboxView: React.FC<Props> = ({
 
   const [runId, setRunId] = useState<number | null>(null);
   const [runCompleted, setRunCompleted] = useState(false); // prevent double-complete
+
+  // NEW: hints collected during a simulation run
+  const [runHintRuleIds, setRunHintRuleIds] = useState<string[]>([]);
 
   // TIMED EMAIL MECHANIC
   const [incomingQueue, setIncomingQueue] = useState<Email[]>([]);
@@ -152,6 +159,9 @@ export const InboxView: React.FC<Props> = ({
         setActiveLink(null);
         setActiveAttachment(null);
 
+        // NEW: reset hint state
+        setRunHintRuleIds([]);
+
         // reset timed-wave state on level load/replay
         setIncomingQueue([]);
         setWaveTriggered(false);
@@ -204,6 +214,26 @@ export const InboxView: React.FC<Props> = ({
     if (!selected) return;
 
     const isCorrect = selected.is_phish === isPhishGuess;
+
+    // NEW: collect hints for curated simulator levels only (not PVP)
+    if (mode === 'simulation' && !isCorrect) {
+      const ruleIds = getSimulationHintRuleIds(selected);
+      if (ruleIds.length > 0) {
+        setRunHintRuleIds((prev) => {
+          // de-dupe while keeping stable order (first time seen wins)
+          const seen = new Set(prev);
+          const next = [...prev];
+          for (const r of ruleIds) {
+            if (!seen.has(r)) {
+              next.push(r);
+              seen.add(r);
+            }
+          }
+          // keep the end-of-level list readable
+          return next.slice(0, 8);
+        });
+      }
+    }
 
     // Update UI counters first (snappy)
     if (isCorrect) setRunCorrect((prev) => prev + 1);
@@ -542,6 +572,7 @@ export const InboxView: React.FC<Props> = ({
           correct={runCorrect}
           incorrect={runIncorrect}
           total={runTotal}
+          hints={getHintLines(runHintRuleIds)}
           onReplay={() => setRunKey((k) => k + 1)}
           onExit={onExit}
         />
