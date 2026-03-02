@@ -1,4 +1,3 @@
-// src/frontend/src/components/InboxView.tsx
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Email,
@@ -11,7 +10,6 @@ import {
   createDecisionEvent,
 } from '../api';
 
-// hint support
 import { getHintLines } from '../content/infoLookup';
 import { getSimulationHintRuleIds } from '../content/hintEngine';
 
@@ -55,28 +53,32 @@ export const InboxView: React.FC<Props> = ({
   const [runIncorrect, setRunIncorrect] = useState(0);
   const [showCompleteModal, setShowCompleteModal] = useState(false);
 
-  // used to force a full reload on replay
   const [runKey, setRunKey] = useState(0);
 
   const [runId, setRunId] = useState<number | null>(null);
-  const [runCompleted, setRunCompleted] = useState(false); // prevent double-complete
+  const [runCompleted, setRunCompleted] = useState(false);
 
-  // NEW: hints collected during a simulation run
   const [runHintRuleIds, setRunHintRuleIds] = useState<string[]>([]);
 
-  // TIMED EMAIL MECHANIC
   const [incomingQueue, setIncomingQueue] = useState<Email[]>([]);
   const [waveTriggered, setWaveTriggered] = useState(false);
 
-  // NEW: wave notification UI
   const [waveToastCount, setWaveToastCount] = useState<number>(0);
 
-  // NEW: track emails we’ve already seen so wave fetch can’t double-add + double-notify
   const seenEmailIdsRef = useRef<Set<number>>(new Set());
 
   const isHighLevel = (lvl?: number) => (lvl ?? 0) >= 3;
 
-  // NEW: prime audio after first user gesture (browser autoplay rules)
+  const [elapsedMs, setElapsedMs] = useState(0);
+const startedAtRef = useRef<number>(0);
+
+  const calcScore = useCallback(() => {
+    const total = runTotal || 0;
+    if (total <= 0) return 0;
+    const acc = runCorrect / total;
+    return Math.round(acc * 1000);
+  }, [runCorrect, runTotal]);
+
   useEffect(() => {
     const prime = () => {
       primeWaveAudio();
@@ -93,7 +95,6 @@ export const InboxView: React.FC<Props> = ({
 
   const triggerIncomingWave = useCallback(
     async (removedId?: number) => {
-      // If PVP, we must have a level id
       if (mode === 'pvp' && !pvpLevelId) return;
 
       setWaveTriggered(true);
@@ -109,7 +110,6 @@ export const InboxView: React.FC<Props> = ({
               wave: true,
             } as any);
 
-      // Do NOT read `emails` from closure; use prev state instead.
       setEmails((prev) => {
         const existingIds = new Set(prev.map((e) => e.id));
 
@@ -145,7 +145,6 @@ export const InboxView: React.FC<Props> = ({
 
         setEmails(data);
 
-        // Reset “seen” tracking for this run
         const nextSeen = new Set<number>();
         data.forEach((e) => nextSeen.add(e.id));
         seenEmailIdsRef.current = nextSeen;
@@ -159,19 +158,18 @@ export const InboxView: React.FC<Props> = ({
         setActiveLink(null);
         setActiveAttachment(null);
 
-        // NEW: reset hint state
         setRunHintRuleIds([]);
 
-        // reset timed-wave state on level load/replay
         setIncomingQueue([]);
         setWaveTriggered(false);
 
-        // NEW: clear wave toast
         setWaveToastCount(0);
 
-        // metrics: start a run (only for simulation; you can include arcade too later)
         setRunCompleted(false);
         setRunId(null);
+
+        startedAtRef.current = Date.now();
+        setElapsedMs(0);
 
         if (mode === 'simulation' || mode === 'pvp') {
           try {
@@ -196,7 +194,21 @@ export const InboxView: React.FC<Props> = ({
     loadEmails();
   }, [mode, scenarioId, level, runKey, userId, pvpLevelId]);
 
-  // trigger timed wave mid-level
+  useEffect(() => {
+  // (re)start timer baseline when a run loads/reloads
+  startedAtRef.current = Date.now();
+  }, [runKey, mode, scenarioId, level, pvpLevelId]);
+
+  useEffect(() => {
+    if (showCompleteModal) return;
+
+    const t = window.setInterval(() => {
+      setElapsedMs(Date.now() - startedAtRef.current);
+    }, 250);
+
+    return () => window.clearInterval(t);
+  }, [showCompleteModal, runKey, mode, level, scenarioId]);
+
   useEffect(() => {
     if (mode !== 'simulation' && mode !== 'pvp') return;
 
@@ -206,7 +218,7 @@ export const InboxView: React.FC<Props> = ({
           console.error('triggerIncomingWave failed', e)
         );
       }
-    }, 45000);
+    }, 30000);
 
     return () => clearTimeout(timer);
   }, [runKey, mode, waveTriggered, triggerIncomingWave]);
@@ -216,12 +228,10 @@ export const InboxView: React.FC<Props> = ({
 
     const isCorrect = selected.is_phish === isPhishGuess;
 
-    // NEW: collect hints for curated simulator levels only (not PVP)
     if (mode === 'simulation' && !isCorrect) {
       const ruleIds = getSimulationHintRuleIds(selected);
       if (ruleIds.length > 0) {
         setRunHintRuleIds((prev) => {
-          // de-dupe while keeping stable order (first time seen wins)
           const seen = new Set(prev);
           const next = [...prev];
           for (const r of ruleIds) {
@@ -230,24 +240,20 @@ export const InboxView: React.FC<Props> = ({
               seen.add(r);
             }
           }
-          // keep the end-of-level list readable
           return next.slice(0, 8);
         });
       }
     }
 
-    // Update UI counters first (snappy)
     if (isCorrect) setRunCorrect((prev) => prev + 1);
     else setRunIncorrect((prev) => prev + 1);
 
-    // existing progress endpoint (keep)
     try {
       await submitResult(userId, isCorrect);
     } catch (err) {
       console.error('Error submitting result:', err);
     }
 
-    // metrics: decision event
     try {
       await createDecisionEvent({
         user_id: userId,
@@ -266,9 +272,13 @@ export const InboxView: React.FC<Props> = ({
 
     const removedId = selected.id;
 
-    // Must trigger even if user finishes early (before completing)
     const isFinalEmail = emails.length === 1;
-    if (mode === 'simulation' && isFinalEmail && !waveTriggered && isHighLevel(level)) {
+    if (
+      (mode === 'simulation' || mode === 'pvp') &&
+      isFinalEmail &&
+      !waveTriggered &&
+      isHighLevel(level)
+    ) {
       try {
         await triggerIncomingWave(removedId);
       } catch (e) {
@@ -278,26 +288,29 @@ export const InboxView: React.FC<Props> = ({
       setSelected(null);
       setActiveLink(null);
       setActiveAttachment(null);
-      return; // prevent completion until new emails handled
+      return;
     }
 
-    // Compute end-of-run + complete
     setEmails((prev) => {
       const next = prev.filter((e) => e.id !== removedId);
 
       if (next.length === 0) {
         setShowCompleteModal(true);
 
-        // complete the run once (server record)
         if ((mode === 'simulation' || mode === 'pvp') && runId && !runCompleted) {
           const nextCorrect = isCorrect ? runCorrect + 1 : runCorrect;
           const nextIncorrect = !isCorrect ? runIncorrect + 1 : runIncorrect;
 
           setRunCompleted(true);
-          completeLevelRun(runId, {
-            correct: nextCorrect,
-            incorrect: nextIncorrect,
-          }).catch((e) => console.error('Failed to complete level run', e));
+          completeLevelRun(
+            runId,
+            {
+              correct: nextCorrect,
+              incorrect: nextIncorrect,
+              duration_ms: Date.now() - startedAtRef.current,
+              points: calcScore(),
+            } as any
+          ).catch((e) => console.error('Failed to complete level run', e));
         }
       }
 
@@ -346,12 +359,10 @@ export const InboxView: React.FC<Props> = ({
 
   return (
     <div className="outlook-shell">
-      {/* NEW: Wave arrival toast */}
       {waveToastCount > 0 && (
         <WaveToast count={waveToastCount} onClose={() => setWaveToastCount(0)} />
       )}
 
-      {/* Top bar */}
       <div className="outlook-topbar">
         <div className="outlook-topbar-left">
           <button className="btn" onClick={onExit}>
@@ -366,7 +377,6 @@ export const InboxView: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* action toolbar */}
         <div className="outlook-topbar-center">
           <button
             className="btn btn-danger"
@@ -397,6 +407,17 @@ export const InboxView: React.FC<Props> = ({
         <div className="outlook-topbar-actions">
           <input className="fake-search" placeholder="Search mail (not implemented)" />
 
+          {(mode === 'simulation' || mode === 'pvp') && (
+            <>
+              <div className="arcade-score-pill">
+                Time: <strong>{Math.floor(elapsedMs / 1000)}s</strong>
+              </div>
+              <div className="arcade-score-pill">
+                Score: <strong>{calcScore()}</strong>
+              </div>
+            </>
+          )}
+
           <div className="user-controls">
             <span className="user-label">Signed in as {username}</span>
             <button
@@ -412,7 +433,6 @@ export const InboxView: React.FC<Props> = ({
       </div>
 
       <div className="outlook-main">
-        {/* Left: folders */}
         <div className="folder-pane">
           <div className="folder-title">Folders</div>
           <div className="folder-item active">
@@ -440,7 +460,6 @@ export const InboxView: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* Middle: list */}
         <div className="list-pane">
           <div className="list-header">
             <h3>Inbox</h3>
@@ -455,7 +474,6 @@ export const InboxView: React.FC<Props> = ({
                 (email.body || '').replace(/\s+/g, ' ').slice(0, 80) +
                 ((email.body || '').length > 80 ? '…' : '');
 
-              // Fake time just for UI (stable per email id)
               const fakeHour = 9 + (email.id % 8);
               const fakeMin = (email.id * 7) % 60;
               const timeStr = `${String(fakeHour).padStart(2, '0')}:${String(
@@ -482,7 +500,6 @@ export const InboxView: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* Right: reading pane */}
         <div className="reading-pane">
           {selected ? (
             <div className="reading-card">

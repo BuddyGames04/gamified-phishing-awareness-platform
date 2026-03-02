@@ -26,10 +26,11 @@ class StartRunResponseSerializer(serializers.ModelSerializer):
             "started_at",
         ]
 
-
 class CompleteRunSerializer(serializers.Serializer):
     correct = serializers.IntegerField(min_value=0)
     incorrect = serializers.IntegerField(min_value=0)
+    duration_ms = serializers.IntegerField(required=False, allow_null=True, min_value=0)
+    points = serializers.IntegerField(required=False, allow_null=True)
 
 
 class DecisionCreateSerializer(serializers.Serializer):

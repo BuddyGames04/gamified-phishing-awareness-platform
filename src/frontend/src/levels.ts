@@ -25,4 +25,10 @@ export const LEVELS: LevelDef[] = [
   { level: 13, scenarioId: 8 },
   { level: 14, scenarioId: 9 },
   { level: 15, scenarioId: 6 },
+
+  { level: 16, scenarioId: 6 },
+  { level: 17, scenarioId: 7 },
+  { level: 18, scenarioId: 8 },
+  { level: 19, scenarioId: 9 },
+  { level: 20, scenarioId: 6 },
 ];

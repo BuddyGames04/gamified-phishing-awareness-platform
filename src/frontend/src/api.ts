@@ -139,7 +139,7 @@ export async function startLevelRun(params: {
 
 export async function completeLevelRun(
   runId: number,
-  params: { correct: number; incorrect: number }
+  params: { correct: number; incorrect: number; duration_ms?: number; points?: number }
 ) {
   const response = await authFetch(
     `${API_BASE}/metrics/level-runs/${runId}/complete/`,

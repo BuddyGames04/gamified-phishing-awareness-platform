@@ -141,13 +141,14 @@ class LevelRun(models.Model):
         choices=[("arcade", "Arcade"), ("simulation", "Simulation")],
     )
 
+    # Optional but strongly recommended: tie to Level for clean aggregation
     level = models.ForeignKey(
         Level, null=True, blank=True, on_delete=models.SET_NULL, related_name="runs"
     )
     scenario = models.ForeignKey(
         Scenario, null=True, blank=True, on_delete=models.SET_NULL, related_name="runs"
     )
-    level_number = models.IntegerField(default=1)
+    level_number = models.IntegerField(default=1)  # keep the global number for convenience
 
     emails_total = models.IntegerField(default=0)
     correct = models.IntegerField(default=0)
@@ -156,11 +157,44 @@ class LevelRun(models.Model):
     started_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)
 
-    def mark_complete(self, correct: int, incorrect: int):
+    #timing + score (used later; not necessarily shown to users)
+    duration_ms = models.IntegerField(default=0)
+    client_duration_ms = models.IntegerField(null=True, blank=True)
+    points = models.IntegerField(default=0)
+
+    def mark_complete(
+        self,
+        correct: int,
+        incorrect: int,
+        *,
+        duration_ms: int | None = None,
+        points: int | None = None,
+    ):
         self.correct = int(correct)
         self.incorrect = int(incorrect)
         self.completed_at = timezone.now()
-        self.save(update_fields=["correct", "incorrect", "completed_at"])
+
+        if duration_ms is not None:
+            self.client_duration_ms = int(duration_ms)
+            self.duration_ms = int(duration_ms)
+        else:
+            # fallback if client didn't send it
+            delta = self.completed_at - self.started_at
+            self.duration_ms = int(delta.total_seconds() * 1000)
+
+        if points is not None:
+            self.points = int(points)
+
+        self.save(
+            update_fields=[
+                "correct",
+                "incorrect",
+                "completed_at",
+                "duration_ms",
+                "client_duration_ms",
+                "points",
+            ]
+        )
 
     def __str__(self):
         return f"LevelRun({self.user_id}, L{self.level_number}, {self.mode})"

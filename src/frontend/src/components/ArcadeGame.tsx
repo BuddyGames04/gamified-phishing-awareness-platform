@@ -1,6 +1,11 @@
-// src/frontend/src/components/ArcadeGame.tsx
 import React, { useEffect, useRef, useState } from 'react';
-import { ArcadeNextEmail, fetchArcadeNext, postArcadeAttempt } from '../api';
+import {
+  ArcadeNextEmail,
+  fetchArcadeNext,
+  postArcadeAttempt,
+  startLevelRun,
+  completeLevelRun,
+} from '../api';
 import '../styles/InboxView.css';
 import '../styles/ArcadeMode.css';
 import { getHintLines } from '../content/infoLookup';
@@ -14,10 +19,15 @@ type Phase = 'answer' | 'review';
 
 const ArcadeGame: React.FC<Props> = ({ onExit, onOpenMenu }) => {
   const [email, setEmail] = useState<ArcadeNextEmail | null>(null);
+
   const [score, setScore] = useState(0);
+  const [correct, setCorrect] = useState(0);
+  const [incorrect, setIncorrect] = useState(0);
+  const [runId, setRunId] = useState<number | null>(null);
+
   const [feedback, setFeedback] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const startedAtRef = useRef<number>(Date.now());
+  const startedAtRef = useRef<number>(0);
 
   const [hintTitle, setHintTitle] = useState<string | null>(null);
   const [hintRules, setHintRules] = useState<string[]>([]);
@@ -25,14 +35,18 @@ const ArcadeGame: React.FC<Props> = ({ onExit, onOpenMenu }) => {
   const [phase, setPhase] = useState<Phase>('answer');
   const [answering, setAnswering] = useState(false);
 
+  const sessionStartedAtRef = useRef<number>(Date.now());
+  const [sessionElapsedMs, setSessionElapsedMs] = useState(0);
+  const [emailElapsedMs, setEmailElapsedMs] = useState(0);
+
   const loadNext = async () => {
     setLoading(true);
     try {
       const next = await fetchArcadeNext();
       setEmail(next);
       startedAtRef.current = Date.now();
+      setEmailElapsedMs(0);
 
-      // reset UI state for the next email
       setFeedback(null);
       setHintTitle(null);
       setHintRules([]);
@@ -45,6 +59,40 @@ const ArcadeGame: React.FC<Props> = ({ onExit, onOpenMenu }) => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    sessionStartedAtRef.current = Date.now();
+    const t = window.setInterval(() => {
+      setSessionElapsedMs(Date.now() - sessionStartedAtRef.current);
+    }, 250);
+    return () => window.clearInterval(t);
+  }, []);
+
+  useEffect(() => {
+    if (phase !== 'answer') return;
+
+    const t = window.setInterval(() => {
+      setEmailElapsedMs(Date.now() - startedAtRef.current);
+    }, 250);
+
+    return () => window.clearInterval(t);
+  }, [phase, email?.id]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const run: any = await startLevelRun({
+          user_id: 'unused-in-frontend',
+          mode: 'arcade',
+          level_number: 0,
+          emails_total: 0,
+        } as any);
+        setRunId(run.id);
+      } catch (e) {
+        console.error('Failed to start arcade run', e);
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     loadNext();
@@ -62,6 +110,9 @@ const ArcadeGame: React.FC<Props> = ({ onExit, onOpenMenu }) => {
     setFeedback(isCorrect ? 'Correct' : 'Wrong');
     setScore((s) => s + (isCorrect ? 1 : 0));
 
+    if (isCorrect) setCorrect((c) => c + 1);
+    else setIncorrect((x) => x + 1);
+
     try {
       const attempt: any = await postArcadeAttempt({
         email_id: email.id,
@@ -73,12 +124,28 @@ const ArcadeGame: React.FC<Props> = ({ onExit, onOpenMenu }) => {
       setHintRules(Array.isArray(attempt?.hint_rule_ids) ? attempt.hint_rule_ids : []);
     } catch (e) {
       console.error('postArcadeAttempt failed', e);
-      // still allow review/next even if hints fail
       setHintTitle(null);
       setHintRules([]);
     } finally {
       setPhase('review');
       setAnswering(false);
+    }
+  };
+
+  const exitArcade = async () => {
+    try {
+      if (runId) {
+        await completeLevelRun(runId, {
+          correct,
+          incorrect,
+          duration_ms: Date.now() - sessionStartedAtRef.current,
+          points: correct,
+        } as any);
+      }
+    } catch (e) {
+      console.error('Failed to complete arcade run', e);
+    } finally {
+      onExit();
     }
   };
 
@@ -89,7 +156,7 @@ const ArcadeGame: React.FC<Props> = ({ onExit, onOpenMenu }) => {
     <div className="outlook-shell">
       <div className="outlook-topbar">
         <div className="outlook-topbar-left">
-          <button className="btn" onClick={onExit}>
+          <button className="btn" onClick={exitArcade}>
             Back
           </button>
           <div className="outlook-topbar-title">Arcade Mode</div>
@@ -98,6 +165,14 @@ const ArcadeGame: React.FC<Props> = ({ onExit, onOpenMenu }) => {
         <div className="outlook-topbar-actions">
           <div className="arcade-score-pill">
             Score: <strong>{score}</strong>
+          </div>
+
+          <div className="arcade-score-pill">
+            Session: <strong>{Math.floor(sessionElapsedMs / 1000)}s</strong>
+          </div>
+
+          <div className="arcade-score-pill">
+            Email: <strong>{Math.floor(emailElapsedMs / 1000)}s</strong>
           </div>
 
           <button
@@ -177,7 +252,6 @@ const ArcadeGame: React.FC<Props> = ({ onExit, onOpenMenu }) => {
                 </div>
               )}
 
-              {/* Show hints in review phase (so they persist until Next) */}
               {phase === 'review' && feedback === 'Wrong' && hintRules.length > 0 && (
                 <div style={{ marginTop: 10, fontSize: 13, opacity: 0.95 }}>
                   <div style={{ fontWeight: 800, marginBottom: 6 }}>
@@ -201,7 +275,6 @@ const ArcadeGame: React.FC<Props> = ({ onExit, onOpenMenu }) => {
                 </div>
               )}
 
-              {/* tiny debug pill (remove later) */}
               <div className="arcade-progress">
                 Target difficulty: {email.target_difficulty_int} (
                 {email.target_difficulty.toFixed(1)})

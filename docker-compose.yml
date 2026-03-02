@@ -17,6 +17,12 @@ services:
 
   backend:
     build: ./src/backend
+    command: >
+      gunicorn core.wsgi:application
+      --bind 0.0.0.0:8000
+      --workers 2
+      --threads 8
+      --timeout 60
     volumes:
       - ./src/backend:/app
     ports:
@@ -27,12 +33,8 @@ services:
       POSTGRES_PASSWORD: devpass
       POSTGRES_HOST: db
       POSTGRES_PORT: "5432"
-
-
       DEBUG: "true"
       ALLOWED_HOSTS: "localhost,127.0.0.1"
-
-
       FRONTEND_ORIGIN: "http://localhost:3000"
     depends_on:
       db:

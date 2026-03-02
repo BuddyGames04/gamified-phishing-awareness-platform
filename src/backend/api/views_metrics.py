@@ -109,11 +109,10 @@ class StartLevelRunView(APIView):
             StartRunResponseSerializer(run).data, status=status.HTTP_201_CREATED
         )
 
-
 class CompleteLevelRunView(APIView):
     """
     POST /api/metrics/level-runs/<run_id>/complete/
-    Body: { correct, incorrect }
+    Body: { correct, incorrect, duration_ms?, points? }
     """
 
     def post(self, request, run_id: int):
@@ -124,7 +123,10 @@ class CompleteLevelRunView(APIView):
         run.mark_complete(
             correct=ser.validated_data["correct"],
             incorrect=ser.validated_data["incorrect"],
+            duration_ms=ser.validated_data.get("duration_ms"),
+            points=ser.validated_data.get("points"),
         )
+
         return Response({"ok": True, "run_id": run.id})
 
 
