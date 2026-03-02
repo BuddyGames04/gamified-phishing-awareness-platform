@@ -2,7 +2,16 @@ import React from 'react';
 import '../styles/MenuScreens.css';
 
 interface Props {
-  navigate: (screen: 'menu' | 'inbox' | 'arcade' | 'levels' | 'pvp' | 'info') => void;
+  navigate: (
+    screen:
+      | 'menu'
+      | 'inbox'
+      | 'arcade'
+      | 'levels'
+      | 'pvp'
+      | 'info'
+      | 'leaderboard'
+  ) => void;
 }
 
 const MenuView: React.FC<Props> = ({ navigate }) => {
@@ -74,11 +83,19 @@ const MenuView: React.FC<Props> = ({ navigate }) => {
               </div>
             </div>
 
-            <div className="action-card disabled" aria-disabled="true">
+            <div
+              className="action-card"
+              role="button"
+              tabIndex={0}
+              onClick={() => navigate('leaderboard')}
+              onKeyDown={(e) => e.key === 'Enter' && navigate('leaderboard')}
+            >
               <div className="action-icon primary">🏆</div>
               <div>
                 <div className="action-title">Leaderboard</div>
-                <div className="action-desc">Under construction (coming soon).</div>
+                <div className="action-desc">
+                  Compare scores across Arcade, Simulator, and PVP.
+                </div>
               </div>
             </div>
 

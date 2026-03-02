@@ -13,11 +13,12 @@ import { getHintLines } from '../content/infoLookup';
 interface Props {
   onExit: () => void;
   onOpenMenu: () => void;
+  userId: string;
 }
 
 type Phase = 'answer' | 'review';
 
-const ArcadeGame: React.FC<Props> = ({ onExit, onOpenMenu }) => {
+const ArcadeGame: React.FC<Props> = ({ onExit, onOpenMenu, userId }) => {
   const [email, setEmail] = useState<ArcadeNextEmail | null>(null);
 
   const [score, setScore] = useState(0);
@@ -35,7 +36,7 @@ const ArcadeGame: React.FC<Props> = ({ onExit, onOpenMenu }) => {
   const [phase, setPhase] = useState<Phase>('answer');
   const [answering, setAnswering] = useState(false);
 
-  const sessionStartedAtRef = useRef<number>(Date.now());
+  const sessionStartedAtRef = useRef<number>(0);
   const [sessionElapsedMs, setSessionElapsedMs] = useState(0);
   const [emailElapsedMs, setEmailElapsedMs] = useState(0);
 
@@ -82,7 +83,7 @@ const ArcadeGame: React.FC<Props> = ({ onExit, onOpenMenu }) => {
     (async () => {
       try {
         const run: any = await startLevelRun({
-          user_id: 'unused-in-frontend',
+          user_id: userId,
           mode: 'arcade',
           level_number: 0,
           emails_total: 0,
@@ -92,7 +93,7 @@ const ArcadeGame: React.FC<Props> = ({ onExit, onOpenMenu }) => {
         console.error('Failed to start arcade run', e);
       }
     })();
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     loadNext();
@@ -138,7 +139,7 @@ const ArcadeGame: React.FC<Props> = ({ onExit, onOpenMenu }) => {
         await completeLevelRun(runId, {
           correct,
           incorrect,
-          duration_ms: Date.now() - sessionStartedAtRef.current,
+          client_duration_ms: Date.now() - sessionStartedAtRef.current,
           points: correct,
         } as any);
       }

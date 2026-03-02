@@ -126,6 +126,7 @@ class CompleteLevelRunView(APIView):
             incorrect=ser.validated_data["incorrect"],
             duration_ms=ser.validated_data.get("duration_ms"),
             points=ser.validated_data.get("points"),
+            client_duration_ms=ser.validated_data.get("client_duration_ms"),
         )
 
         return Response({"ok": True, "run_id": run.id})

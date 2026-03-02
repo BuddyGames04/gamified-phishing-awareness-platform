@@ -70,7 +70,7 @@ export const InboxView: React.FC<Props> = ({
   const isHighLevel = (lvl?: number) => (lvl ?? 0) >= 3;
 
   const [elapsedMs, setElapsedMs] = useState(0);
-  const startedAtRef = useRef<number>(0);
+  const startedAtRef = useRef<number | null>(null);
 
   const calcScore = useCallback(() => {
     const total = runTotal || 0;
@@ -168,9 +168,6 @@ export const InboxView: React.FC<Props> = ({
         setRunCompleted(false);
         setRunId(null);
 
-        startedAtRef.current = Date.now();
-        setElapsedMs(0);
-
         if (mode === 'simulation' || mode === 'pvp') {
           try {
             const run = await startLevelRun({
@@ -195,19 +192,22 @@ export const InboxView: React.FC<Props> = ({
   }, [mode, scenarioId, level, runKey, userId, pvpLevelId]);
 
   useEffect(() => {
-    // (re)start timer baseline when a run loads/reloads
-    startedAtRef.current = Date.now();
-  }, [runKey, mode, scenarioId, level, pvpLevelId]);
-
-  useEffect(() => {
     if (showCompleteModal) return;
 
+    startedAtRef.current = Date.now();
+    const reset = window.setTimeout(() => setElapsedMs(0), 0);
+
     const t = window.setInterval(() => {
-      setElapsedMs(Date.now() - startedAtRef.current);
+      if (startedAtRef.current != null) {
+        setElapsedMs(Date.now() - startedAtRef.current);
+      }
     }, 250);
 
-    return () => window.clearInterval(t);
-  }, [showCompleteModal, runKey, mode, level, scenarioId]);
+    return () => {
+      window.clearTimeout(reset);
+      window.clearInterval(t);
+    };
+  }, [runKey, mode, scenarioId, level, pvpLevelId, showCompleteModal]);
 
   useEffect(() => {
     if (mode !== 'simulation' && mode !== 'pvp') return;
@@ -301,11 +301,16 @@ export const InboxView: React.FC<Props> = ({
           const nextCorrect = isCorrect ? runCorrect + 1 : runCorrect;
           const nextIncorrect = !isCorrect ? runIncorrect + 1 : runIncorrect;
 
+          const clientMs =
+            startedAtRef.current != null
+              ? Date.now() - startedAtRef.current
+              : elapsedMs;
+
           setRunCompleted(true);
           completeLevelRun(runId, {
             correct: nextCorrect,
             incorrect: nextIncorrect,
-            duration_ms: Date.now() - startedAtRef.current,
+            client_duration_ms: clientMs,
             points: calcScore(),
           } as any).catch((e) => console.error('Failed to complete level run', e));
         }

@@ -343,9 +343,14 @@ export type LevelPreview = {
   scenario: Scenario;
 };
 
-export async function fetchLevel(level: number): Promise<LevelPreview> {
-  const url = `${API_BASE}/level/?level=${encodeURIComponent(level)}`;
+export async function fetchLevel(level: number, scenarioId?: number): Promise<LevelPreview> {
+  const qs = new URLSearchParams();
+  qs.set('level', String(level));
+  if (scenarioId != null) qs.set('scenario_id', String(scenarioId));
+
+  const url = `${API_BASE}/level/?${qs.toString()}`;
   const res = await authFetch(url, { method: 'GET' });
+
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`Failed to fetch level ${level} (${res.status}): ${text}`);
@@ -516,4 +521,43 @@ export function normaliseEmailPayload(email: any) {
     links,
     attachments,
   };
+}
+
+export type LeaderboardMode = 'overall' | 'arcade' | 'simulation' | 'pvp';
+export type LeaderboardSort = 'asc' | 'desc';
+
+export type LeaderboardRow = {
+  user_id: string;
+  score: number;
+  runs: number;
+  correct: number;
+  incorrect: number;
+  avg_duration_ms: number | null;
+};
+
+export type LeaderboardResponse = {
+  mode: LeaderboardMode;
+  count: number;
+  rows: LeaderboardRow[];
+};
+
+export async function fetchLeaderboard(params?: {
+  mode?: LeaderboardMode;
+  sort?: LeaderboardSort;
+  q?: string;
+  limit?: number;
+}): Promise<LeaderboardResponse> {
+  const qs = new URLSearchParams();
+  if (params?.mode) qs.set('mode', params.mode);
+  if (params?.sort) qs.set('sort', params.sort);
+  if (params?.q) qs.set('q', params.q);
+  if (params?.limit) qs.set('limit', String(params.limit));
+
+  const url = `${API_BASE}/leaderboard/${qs.toString() ? `?${qs.toString()}` : ''}`;
+  const res = await authFetch(url, { method: 'GET' });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to fetch leaderboard (${res.status}): ${text}`);
+  }
+  return res.json();
 }

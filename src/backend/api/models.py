@@ -164,28 +164,23 @@ class LevelRun(models.Model):
     client_duration_ms = models.IntegerField(null=True, blank=True)
     points = models.IntegerField(default=0)
 
-    def mark_complete(
-        self,
-        correct: int,
-        incorrect: int,
-        *,
-        duration_ms: int | None = None,
-        points: int | None = None,
-    ):
+    def mark_complete(self, correct: int, incorrect: int, client_duration_ms: int | None = None):
         self.correct = int(correct)
         self.incorrect = int(incorrect)
         self.completed_at = timezone.now()
 
-        if duration_ms is not None:
-            self.client_duration_ms = int(duration_ms)
-            self.duration_ms = int(duration_ms)
-        else:
-            # fallback if client didn't send it
-            delta = self.completed_at - self.started_at
-            self.duration_ms = int(delta.total_seconds() * 1000)
+        # server duration
+        server_ms = int((self.completed_at - self.started_at).total_seconds() * 1000)
+        self.duration_ms = max(0, server_ms)
 
-        if points is not None:
-            self.points = int(points)
+        # client duration (from frontend timer)
+        self.client_duration_ms = (
+            None if client_duration_ms is None else int(client_duration_ms)
+        )
+
+        # compute points (prefer client duration when available)
+        from .scoring import compute_levelrun_points  # local import avoids circulars
+        self.points = int(compute_levelrun_points(self))
 
         self.save(
             update_fields=[
@@ -197,10 +192,6 @@ class LevelRun(models.Model):
                 "points",
             ]
         )
-
-    def __str__(self):
-        return f"LevelRun({self.user_id}, L{self.level_number}, {self.mode})"
-
 
 class EmailDecisionEvent(models.Model):
     DECISION_CHOICES = [

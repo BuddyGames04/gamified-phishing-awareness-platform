@@ -9,8 +9,18 @@ import HamburgerMenu from './components/HamburgerMenu';
 import ProfileView from './components/ProfileView';
 import PvpRoot from './components/pvp/PvpRoot';
 import InfoView from './components/InfoView';
+import Leaderboard from './components/Leaderboard';
 
-type Screen = 'menu' | 'inbox' | 'arcade' | 'levels' | 'profile' | 'pvp' | 'info';
+
+type Screen =
+  | 'menu'
+  | 'inbox'
+  | 'arcade'
+  | 'levels'
+  | 'leaderboard'
+  | 'profile'
+  | 'pvp'
+  | 'info';
 
 const App: React.FC = () => {
   const [screen, setScreen] = useState<Screen>('menu');
@@ -78,6 +88,7 @@ const App: React.FC = () => {
         <ArcadeGame
           onExit={() => setScreen('menu')}
           onOpenMenu={() => setDrawerOpen(true)}
+          userId={username}
         />
       )}
       {screen === 'levels' && (
@@ -122,6 +133,9 @@ const App: React.FC = () => {
             <ProfileView userId={username} />
           </div>
         </div>
+      )}
+      {screen === 'leaderboard' && (
+        <Leaderboard onBack={() => setScreen('menu')} />
       )}
       {screen === 'pvp' && (
         <PvpRoot

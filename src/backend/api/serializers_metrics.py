@@ -32,6 +32,7 @@ class CompleteRunSerializer(serializers.Serializer):
     incorrect = serializers.IntegerField(min_value=0)
     duration_ms = serializers.IntegerField(required=False, allow_null=True, min_value=0)
     points = serializers.IntegerField(required=False, allow_null=True)
+    client_duration_ms = serializers.IntegerField(required=False, allow_null=True)
 
 
 class DecisionCreateSerializer(serializers.Serializer):

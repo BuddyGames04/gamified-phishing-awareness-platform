@@ -7,6 +7,7 @@ from .views_metrics import (
     ProfileMetricsView,
     StartLevelRunView,
 )
+from .views_leaderboard import get_leaderboard
 
 urlpatterns = [
     path("emails/", views.get_emails, name="get_emails"),
@@ -40,4 +41,5 @@ urlpatterns = [
         views_pvp.pvp_level_emails_detail,
     ),
     path("pvp/play/emails/", views_pvp.pvp_play_emails),
+    path("leaderboard/", get_leaderboard),
 ]
