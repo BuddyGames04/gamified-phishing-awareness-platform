@@ -179,7 +179,7 @@ export const InboxView: React.FC<Props> = ({
               user_id: userId,
               mode,
               scenario_id: mode === 'simulation' ? scenarioId : undefined,
-              level_number: mode === 'simulation' ? (level ?? 1) : (pvpLevelId ?? 1),
+              level_number: mode === 'simulation' ? level ?? 1 : pvpLevelId ?? 1,
               emails_total: data.length,
               pvp_level_id: mode === 'pvp' ? pvpLevelId : undefined,
             });
@@ -568,7 +568,9 @@ export const InboxView: React.FC<Props> = ({
 
       {showCompleteModal && (mode === 'simulation' || mode === 'pvp') && (
         <LevelCompleteModal
-          title={mode === 'pvp' ? 'PVP level complete' : `Level ${level ?? ''} complete`}
+          title={
+            mode === 'pvp' ? 'PVP level complete' : `Level ${level ?? ''} complete`
+          }
           subtitle="Results:"
           correct={runCorrect}
           incorrect={runIncorrect}

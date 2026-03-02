@@ -6,14 +6,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import (
+    ArcadeAttempt,
+    ArcadeState,
     Email,
     EmailDecisionEvent,
     InteractionEvent,
     Level,
     LevelRun,
     Scenario,
-    ArcadeAttempt,
-    ArcadeState,
 )
 from .models_pvp import PvpLevel  # needed for creator metrics
 from .serializers_metrics import (
@@ -289,7 +289,9 @@ class ProfileMetricsView(APIView):
         # ----------------------------
         # Arcade metrics (flat attempts)
         # ----------------------------
-        arcade_attempts_qs = ArcadeAttempt.objects.filter(user_id=user_id).order_by("id")
+        arcade_attempts_qs = ArcadeAttempt.objects.filter(user_id=user_id).order_by(
+            "id"
+        )
         arcade_total = arcade_attempts_qs.count()
         arcade_correct = arcade_attempts_qs.filter(was_correct=True).count()
         arcade_incorrect = arcade_total - arcade_correct
@@ -311,14 +313,12 @@ class ProfileMetricsView(APIView):
         # Current target difficulty (from ArcadeState if available, else last attempt target)
         arcade_state = ArcadeState.objects.filter(user_id=user_id).first()
         arcade_target_now = (
-            float(arcade_state.difficulty_float)
-            if arcade_state is not None
-            else None
+            float(arcade_state.difficulty_float) if arcade_state is not None else None
         )
         if arcade_target_now is None:
-            last_target = (
-                arcade_attempts_qs.values_list("target_difficulty", flat=True).last()
-            )
+            last_target = arcade_attempts_qs.values_list(
+                "target_difficulty", flat=True
+            ).last()
             arcade_target_now = float(last_target) if last_target is not None else None
 
         # Streak + longest streak computed from attempt history
@@ -342,7 +342,11 @@ class ProfileMetricsView(APIView):
                 return "3"
             return "4-5"
 
-        by_bucket = {"1-2": {"n": 0, "c": 0}, "3": {"n": 0, "c": 0}, "4-5": {"n": 0, "c": 0}}
+        by_bucket = {
+            "1-2": {"n": 0, "c": 0},
+            "3": {"n": 0, "c": 0},
+            "4-5": {"n": 0, "c": 0},
+        }
         for d, wc in arcade_attempts_qs.values_list("email_difficulty", "was_correct"):
             b = bucket(d)
             if b in by_bucket:
@@ -392,9 +396,13 @@ class ProfileMetricsView(APIView):
         pvp_accuracy = (pvp_correct / pvp_total) if pvp_total > 0 else 0.0
 
         pvp_link_before = pvp_decisions_playing.filter(had_link_click=True).count()
-        pvp_attach_before = pvp_decisions_playing.filter(had_attachment_open=True).count()
+        pvp_attach_before = pvp_decisions_playing.filter(
+            had_attachment_open=True
+        ).count()
         pvp_pct_link_before = (pvp_link_before / pvp_total) if pvp_total > 0 else 0.0
-        pvp_pct_attach_before = (pvp_attach_before / pvp_total) if pvp_total > 0 else 0.0
+        pvp_pct_attach_before = (
+            (pvp_attach_before / pvp_total) if pvp_total > 0 else 0.0
+        )
 
         # B) Creator metrics (other people’s decisions on your posted/owned levels)
         # NOTE: This relies on Email.pvp_level FK being set on the shadow Email.
@@ -406,7 +414,9 @@ class ProfileMetricsView(APIView):
         creator_total = pvp_decisions_on_my_levels.count()
         creator_correct = pvp_decisions_on_my_levels.filter(was_correct=True).count()
         creator_incorrect = creator_total - creator_correct
-        creator_accuracy = (creator_correct / creator_total) if creator_total > 0 else 0.0
+        creator_accuracy = (
+            (creator_correct / creator_total) if creator_total > 0 else 0.0
+        )
 
         creator_unique_players = (
             pvp_decisions_on_my_levels.values("user_id").distinct().count()
@@ -419,12 +429,16 @@ class ProfileMetricsView(APIView):
         ).count()
         creator_levels_total = PvpLevel.objects.filter(owner__username=user_id).count()
 
-        overall_all_attempts = (sim_correct + sim_incorrect) + arcade_total_all + pvp_total
+        overall_all_attempts = (
+            (sim_correct + sim_incorrect) + arcade_total_all + pvp_total
+        )
         overall_all_correct = sim_correct + arcade_correct_all + pvp_correct
         overall_all_incorrect = sim_incorrect + arcade_incorrect_all + pvp_incorrect
 
         overall_all_accuracy = (
-            (overall_all_correct / overall_all_attempts) if overall_all_attempts > 0 else 0.0
+            (overall_all_correct / overall_all_attempts)
+            if overall_all_attempts > 0
+            else 0.0
         )
 
         return Response(

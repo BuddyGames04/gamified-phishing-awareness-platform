@@ -15,7 +15,6 @@ from .serializers_pvp import (
     PvpScenarioSerializer,
 )
 
-
 # -------------------------
 # Scenarios (owned CRUD)
 # -------------------------
@@ -286,10 +285,9 @@ def pvp_play_emails(request):
         return Response({"detail": "Level not found"}, status=404)
 
     # PvpEmail rows in the correct order for this wave state
-    pvp_qs = (
-        PvpEmail.objects.filter(level=lvl, is_wave=wave_true)
-        .order_by("sort_order", "id")[:limit]
-    )
+    pvp_qs = PvpEmail.objects.filter(level=lvl, is_wave=wave_true).order_by(
+        "sort_order", "id"
+    )[:limit]
 
     # Ensure shadow emails exist and preserve order
     shadow_ids: list[int] = []

@@ -98,6 +98,7 @@ class PvpEmail(models.Model):
 
     def sync_shadow_email(self):
         from .models import Email
+
         shadow, _ = Email.objects.update_or_create(
             mode="pvp",
             pvp_level=self.level,
@@ -111,7 +112,7 @@ class PvpEmail(models.Model):
                 category=self.category,
                 links=self.links or [],
                 attachments=self.attachments or [],
-            )
+            ),
         )
         self.shadow_email = shadow
         self.save(update_fields=["shadow_email"])
