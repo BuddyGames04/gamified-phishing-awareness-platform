@@ -25,7 +25,7 @@ export interface UserProgress {
 export interface InteractionEvent {
   id: number;
   user_id: string;
-  email: number; // (backend returns FK as id)
+  email: number;
   event_type: string;
   value?: string | null;
   created_at: string;
@@ -68,10 +68,7 @@ export async function fetchEmails(params?: {
   return response.json();
 }
 
-export async function submitResult(
-  userId: string,
-  isCorrect: boolean
-): Promise<UserProgress> {
+export async function submitResult(userId: string, isCorrect: boolean): Promise<UserProgress> {
   const response = await authFetch(`${API_BASE}/submit/`, {
     method: 'POST',
     headers: {},
@@ -137,18 +134,12 @@ export async function startLevelRun(params: {
   return response.json();
 }
 
-export async function completeLevelRun(
-  runId: number,
-  params: { correct: number; incorrect: number }
-) {
-  const response = await authFetch(
-    `${API_BASE}/metrics/level-runs/${runId}/complete/`,
-    {
-      method: 'POST',
-      headers: {},
-      body: JSON.stringify(params),
-    }
-  );
+export async function completeLevelRun(runId: number, params: { correct: number; incorrect: number }) {
+  const response = await authFetch(`${API_BASE}/metrics/level-runs/${runId}/complete/`, {
+    method: 'POST',
+    headers: {},
+    body: JSON.stringify(params),
+  });
 
   if (!response.ok) throw new Error('Failed to complete level run');
   return response.json();
@@ -174,14 +165,14 @@ export async function createDecisionEvent(params: {
 export type ArcadeBucketAccuracy = {
   bucket: '1-2' | '3' | '4-5';
   attempts: number;
-  accuracy: number; // 0..1
+  accuracy: number;
 };
 
 export type ArcadeMetrics = {
   total_attempts: number;
   correct: number;
   incorrect: number;
-  accuracy: number; // 0..1
+  accuracy: number;
   avg_response_time_ms: number | null;
   avg_email_difficulty: number | null;
   target_difficulty_now: number | null;
@@ -195,10 +186,10 @@ export type ProfileMetrics = {
   overall: {
     total_runs: number;
     total_attempts: number;
-    accuracy: number; // 0..1
+    accuracy: number;
     decision_events: number;
-    pct_link_click_before_decision: number; // 0..100
-    pct_attachment_open_before_decision: number; // 0..100
+    pct_link_click_before_decision: number;
+    pct_attachment_open_before_decision: number;
   };
   recent_runs: Array<{
     id?: number;
@@ -217,13 +208,13 @@ export type ProfileMetrics = {
     runs: number;
     correct: number;
     incorrect: number;
-    accuracy: number; // 0..1 OR 0..100 depending on backend(check)
+    accuracy: number;
     last_played_at?: string | null;
   }>;
   trends: {
     accuracy: Array<{
       date: string;
-      accuracy: number; // 0..1 OR 0..100
+      accuracy: number;
       risky_action_rate?: number;
     }>;
   };
@@ -233,9 +224,9 @@ export type ProfileMetrics = {
       total_attempts: number;
       correct: number;
       incorrect: number;
-      accuracy: number; // 0..1
-      pct_link_before: number; // 0..1
-      pct_attach_before: number; // 0..1
+      accuracy: number;
+      pct_link_before: number;
+      pct_attach_before: number;
     };
     creator: {
       levels_total: number;
@@ -243,7 +234,7 @@ export type ProfileMetrics = {
       total_attempts: number;
       correct: number;
       incorrect: number;
-      accuracy: number; // 0..1
+      accuracy: number;
       unique_players: number;
     };
   };
@@ -269,7 +260,7 @@ export type ArcadeNextEmail = Email & {
 export type ArcadeAttemptResponse = {
   was_correct: boolean;
   new_target_difficulty: number;
-  accuracy: number; // 0..1
+  accuracy: number;
   hint_title?: string | null;
   hint_rule_ids?: string[];
 };
@@ -336,7 +327,22 @@ export type PvpEmail = {
   created_at: string;
 };
 
-// ---- PVP Endpoints ----
+export type LevelPreview = {
+  level: number;
+  title: string;
+  briefing: string;
+  scenario: Scenario;
+};
+
+export async function fetchLevel(level: number): Promise<LevelPreview> {
+  const url = `${API_BASE}/level/?level=${encodeURIComponent(level)}`;
+  const res = await authFetch(url, { method: 'GET' });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to fetch level ${level} (${res.status}): ${text}`);
+  }
+  return res.json();
+}
 
 export async function fetchPvpPostedLevels(): Promise<PvpLevel[]> {
   const res = await authFetch(`${API_BASE}/pvp/levels/posted/`, { method: 'GET' });
@@ -433,26 +439,23 @@ export async function createPvpEmail(params: {
   is_wave: boolean;
   sort_order: number;
 }): Promise<PvpEmail> {
-  const res = await authFetch(
-    `${API_BASE}/pvp/levels/${params.level_id}/emails/create/`,
-    {
-      method: 'POST',
-      headers: {},
-      body: JSON.stringify({
-        sender_name: params.sender_name,
-        sender_email: params.sender_email,
-        subject: params.subject,
-        body: params.body,
-        is_phish: params.is_phish,
-        difficulty: params.difficulty,
-        category: params.category ?? null,
-        links: params.links ?? [],
-        attachments: params.attachments ?? [],
-        is_wave: params.is_wave,
-        sort_order: params.sort_order,
-      }),
-    }
-  );
+  const res = await authFetch(`${API_BASE}/pvp/levels/${params.level_id}/emails/create/`, {
+    method: 'POST',
+    headers: {},
+    body: JSON.stringify({
+      sender_name: params.sender_name,
+      sender_email: params.sender_email,
+      subject: params.subject,
+      body: params.body,
+      is_phish: params.is_phish,
+      difficulty: params.difficulty,
+      category: params.category ?? null,
+      links: params.links ?? [],
+      attachments: params.attachments ?? [],
+      is_wave: params.is_wave,
+      sort_order: params.sort_order,
+    }),
+  });
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`Failed to create PVP email: ${text}`);
@@ -460,11 +463,7 @@ export async function createPvpEmail(params: {
   return res.json();
 }
 
-export async function fetchPvpEmails(params: {
-  level_id: number;
-  limit?: number;
-  wave?: boolean;
-}): Promise<Email[]> {
+export async function fetchPvpEmails(params: { level_id: number; limit?: number; wave?: boolean }): Promise<Email[]> {
   const qs = new URLSearchParams();
   qs.set('level_id', String(params.level_id));
   if (params.limit) qs.set('limit', String(params.limit));
@@ -481,8 +480,7 @@ export function normaliseEmailPayload(email: any) {
     String(s ?? '')
       .trim()
       .replace(/\s+/g, ' ');
-  const tidyList = (xs: any) =>
-    Array.isArray(xs) ? xs.map((x) => String(x).trim()).filter(Boolean) : [];
+  const tidyList = (xs: any) => (Array.isArray(xs) ? xs.map((x) => String(x).trim()).filter(Boolean) : []);
 
   const sender_name = tidy(email.sender_name);
   const sender_email = tidy(email.sender_email).toLowerCase();
@@ -490,10 +488,7 @@ export function normaliseEmailPayload(email: any) {
   const body = String(email.body ?? '');
 
   const links = tidyList(email.links);
-  const attachments = tidyList(email.attachments).map((f) =>
-    //make filenames safe-ish
-    f.replace(/\s+/g, '_')
-  );
+  const attachments = tidyList(email.attachments).map((f) => f.replace(/\s+/g, '_'));
 
   return {
     ...email,

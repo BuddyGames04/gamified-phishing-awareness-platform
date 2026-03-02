@@ -67,7 +67,6 @@ def get_emails(request):
         )
         return Response(EmailSerializer(emails, many=True).data)
 
-    # arcade fallback: just return random arcade emails (until /arcade/next is ready)
     emails = Email.objects.filter(mode="arcade").order_by("?")[:limit]
     return Response(EmailSerializer(emails, many=True).data)
 
@@ -77,6 +76,47 @@ def get_scenarios(request):
     scenarios = Scenario.objects.all()
     serializer = ScenarioSerializer(scenarios, many=True)
     return Response(serializer.data)
+
+
+@api_view(["GET"])
+def get_level(request):
+    level = request.query_params.get("level")
+    if not level:
+        return Response({"detail": "level required"}, status=400)
+
+    try:
+        level_num = int(level)
+    except ValueError:
+        return Response({"detail": "level must be int"}, status=400)
+
+    try:
+        lvl = Level.objects.select_related("scenario").get(number=level_num)
+    except Level.DoesNotExist:
+        return Response({"detail": "Level not found"}, status=404)
+
+    scenario_payload = ScenarioSerializer(lvl.scenario).data
+    overrides = lvl.scenario_overrides or {}
+
+    for key in (
+        "company_name",
+        "sector",
+        "role_title",
+        "department_name",
+        "line_manager_name",
+        "responsibilities",
+        "intro_text",
+    ):
+        if key in overrides and overrides[key] is not None:
+            scenario_payload[key] = overrides[key]
+
+    return Response(
+        {
+            "level": lvl.number,
+            "title": lvl.title,
+            "briefing": lvl.briefing,
+            "scenario": scenario_payload,
+        }
+    )
 
 
 @api_view(["POST"])

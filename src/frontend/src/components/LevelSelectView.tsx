@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import '../styles/MenuScreens.css';
-import { fetchScenarios, Scenario } from '../api';
+import { fetchLevel, LevelPreview } from '../api';
 import ScenarioIntroModal from './ScenarioIntroModal';
 import { LEVELS } from '../levels';
 
@@ -10,24 +10,9 @@ interface Props {
 }
 
 const LevelSelectView: React.FC<Props> = ({ onStartLevel, onBack }) => {
-  const [scenarios, setScenarios] = useState<Scenario[]>([]);
-  const [activeScenario, setActiveScenario] = useState<Scenario | null>(null);
-
+  const [active, setActive] = useState<LevelPreview | null>(null);
   const [pendingLevel, setPendingLevel] = useState<number | null>(null);
   const [showScenarioModal, setShowScenarioModal] = useState(false);
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const data = await fetchScenarios();
-        setScenarios(data);
-        setActiveScenario(data[0] ?? null);
-      } catch (e) {
-        console.error('Failed to fetch scenarios', e);
-      }
-    };
-    load();
-  }, []);
 
   const levels = useMemo(() => LEVELS, []);
 
@@ -58,18 +43,15 @@ const LevelSelectView: React.FC<Props> = ({ onStartLevel, onBack }) => {
               <button
                 key={ld.level}
                 className="level-blue-btn"
-                onClick={() => {
-                  const scenarioForLevel =
-                    scenarios[Math.floor((ld.level - 1) / 2)] ?? null;
-
-                  if (!scenarioForLevel) {
-                    console.warn('No scenario found for level', ld.level);
-                    return;
+                onClick={async () => {
+                  try {
+                    const data = await fetchLevel(ld.level);
+                    setActive(data);
+                    setPendingLevel(ld.level);
+                    setShowScenarioModal(true);
+                  } catch (e) {
+                    console.error('Failed to load level preview', e);
                   }
-
-                  setActiveScenario(scenarioForLevel);
-                  setPendingLevel(ld.level);
-                  setShowScenarioModal(true);
                 }}
               >
                 Level {ld.level}
@@ -79,10 +61,12 @@ const LevelSelectView: React.FC<Props> = ({ onStartLevel, onBack }) => {
         </div>
       </div>
 
-      {showScenarioModal && activeScenario && pendingLevel !== null && (
+      {showScenarioModal && active && pendingLevel !== null && (
         <ScenarioIntroModal
-          scenario={activeScenario}
+          scenario={active.scenario}
           level={pendingLevel}
+          levelTitle={active.title}
+          levelBriefing={active.briefing}
           onClose={() => {
             setShowScenarioModal(false);
             setPendingLevel(null);
@@ -91,7 +75,7 @@ const LevelSelectView: React.FC<Props> = ({ onStartLevel, onBack }) => {
             setShowScenarioModal(false);
             const lvl = pendingLevel;
             setPendingLevel(null);
-            onStartLevel(activeScenario.id, lvl);
+            onStartLevel(active.scenario.id, lvl);
           }}
         />
       )}

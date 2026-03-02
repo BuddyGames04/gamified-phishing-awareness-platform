@@ -14,7 +14,11 @@ def apply_curated_level_defs(defs: list[dict[str, Any]]) -> None:
         lvl, _ = Level.objects.update_or_create(
             scenario=ld["scenario"],
             number=ld["number"],
-            defaults=dict(title=ld["title"], briefing=ld["briefing"]),
+            defaults=dict(
+                title=ld.get("title", ""),
+                briefing=ld.get("briefing", ""),
+                scenario_overrides=ld.get("scenario_overrides", {}),
+            ),
         )
 
         LevelEmail.objects.filter(level=lvl).delete()

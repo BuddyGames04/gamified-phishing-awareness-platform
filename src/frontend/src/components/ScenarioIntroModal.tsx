@@ -1,22 +1,24 @@
 import React from 'react';
 import '../styles/InboxView.css';
+import { Scenario } from '../api';
 
 type Props = {
-  scenario: {
-    company_name: string;
-    sector: string;
-    role_title: string;
-    department_name: string;
-    line_manager_name: string;
-    responsibilities: string[];
-    intro_text: string;
-  };
+  scenario: Scenario;
   level: number;
+  levelTitle?: string;
+  levelBriefing?: string;
   onClose: () => void;
   onStart: () => void;
 };
 
-const ScenarioIntroModal: React.FC<Props> = ({ scenario, level, onClose, onStart }) => {
+const ScenarioIntroModal: React.FC<Props> = ({
+  scenario,
+  level,
+  levelTitle,
+  levelBriefing,
+  onClose,
+  onStart,
+}) => {
   return (
     <div
       style={{
@@ -43,6 +45,13 @@ const ScenarioIntroModal: React.FC<Props> = ({ scenario, level, onClose, onStart
       >
         <h2 style={{ marginTop: 0 }}>Level {level}: Scenario Briefing</h2>
 
+        {levelTitle && (
+          <p style={{ marginTop: 0 }}>
+            <strong>{levelTitle}</strong>
+          </p>
+        )}
+        {levelBriefing && <p style={{ whiteSpace: 'pre-wrap' }}>{levelBriefing}</p>}
+
         <div style={{ marginBottom: '0.75rem' }}>
           <div>
             <strong>Company:</strong> {scenario.company_name}
@@ -65,20 +74,20 @@ const ScenarioIntroModal: React.FC<Props> = ({ scenario, level, onClose, onStart
           <p style={{ whiteSpace: 'pre-wrap' }}>{scenario.intro_text}</p>
         )}
 
-        {scenario.responsibilities?.length > 0 && (
+        {(scenario.responsibilities ?? []).length > 0 && (
           <>
             <h4>Responsibilities</h4>
             <ul>
-              {scenario.responsibilities.map((r, i) => (
-                <li key={i}>{r}</li>
+              {(scenario.responsibilities ?? []).map((r: string, idx: number) => (
+                <li key={idx}>{r}</li>
               ))}
             </ul>
           </>
         )}
 
         <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-          <button onClick={onClose}>Back</button>
-          <button onClick={onStart}>Start Level</button>
+          <button onClick={onClose}>Close</button>
+          <button onClick={onStart}>Start</button>
         </div>
       </div>
     </div>

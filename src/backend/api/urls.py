@@ -21,6 +21,7 @@ urlpatterns = [
     path("profile/metrics/", ProfileMetricsView.as_view()),
     path("arcade/next/", views_arcade.get_arcade_next, name="arcade_next"),
     path("arcade/attempt/", views_arcade.post_arcade_attempt, name="arcade_attempt"),
+    path("level/", views.get_level),
     # --------------------
     # PVP
     # --------------------
