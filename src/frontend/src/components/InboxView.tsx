@@ -70,7 +70,7 @@ export const InboxView: React.FC<Props> = ({
   const isHighLevel = (lvl?: number) => (lvl ?? 0) >= 3;
 
   const [elapsedMs, setElapsedMs] = useState(0);
-const startedAtRef = useRef<number>(0);
+  const startedAtRef = useRef<number>(0);
 
   const calcScore = useCallback(() => {
     const total = runTotal || 0;
@@ -195,8 +195,8 @@ const startedAtRef = useRef<number>(0);
   }, [mode, scenarioId, level, runKey, userId, pvpLevelId]);
 
   useEffect(() => {
-  // (re)start timer baseline when a run loads/reloads
-  startedAtRef.current = Date.now();
+    // (re)start timer baseline when a run loads/reloads
+    startedAtRef.current = Date.now();
   }, [runKey, mode, scenarioId, level, pvpLevelId]);
 
   useEffect(() => {
@@ -302,15 +302,12 @@ const startedAtRef = useRef<number>(0);
           const nextIncorrect = !isCorrect ? runIncorrect + 1 : runIncorrect;
 
           setRunCompleted(true);
-          completeLevelRun(
-            runId,
-            {
-              correct: nextCorrect,
-              incorrect: nextIncorrect,
-              duration_ms: Date.now() - startedAtRef.current,
-              points: calcScore(),
-            } as any
-          ).catch((e) => console.error('Failed to complete level run', e));
+          completeLevelRun(runId, {
+            correct: nextCorrect,
+            incorrect: nextIncorrect,
+            duration_ms: Date.now() - startedAtRef.current,
+            points: calcScore(),
+          } as any).catch((e) => console.error('Failed to complete level run', e));
         }
       }
 

@@ -148,7 +148,9 @@ class LevelRun(models.Model):
     scenario = models.ForeignKey(
         Scenario, null=True, blank=True, on_delete=models.SET_NULL, related_name="runs"
     )
-    level_number = models.IntegerField(default=1)  # keep the global number for convenience
+    level_number = models.IntegerField(
+        default=1
+    )  # keep the global number for convenience
 
     emails_total = models.IntegerField(default=0)
     correct = models.IntegerField(default=0)
@@ -157,7 +159,7 @@ class LevelRun(models.Model):
     started_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)
 
-    #timing + score (used later; not necessarily shown to users)
+    # timing + score (used later; not necessarily shown to users)
     duration_ms = models.IntegerField(default=0)
     client_duration_ms = models.IntegerField(null=True, blank=True)
     points = models.IntegerField(default=0)

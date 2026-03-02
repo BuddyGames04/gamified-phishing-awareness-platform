@@ -26,6 +26,7 @@ class StartRunResponseSerializer(serializers.ModelSerializer):
             "started_at",
         ]
 
+
 class CompleteRunSerializer(serializers.Serializer):
     correct = serializers.IntegerField(min_value=0)
     incorrect = serializers.IntegerField(min_value=0)

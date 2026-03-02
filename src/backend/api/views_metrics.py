@@ -109,6 +109,7 @@ class StartLevelRunView(APIView):
             StartRunResponseSerializer(run).data, status=status.HTTP_201_CREATED
         )
 
+
 class CompleteLevelRunView(APIView):
     """
     POST /api/metrics/level-runs/<run_id>/complete/
