@@ -207,7 +207,9 @@ def curated_levels_11_15(scenario_by_company) -> list[dict[str, Any]]:
                             is_phish=False,
                             difficulty=4,
                             category="facilities",
-                            links=[f"{facilities_portal}/deliveries/confirm?ref=FURN-4821"],
+                            links=[
+                                f"{facilities_portal}/deliveries/confirm?ref=FURN-4821"
+                            ],
                             attachments=[],
                         ),
                         e(
@@ -221,7 +223,9 @@ def curated_levels_11_15(scenario_by_company) -> list[dict[str, Any]]:
                             is_phish=False,
                             difficulty=4,
                             category="security",
-                            links=[f"{facilities_portal}/visitors/upload?ref=FURN-4821"],
+                            links=[
+                                f"{facilities_portal}/visitors/upload?ref=FURN-4821"
+                            ],
                             attachments=[],
                         ),
                         e(
@@ -392,7 +396,9 @@ def curated_levels_11_15(scenario_by_company) -> list[dict[str, Any]]:
                             is_phish=True,
                             difficulty=5,
                             category="phish",
-                            links=[f"http://{sharepoint_spoof}/open?id=visitor-access-FURN-4821"],
+                            links=[
+                                f"http://{sharepoint_spoof}/open?id=visitor-access-FURN-4821"
+                            ],
                             attachments=[],
                         ),
                         e(
@@ -446,7 +452,9 @@ def curated_levels_11_15(scenario_by_company) -> list[dict[str, Any]]:
                             is_phish=False,
                             difficulty=5,
                             category="facilities",
-                            links=[f"{facilities_portal}/deliveries/confirm?ref=FURN-4821&update=1"],
+                            links=[
+                                f"{facilities_portal}/deliveries/confirm?ref=FURN-4821&update=1"
+                            ],
                             attachments=[],
                         ),
                         e(
@@ -485,7 +493,9 @@ def curated_levels_11_15(scenario_by_company) -> list[dict[str, Any]]:
                             is_phish=False,
                             difficulty=4,
                             category="internal",
-                            links=[f"https://{dom}/engineering/release/readiness?rel=R-24.3"],
+                            links=[
+                                f"https://{dom}/engineering/release/readiness?rel=R-24.3"
+                            ],
                             attachments=[],
                         ),
                         e(
@@ -683,7 +693,9 @@ def curated_levels_11_15(scenario_by_company) -> list[dict[str, Any]]:
                             is_phish=True,
                             difficulty=5,
                             category="phish",
-                            links=[f"http://{sharepoint_spoof}/open?id=readiness-R-24.3"],
+                            links=[
+                                f"http://{sharepoint_spoof}/open?id=readiness-R-24.3"
+                            ],
                             attachments=[],
                         ),
                         e(
@@ -707,7 +719,9 @@ def curated_levels_11_15(scenario_by_company) -> list[dict[str, Any]]:
                             is_phish=False,
                             difficulty=5,
                             category="internal",
-                            links=[f"https://{dom}/engineering/release/readiness?rel=R-24.3&block=dpa"],
+                            links=[
+                                f"https://{dom}/engineering/release/readiness?rel=R-24.3&block=dpa"
+                            ],
                             attachments=[],
                         ),
                         e(
@@ -718,7 +732,9 @@ def curated_levels_11_15(scenario_by_company) -> list[dict[str, Any]]:
                             is_phish=True,
                             difficulty=5,
                             category="phish",
-                            links=[f"http://{helpdesk_spoof}/access/submit?escalation=1"],
+                            links=[
+                                f"http://{helpdesk_spoof}/access/submit?escalation=1"
+                            ],
                             attachments=[],
                         ),
                     ],
@@ -779,7 +795,9 @@ def curated_levels_11_15(scenario_by_company) -> list[dict[str, Any]]:
                             is_phish=False,
                             difficulty=4,
                             category="internal",
-                            links=[f"https://{dom}/logistics/carriers/slots/reschedule?ref=SL-1881"],
+                            links=[
+                                f"https://{dom}/logistics/carriers/slots/reschedule?ref=SL-1881"
+                            ],
                             attachments=[],
                         ),
                         e(
@@ -892,7 +910,9 @@ def curated_levels_11_15(scenario_by_company) -> list[dict[str, Any]]:
                             is_phish=False,
                             difficulty=4,
                             category="facilities",
-                            links=[f"{facilities_portal}/maintenance/forklift?week=current"],
+                            links=[
+                                f"{facilities_portal}/maintenance/forklift?week=current"
+                            ],
                             attachments=[],
                         ),
                         e(
@@ -925,7 +945,9 @@ def curated_levels_11_15(scenario_by_company) -> list[dict[str, Any]]:
                             is_phish=True,
                             difficulty=5,
                             category="phish",
-                            links=[f"http://{vendorhub_spoof}/bank/re-enter?case=BC-4402"],
+                            links=[
+                                f"http://{vendorhub_spoof}/bank/re-enter?case=BC-4402"
+                            ],
                             attachments=[],
                         ),
                         e(
@@ -1006,7 +1028,9 @@ def curated_levels_11_15(scenario_by_company) -> list[dict[str, Any]]:
                             is_phish=False,
                             difficulty=5,
                             category="internal",
-                            links=[f"https://{dom}/customs/shipments/HL-7741/approve?window=today"],
+                            links=[
+                                f"https://{dom}/customs/shipments/HL-7741/approve?window=today"
+                            ],
                             attachments=[],
                         ),
                         e(
@@ -1028,7 +1052,9 @@ def curated_levels_11_15(scenario_by_company) -> list[dict[str, Any]]:
                             is_phish=False,
                             difficulty=5,
                             category="hr",
-                            links=[f"{hr_portal}/absence/cases?dept=depot-ops&status=open"],
+                            links=[
+                                f"{hr_portal}/absence/cases?dept=depot-ops&status=open"
+                            ],
                             attachments=[],
                         ),
                     ],
@@ -1056,7 +1082,9 @@ def curated_levels_11_15(scenario_by_company) -> list[dict[str, Any]]:
                             is_phish=False,
                             difficulty=4,
                             category="internal",
-                            links=[f"https://{dom}/portal/timetabling/changes?week=current"],
+                            links=[
+                                f"https://{dom}/portal/timetabling/changes?week=current"
+                            ],
                             attachments=[],
                         ),
                         e(
@@ -1067,7 +1095,9 @@ def curated_levels_11_15(scenario_by_company) -> list[dict[str, Any]]:
                             is_phish=False,
                             difficulty=4,
                             category="facilities",
-                            links=[f"{facilities_portal}/events/guest-passes/upload?event=EV-992"],
+                            links=[
+                                f"{facilities_portal}/events/guest-passes/upload?event=EV-992"
+                            ],
                             attachments=[],
                         ),
                         e(
@@ -1078,7 +1108,9 @@ def curated_levels_11_15(scenario_by_company) -> list[dict[str, Any]]:
                             is_phish=False,
                             difficulty=4,
                             category="facilities",
-                            links=[f"{facilities_portal}/deliveries/confirm?ref=EV-AV-210"],
+                            links=[
+                                f"{facilities_portal}/deliveries/confirm?ref=EV-AV-210"
+                            ],
                             attachments=[],
                         ),
                         e(
@@ -1144,7 +1176,9 @@ def curated_levels_11_15(scenario_by_company) -> list[dict[str, Any]]:
                             is_phish=True,
                             difficulty=5,
                             category="phish",
-                            links=[f"http://{sharepoint_spoof}/open?id=EV-992-guestlist"],
+                            links=[
+                                f"http://{sharepoint_spoof}/open?id=EV-992-guestlist"
+                            ],
                             attachments=[],
                         ),
                         e(
@@ -1166,7 +1200,9 @@ def curated_levels_11_15(scenario_by_company) -> list[dict[str, Any]]:
                             is_phish=True,
                             difficulty=5,
                             category="phish",
-                            links=[f"http://{vendorhub_spoof}/pay/deposit?ref=EV-AV-210"],
+                            links=[
+                                f"http://{vendorhub_spoof}/pay/deposit?ref=EV-AV-210"
+                            ],
                             attachments=[],
                         ),
                         e(
@@ -1232,7 +1268,9 @@ def curated_levels_11_15(scenario_by_company) -> list[dict[str, Any]]:
                             is_phish=False,
                             difficulty=4,
                             category="internal",
-                            links=[f"https://{dom}/research/compliance/checks/RC-1881?due=today"],
+                            links=[
+                                f"https://{dom}/research/compliance/checks/RC-1881?due=today"
+                            ],
                             attachments=[],
                         ),
                         e(
@@ -1302,7 +1340,9 @@ def curated_levels_11_15(scenario_by_company) -> list[dict[str, Any]]:
                             is_phish=True,
                             difficulty=5,
                             category="phish",
-                            links=[f"http://{sharepoint_spoof}/open?id=EV-992-guestlist-v2"],
+                            links=[
+                                f"http://{sharepoint_spoof}/open?id=EV-992-guestlist-v2"
+                            ],
                             attachments=[],
                         ),
                         e(
@@ -1351,7 +1391,9 @@ def curated_levels_11_15(scenario_by_company) -> list[dict[str, Any]]:
                         is_phish=False,
                         difficulty=5,
                         category="security",
-                        links=[f"https://{dom}/security/advisories/incident-exploitation"],
+                        links=[
+                            f"https://{dom}/security/advisories/incident-exploitation"
+                        ],
                         attachments=[],
                     ),
                     e(
@@ -1541,7 +1583,9 @@ def curated_levels_11_15(scenario_by_company) -> list[dict[str, Any]]:
                         is_phish=False,
                         difficulty=5,
                         category="internal",
-                        links=[f"{finance_portal}/audit/evidence/upload?topic=bank-changes"],
+                        links=[
+                            f"{finance_portal}/audit/evidence/upload?topic=bank-changes"
+                        ],
                         attachments=[],
                     ),
                     e(
@@ -1563,7 +1607,9 @@ def curated_levels_11_15(scenario_by_company) -> list[dict[str, Any]]:
                         is_phish=False,
                         difficulty=5,
                         category="facilities",
-                        links=[f"{facilities_portal}/deliveries/confirm?ref=DESK-8811&reminder=1"],
+                        links=[
+                            f"{facilities_portal}/deliveries/confirm?ref=DESK-8811&reminder=1"
+                        ],
                         attachments=[],
                     ),
                     e(

@@ -68,7 +68,10 @@ export async function fetchEmails(params?: {
   return response.json();
 }
 
-export async function submitResult(userId: string, isCorrect: boolean): Promise<UserProgress> {
+export async function submitResult(
+  userId: string,
+  isCorrect: boolean
+): Promise<UserProgress> {
   const response = await authFetch(`${API_BASE}/submit/`, {
     method: 'POST',
     headers: {},
@@ -134,12 +137,18 @@ export async function startLevelRun(params: {
   return response.json();
 }
 
-export async function completeLevelRun(runId: number, params: { correct: number; incorrect: number }) {
-  const response = await authFetch(`${API_BASE}/metrics/level-runs/${runId}/complete/`, {
-    method: 'POST',
-    headers: {},
-    body: JSON.stringify(params),
-  });
+export async function completeLevelRun(
+  runId: number,
+  params: { correct: number; incorrect: number }
+) {
+  const response = await authFetch(
+    `${API_BASE}/metrics/level-runs/${runId}/complete/`,
+    {
+      method: 'POST',
+      headers: {},
+      body: JSON.stringify(params),
+    }
+  );
 
   if (!response.ok) throw new Error('Failed to complete level run');
   return response.json();
@@ -439,23 +448,26 @@ export async function createPvpEmail(params: {
   is_wave: boolean;
   sort_order: number;
 }): Promise<PvpEmail> {
-  const res = await authFetch(`${API_BASE}/pvp/levels/${params.level_id}/emails/create/`, {
-    method: 'POST',
-    headers: {},
-    body: JSON.stringify({
-      sender_name: params.sender_name,
-      sender_email: params.sender_email,
-      subject: params.subject,
-      body: params.body,
-      is_phish: params.is_phish,
-      difficulty: params.difficulty,
-      category: params.category ?? null,
-      links: params.links ?? [],
-      attachments: params.attachments ?? [],
-      is_wave: params.is_wave,
-      sort_order: params.sort_order,
-    }),
-  });
+  const res = await authFetch(
+    `${API_BASE}/pvp/levels/${params.level_id}/emails/create/`,
+    {
+      method: 'POST',
+      headers: {},
+      body: JSON.stringify({
+        sender_name: params.sender_name,
+        sender_email: params.sender_email,
+        subject: params.subject,
+        body: params.body,
+        is_phish: params.is_phish,
+        difficulty: params.difficulty,
+        category: params.category ?? null,
+        links: params.links ?? [],
+        attachments: params.attachments ?? [],
+        is_wave: params.is_wave,
+        sort_order: params.sort_order,
+      }),
+    }
+  );
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`Failed to create PVP email: ${text}`);
@@ -463,7 +475,11 @@ export async function createPvpEmail(params: {
   return res.json();
 }
 
-export async function fetchPvpEmails(params: { level_id: number; limit?: number; wave?: boolean }): Promise<Email[]> {
+export async function fetchPvpEmails(params: {
+  level_id: number;
+  limit?: number;
+  wave?: boolean;
+}): Promise<Email[]> {
   const qs = new URLSearchParams();
   qs.set('level_id', String(params.level_id));
   if (params.limit) qs.set('limit', String(params.limit));
@@ -480,7 +496,8 @@ export function normaliseEmailPayload(email: any) {
     String(s ?? '')
       .trim()
       .replace(/\s+/g, ' ');
-  const tidyList = (xs: any) => (Array.isArray(xs) ? xs.map((x) => String(x).trim()).filter(Boolean) : []);
+  const tidyList = (xs: any) =>
+    Array.isArray(xs) ? xs.map((x) => String(x).trim()).filter(Boolean) : [];
 
   const sender_name = tidy(email.sender_name);
   const sender_email = tidy(email.sender_email).toLowerCase();

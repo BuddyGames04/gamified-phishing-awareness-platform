@@ -59,10 +59,18 @@ const ProfileView: React.FC<Props> = ({ userId }) => {
       </div>
 
       <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
-        <button className="btn" onClick={() => setTab('main')} disabled={tab === 'main'}>
+        <button
+          className="btn"
+          onClick={() => setTab('main')}
+          disabled={tab === 'main'}
+        >
           Main
         </button>
-        <button className="btn" onClick={() => setTab('arcade')} disabled={tab === 'arcade'}>
+        <button
+          className="btn"
+          onClick={() => setTab('arcade')}
+          disabled={tab === 'arcade'}
+        >
           Arcade
         </button>
         <button className="btn" onClick={() => setTab('pvp')} disabled={tab === 'pvp'}>
@@ -77,7 +85,9 @@ const ProfileView: React.FC<Props> = ({ userId }) => {
               <div className="profile-card-title">Overall (all modes)</div>
               <div className="profile-big">{Math.round(overallAllAccuracyPct)}%</div>
               <div className="profile-muted">
-                Attempts: {(data as any).overall_all?.total_attempts ?? data.overall.total_attempts}
+                Attempts:{' '}
+                {(data as any).overall_all?.total_attempts ??
+                  data.overall.total_attempts}
                 <br />
                 Arcade: {(data as any).overall_all?.arcade_attempts ?? '-'} · Inbox:{' '}
                 {(data as any).overall_all?.inbox_attempts ?? '-'} · PVP:{' '}
@@ -89,7 +99,8 @@ const ProfileView: React.FC<Props> = ({ userId }) => {
               <div className="profile-card-title">Inbox (curated levels)</div>
               <div className="profile-big">{Math.round(inboxAccuracyPct)}%</div>
               <div className="profile-muted">
-                Runs: {data.overall.total_runs} · Attempts: {data.overall.total_attempts}
+                Runs: {data.overall.total_runs} · Attempts:{' '}
+                {data.overall.total_attempts}
               </div>
             </div>
           </div>
@@ -174,7 +185,9 @@ const ProfileView: React.FC<Props> = ({ userId }) => {
                         <td>{r.correct ?? '-'}</td>
                         <td>{r.incorrect ?? '-'}</td>
                         <td>
-                          {r.completed_at ? new Date(r.completed_at).toLocaleString() : '-'}
+                          {r.completed_at
+                            ? new Date(r.completed_at).toLocaleString()
+                            : '-'}
                         </td>
                       </tr>
                     ))}
@@ -202,7 +215,9 @@ const ProfileView: React.FC<Props> = ({ userId }) => {
                     {data.trends.accuracy.map((row, idx) => {
                       const acc = asPercent(row.accuracy);
                       const prev =
-                        idx > 0 ? asPercent(data.trends!.accuracy[idx - 1].accuracy) : null;
+                        idx > 0
+                          ? asPercent(data.trends!.accuracy[idx - 1].accuracy)
+                          : null;
                       const first = asPercent(data.trends!.accuracy[0].accuracy);
 
                       const deltaPrev = prev == null ? null : acc - prev;
@@ -214,7 +229,9 @@ const ProfileView: React.FC<Props> = ({ userId }) => {
                         return `${sign}${Math.round(d)} pp`;
                       };
 
-                      const completedLabel = row.date ? new Date(row.date).toLocaleString() : '-';
+                      const completedLabel = row.date
+                        ? new Date(row.date).toLocaleString()
+                        : '-';
 
                       return (
                         <tr key={`${row.date ?? 'date'}-${idx}`}>
@@ -248,10 +265,12 @@ const ProfileView: React.FC<Props> = ({ userId }) => {
               <div className="profile-grid" style={{ marginTop: 10 }}>
                 <div className="profile-card">
                   <div className="profile-card-title">Accuracy</div>
-                  <div className="profile-big">{Math.round(asPercent(data.arcade.accuracy))}%</div>
+                  <div className="profile-big">
+                    {Math.round(asPercent(data.arcade.accuracy))}%
+                  </div>
                   <div className="profile-muted">
-                    Attempts: {data.arcade.total_attempts} · Correct: {data.arcade.correct} · Incorrect:{' '}
-                    {data.arcade.incorrect}
+                    Attempts: {data.arcade.total_attempts} · Correct:{' '}
+                    {data.arcade.correct} · Incorrect: {data.arcade.incorrect}
                   </div>
                 </div>
 
@@ -292,7 +311,9 @@ const ProfileView: React.FC<Props> = ({ userId }) => {
               </div>
 
               <div style={{ marginTop: 12 }}>
-                <div style={{ fontWeight: 700, marginBottom: 6 }}>Accuracy by difficulty</div>
+                <div style={{ fontWeight: 700, marginBottom: 6 }}>
+                  Accuracy by difficulty
+                </div>
                 <div className="profile-table-wrap">
                   <table className="profile-table">
                     <thead>
@@ -334,8 +355,8 @@ const ProfileView: React.FC<Props> = ({ userId }) => {
                     {Math.round(asPercent(data.pvp.playing.accuracy))}%
                   </div>
                   <div className="profile-muted">
-                    Attempts: {data.pvp.playing.total_attempts} · Correct: {data.pvp.playing.correct} ·
-                    Incorrect: {data.pvp.playing.incorrect}
+                    Attempts: {data.pvp.playing.total_attempts} · Correct:{' '}
+                    {data.pvp.playing.correct} · Incorrect: {data.pvp.playing.incorrect}
                   </div>
                 </div>
 
@@ -345,10 +366,11 @@ const ProfileView: React.FC<Props> = ({ userId }) => {
                     {Math.round(asPercent(data.pvp.creator.accuracy))}%
                   </div>
                   <div className="profile-muted">
-                    Levels: {data.pvp.creator.levels_total} · Posted: {data.pvp.creator.levels_posted}
+                    Levels: {data.pvp.creator.levels_total} · Posted:{' '}
+                    {data.pvp.creator.levels_posted}
                     <br />
-                    Attempts: {data.pvp.creator.total_attempts} · Correct: {data.pvp.creator.correct} ·
-                    Incorrect: {data.pvp.creator.incorrect}
+                    Attempts: {data.pvp.creator.total_attempts} · Correct:{' '}
+                    {data.pvp.creator.correct} · Incorrect: {data.pvp.creator.incorrect}
                     <br />
                     Unique players: {data.pvp.creator.unique_players}
                   </div>
@@ -359,10 +381,14 @@ const ProfileView: React.FC<Props> = ({ userId }) => {
                 <div className="profile-card-title">Risk actions (PVP)</div>
                 <div className="profile-muted">
                   Link clicks before deciding:{' '}
-                  <strong>{Math.round(asPercent(data.pvp.playing.pct_link_before))}%</strong>
+                  <strong>
+                    {Math.round(asPercent(data.pvp.playing.pct_link_before))}%
+                  </strong>
                   <br />
                   Attachment opens before deciding:{' '}
-                  <strong>{Math.round(asPercent(data.pvp.playing.pct_attach_before))}%</strong>
+                  <strong>
+                    {Math.round(asPercent(data.pvp.playing.pct_attach_before))}%
+                  </strong>
                 </div>
               </div>
             </>

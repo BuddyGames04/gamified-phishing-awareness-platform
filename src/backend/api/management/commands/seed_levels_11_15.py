@@ -9,7 +9,9 @@ from api.models import Scenario
 
 
 class Command(BaseCommand):
-    help = "Seed curated simulation levels 11–15 (handmade). Safe to run multiple times."
+    help = (
+        "Seed curated simulation levels 11–15 (handmade). Safe to run multiple times."
+    )
 
     @transaction.atomic
     def handle(self, *args, **options):
