@@ -18,8 +18,7 @@ const REPLY_CHAIN_RE =
 const PAYMENT_RE =
   /\b(bank details|sort code|account number|payment|transfer|wire|invoice|remittance|purchase order|gift card)\b/i;
 
-const RISKY_EXT_RE =
-  /\.(exe|js|bat|cmd|scr|msi|ps1|vbs|jar|docm|xlsm|pptm|zip|rar)\b/i;
+const RISKY_EXT_RE = /\.(exe|js|bat|cmd|scr|msi|ps1|vbs|jar|docm|xlsm|pptm|zip|rar)\b/i;
 
 function domainOfEmail(addr: string): string {
   const a = (addr || '').trim().toLowerCase();
@@ -79,7 +78,10 @@ export function getSimulationHintRuleIds(email: Email): string[] {
   if (URGENCY_RE.test(subject) || URGENCY_RE.test(body)) rules.push('basic.urgency');
 
   // Sender inconsistency / domain weirdness
-  if (senderDom && /(\bsecure\b|\blogin\b|\bverify\b|\bsupport\b|\balerts\b)/i.test(senderDom)) {
+  if (
+    senderDom &&
+    /(\bsecure\b|\blogin\b|\bverify\b|\bsupport\b|\balerts\b)/i.test(senderDom)
+  ) {
     rules.push('basic.sender');
   }
 
@@ -121,12 +123,17 @@ export function getSimulationHintRuleIds(email: Email): string[] {
 
   // Advanced patterns
   if (PAYMENT_RE.test(subject) || PAYMENT_RE.test(body)) rules.push('advanced.bec');
-  if (MFA_RE.test(subject) || MFA_RE.test(body) || CRED_RE.test(subject) || CRED_RE.test(body)) {
+  if (
+    MFA_RE.test(subject) ||
+    MFA_RE.test(body) ||
+    CRED_RE.test(subject) ||
+    CRED_RE.test(body)
+  ) {
     rules.push('advanced.mfa-fatigue');
   }
 
   // Long email “credibility padding”
-  if ((subject.length + body.length) > 900) rules.push('advanced.long-email');
+  if (subject.length + body.length > 900) rules.push('advanced.long-email');
 
   // De-dupe, filter disallowed, cap
   const seen = new Set<string>();

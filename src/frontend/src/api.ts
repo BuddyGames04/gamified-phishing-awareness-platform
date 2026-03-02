@@ -111,19 +111,21 @@ export async function fetchScenarios(): Promise<Scenario[]> {
 export interface LevelRunStartResponse {
   id: number;
   user_id: string;
-  mode: 'arcade' | 'simulation';
+  mode: 'arcade' | 'simulation' | 'pvp';
   scenario_id?: number | null;
   level_number: number;
   emails_total: number;
   started_at: string;
+  pvp_level_id?: number;
 }
 
 export async function startLevelRun(params: {
   user_id: string;
-  mode: 'arcade' | 'simulation';
+  mode: 'arcade' | 'simulation' | 'pvp';
   scenario_id?: number;
   level_number: number;
   emails_total: number;
+  pvp_level_id?: number;
 }): Promise<LevelRunStartResponse> {
   const response = await authFetch(`${API_BASE}/metrics/level-runs/start/`, {
     method: 'POST',
@@ -169,6 +171,25 @@ export async function createDecisionEvent(params: {
   return response.json();
 }
 
+export type ArcadeBucketAccuracy = {
+  bucket: '1-2' | '3' | '4-5';
+  attempts: number;
+  accuracy: number; // 0..1
+};
+
+export type ArcadeMetrics = {
+  total_attempts: number;
+  correct: number;
+  incorrect: number;
+  accuracy: number; // 0..1
+  avg_response_time_ms: number | null;
+  avg_email_difficulty: number | null;
+  target_difficulty_now: number | null;
+  current_streak: number;
+  best_streak: number;
+  accuracy_by_difficulty_bucket: ArcadeBucketAccuracy[];
+};
+
 export type ProfileMetrics = {
   user_id: string;
   overall: {
@@ -205,6 +226,26 @@ export type ProfileMetrics = {
       accuracy: number; // 0..1 OR 0..100
       risky_action_rate?: number;
     }>;
+  };
+  arcade?: ArcadeMetrics;
+  pvp?: {
+    playing: {
+      total_attempts: number;
+      correct: number;
+      incorrect: number;
+      accuracy: number; // 0..1
+      pct_link_before: number; // 0..1
+      pct_attach_before: number; // 0..1
+    };
+    creator: {
+      levels_total: number;
+      levels_posted: number;
+      total_attempts: number;
+      correct: number;
+      incorrect: number;
+      accuracy: number; // 0..1
+      unique_players: number;
+    };
   };
 };
 

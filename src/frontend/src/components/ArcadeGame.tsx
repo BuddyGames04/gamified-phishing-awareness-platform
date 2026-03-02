@@ -126,7 +126,7 @@ const ArcadeGame: React.FC<Props> = ({ onExit, onOpenMenu }) => {
                 From: {email.sender_name} &lt;{email.sender_email}&gt;
               </div>
 
-              {(email.attachments?.length || email.links?.length) ? (
+              {email.attachments?.length || email.links?.length ? (
                 <div style={{ marginTop: 8, fontSize: 13, opacity: 0.9 }}>
                   {email.attachments && email.attachments.length > 0 && (
                     <div>
@@ -170,7 +170,9 @@ const ArcadeGame: React.FC<Props> = ({ onExit, onOpenMenu }) => {
               </div>
 
               {feedback && (
-                <div className={`arcade-feedback ${feedback === 'Correct' ? 'ok' : 'bad'}`}>
+                <div
+                  className={`arcade-feedback ${feedback === 'Correct' ? 'ok' : 'bad'}`}
+                >
                   {feedback}
                 </div>
               )}
@@ -201,7 +203,8 @@ const ArcadeGame: React.FC<Props> = ({ onExit, onOpenMenu }) => {
 
               {/* tiny debug pill (remove later) */}
               <div className="arcade-progress">
-                Target difficulty: {email.target_difficulty_int} ({email.target_difficulty.toFixed(1)})
+                Target difficulty: {email.target_difficulty_int} (
+                {email.target_difficulty.toFixed(1)})
               </div>
             </div>
           </div>

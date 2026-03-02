@@ -67,6 +67,16 @@ class PvpEmailSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id", "created_at"]
 
+    def create(self, validated_data):
+        email = super().create(validated_data)
+        email.sync_shadow_email()
+        return email
+
+    def update(self, instance, validated_data):
+        email = super().update(instance, validated_data)
+        email.sync_shadow_email()
+        return email
+
     def validate(self, attrs):
         def tidy(s):
             return (s or "").strip()

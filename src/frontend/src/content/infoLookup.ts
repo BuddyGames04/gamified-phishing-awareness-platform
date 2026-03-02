@@ -8,7 +8,9 @@ export function findInfoRuleById(ruleId: string): InfoRule | null {
   return null;
 }
 
-export function getHintLines(ruleIds: string[]): Array<{ id: string; title: string; summary: string }> {
+export function getHintLines(
+  ruleIds: string[]
+): Array<{ id: string; title: string; summary: string }> {
   const seen = new Set<string>();
   const out: Array<{ id: string; title: string; summary: string }> = [];
 

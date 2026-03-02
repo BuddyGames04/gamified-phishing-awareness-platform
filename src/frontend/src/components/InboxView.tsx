@@ -173,14 +173,15 @@ export const InboxView: React.FC<Props> = ({
         setRunCompleted(false);
         setRunId(null);
 
-        if (mode === 'simulation') {
+        if (mode === 'simulation' || mode === 'pvp') {
           try {
             const run = await startLevelRun({
               user_id: userId,
               mode,
-              scenario_id: scenarioId,
-              level_number: level ?? 1,
+              scenario_id: mode === 'simulation' ? scenarioId : undefined,
+              level_number: mode === 'simulation' ? (level ?? 1) : (pvpLevelId ?? 1),
               emails_total: data.length,
+              pvp_level_id: mode === 'pvp' ? pvpLevelId : undefined,
             });
             setRunId(run.id);
           } catch (e) {
@@ -288,7 +289,7 @@ export const InboxView: React.FC<Props> = ({
         setShowCompleteModal(true);
 
         // complete the run once (server record)
-        if (mode === 'simulation' && runId && !runCompleted) {
+        if ((mode === 'simulation' || mode === 'pvp') && runId && !runCompleted) {
           const nextCorrect = isCorrect ? runCorrect + 1 : runCorrect;
           const nextIncorrect = !isCorrect ? runIncorrect + 1 : runIncorrect;
 
@@ -314,7 +315,7 @@ export const InboxView: React.FC<Props> = ({
   };
 
   const proceedModal = async () => {
-    if (mode === 'simulation' && selected) {
+    if ((mode === 'simulation' || mode === 'pvp') && selected) {
       const eventType = activeLink ? 'link_click' : 'attachment_open';
       const value = activeLink ?? activeAttachment ?? null;
 
@@ -502,7 +503,7 @@ export const InboxView: React.FC<Props> = ({
                           type="button"
                           className="link-like"
                           onClick={() => {
-                            if (mode === 'simulation') {
+                            if (mode === 'simulation' || mode === 'pvp') {
                               setOpenedEmailIds((prev) => {
                                 const next = new Set(prev);
                                 next.add(selected.id);
@@ -531,7 +532,7 @@ export const InboxView: React.FC<Props> = ({
                           type="button"
                           className="attachment-like"
                           onClick={() => {
-                            if (mode === 'simulation') {
+                            if (mode === 'simulation' || mode === 'pvp') {
                               setOpenedEmailIds((prev) => {
                                 const next = new Set(prev);
                                 next.add(selected.id);
@@ -565,9 +566,9 @@ export const InboxView: React.FC<Props> = ({
         />
       )}
 
-      {showCompleteModal && mode === 'simulation' && (
+      {showCompleteModal && (mode === 'simulation' || mode === 'pvp') && (
         <LevelCompleteModal
-          title={`Level ${level ?? ''} complete`}
+          title={mode === 'pvp' ? 'PVP level complete' : `Level ${level ?? ''} complete`}
           subtitle="Results:"
           correct={runCorrect}
           incorrect={runIncorrect}

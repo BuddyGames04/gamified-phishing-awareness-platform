@@ -71,8 +71,13 @@ class PvpEmail(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        ordering = ["is_wave", "sort_order", "id"]
+    shadow_email = models.OneToOneField(
+        "api.Email",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="pvp_source",
+    )
 
     def clean(self):
         super().clean()
@@ -90,3 +95,26 @@ class PvpEmail(models.Model):
             raise ValidationError(
                 "Email must have at least one link or one attachment."
             )
+
+    def sync_shadow_email(self):
+        from .models import Email
+        shadow, _ = Email.objects.update_or_create(
+            mode="pvp",
+            pvp_level=self.level,
+            sender_email=self.sender_email,
+            subject=self.subject,
+            defaults=dict(
+                sender_name=self.sender_name,
+                body=self.body,
+                is_phish=self.is_phish,
+                difficulty=self.difficulty,
+                category=self.category,
+                links=self.links or [],
+                attachments=self.attachments or [],
+            )
+        )
+        self.shadow_email = shadow
+        self.save(update_fields=["shadow_email"])
+
+    class Meta:
+        ordering = ["is_wave", "sort_order", "id"]

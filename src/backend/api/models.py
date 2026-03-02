@@ -58,7 +58,19 @@ class Email(models.Model):
     mode = models.CharField(
         max_length=20,
         default="arcade",
-        choices=[("arcade", "Arcade"), ("simulation", "Simulation")],
+        choices=[
+            ("arcade", "Arcade"),
+            ("simulation", "Simulation"),
+            ("pvp", "PVP"),
+        ],
+    )
+
+    pvp_level = models.ForeignKey(
+        "api.PvpLevel",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="emails_shadow",
     )
 
     def clean(self):

@@ -6,35 +6,14 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from .models import Email
 from .models_pvp import PvpEmail, PvpLevel, PvpScenario
+from .serializers import EmailSerializer
 from .serializers_pvp import (
     PvpEmailSerializer,
     PvpLevelSerializer,
     PvpScenarioSerializer,
 )
-
-
-# Reuse existing EmailSerializer shape by returning a compatible dict
-def _pvp_email_as_email_serializer_shape(
-    em: PvpEmail, current_level_number: int | None = None
-):
-    return {
-        "id": em.id,
-        "sender_name": em.sender_name,
-        "sender_email": em.sender_email,
-        "subject": em.subject,
-        "body": em.body,
-        "is_phish": em.is_phish,
-        "difficulty": em.difficulty,
-        "category": em.category,
-        "created_at": em.created_at,
-        "links": em.links or [],
-        "attachments": em.attachments or [],
-        # mimic existing Email model fields
-        "mode": "pvp",
-        "scenario": None,  # not used by InboxView, but keeps field present
-        "current_level_number": current_level_number,
-    }
 
 
 # -------------------------
@@ -139,7 +118,15 @@ def pvp_levels_detail(request, level_id: int):
         return Response({"detail": "Level not found"}, status=404)
 
     if request.method == "DELETE":
+        # delete shadow Email rows for all emails in this level
+        shadow_ids = list(
+            PvpEmail.objects.filter(level=lvl)
+            .exclude(shadow_email__isnull=True)
+            .values_list("shadow_email_id", flat=True)
+        )
         lvl.delete()
+        if shadow_ids:
+            Email.objects.filter(id__in=shadow_ids).delete()
         return Response(status=204)
 
     # Block visibility changes to posted here — must use /publish/
@@ -237,7 +224,10 @@ def pvp_level_emails_detail(request, level_id: int, email_id: int):
         return Response({"detail": "Email not found"}, status=404)
 
     if request.method == "DELETE":
+        sid = em.shadow_email_id
         em.delete()
+        if sid:
+            Email.objects.filter(id=sid).delete()
         return Response(status=204)
 
     ser = PvpEmailSerializer(em, data=request.data, partial=True)
@@ -252,13 +242,21 @@ def pvp_level_emails_detail(request, level_id: int, email_id: int):
 
 
 # -------------------------
-# Play endpoint (reuses InboxView)
+# Play endpoint (InboxView) — returns shadow Email rows
 # -------------------------
 
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def pvp_play_emails(request):
+    """
+    Returns real Email rows (shadow copies) so the frontend can reuse the existing
+    EmailSerializer shape without special-casing PVP.
+
+    Rules:
+    - Can play if the level is posted OR the requester is the owner.
+    - Supports ?wave=true|false and ?limit=N.
+    """
     level_id = request.query_params.get("level_id")
     if not level_id:
         return Response({"detail": "level_id required"}, status=400)
@@ -267,6 +265,15 @@ def pvp_play_emails(request):
         lvl_id_int = int(level_id)
     except ValueError:
         return Response({"detail": "level_id must be an integer"}, status=400)
+
+    limit = int(request.query_params.get("limit", "20"))
+    wave_true = str(request.query_params.get("wave", "")).lower() in (
+        "1",
+        "true",
+        "yes",
+        "y",
+        "on",
+    )
 
     # Can play if posted OR owner
     lvl = (
@@ -278,21 +285,29 @@ def pvp_play_emails(request):
     if not lvl:
         return Response({"detail": "Level not found"}, status=404)
 
-    limit = int(request.query_params.get("limit", "20"))
-    wave_true = str(request.query_params.get("wave", "")).lower() in (
-        "1",
-        "true",
-        "yes",
-        "y",
-        "on",
+    # PvpEmail rows in the correct order for this wave state
+    pvp_qs = (
+        PvpEmail.objects.filter(level=lvl, is_wave=wave_true)
+        .order_by("sort_order", "id")[:limit]
     )
 
-    qs = PvpEmail.objects.filter(level=lvl, is_wave=wave_true).order_by(
-        "sort_order", "id"
-    )[:limit]
+    # Ensure shadow emails exist and preserve order
+    shadow_ids: list[int] = []
+    for pe in pvp_qs:
+        sid = getattr(pe, "shadow_email_id", None)
+        if sid is None:
+            if hasattr(pe, "sync_shadow_email") and callable(pe.sync_shadow_email):
+                pe.sync_shadow_email()
+                sid = getattr(pe, "shadow_email_id", None)
 
-    # Return objects in EmailSerializer-compatible shape
-    payload = [
-        _pvp_email_as_email_serializer_shape(e, current_level_number=None) for e in qs
-    ]
-    return Response(payload)
+        if sid is not None:
+            shadow_ids.append(int(sid))
+
+    if not shadow_ids:
+        return Response([], status=200)
+
+    shadows = Email.objects.filter(id__in=shadow_ids)
+    shadows_by_id = {e.id: e for e in shadows}
+    ordered = [shadows_by_id[sid] for sid in shadow_ids if sid in shadows_by_id]
+
+    return Response(EmailSerializer(ordered, many=True).data)
