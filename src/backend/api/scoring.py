@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+def base_points(correct: int, incorrect: int) -> int:
+    base = (correct * 100) - (incorrect * 180)
+    return max(0, base)
+
 def _sim_band_weight(level_number: int) -> float:
     if level_number <= 5:
         return 0.90
