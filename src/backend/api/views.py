@@ -1,4 +1,3 @@
-# src/backend/api/views.py
 import random
 
 from django.db.models import F
@@ -84,14 +83,23 @@ def get_level(request):
     if not level:
         return Response({"detail": "level required"}, status=400)
 
+    scenario_id = request.query_params.get("scenario_id")
+
     try:
         level_num = int(level)
     except ValueError:
         return Response({"detail": "level must be int"}, status=400)
 
-    try:
-        lvl = Level.objects.select_related("scenario").get(number=level_num)
-    except Level.DoesNotExist:
+    qs = Level.objects.select_related("scenario").filter(number=level_num)
+
+    if scenario_id:
+        try:
+            qs = qs.filter(scenario_id=int(scenario_id))
+        except ValueError:
+            return Response({"detail": "scenario_id must be int"}, status=400)
+
+    lvl = qs.first()
+    if not lvl:
         return Response({"detail": "Level not found"}, status=404)
 
     scenario_payload = ScenarioSerializer(lvl.scenario).data

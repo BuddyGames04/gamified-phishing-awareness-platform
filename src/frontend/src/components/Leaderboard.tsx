@@ -245,7 +245,7 @@ const Leaderboard: React.FC<Props> = ({ onBack }) => {
             <div>
               <h1 className="screen-title">Leaderboard</h1>
               <p className="screen-subtitle">
-                Server aggregates. Client demonstrates filter/search + merge sort / bubble sort.
+                FYI - Server aggregates. Client demonstrates filter/search + merge sort / bubble sort.
               </p>
             </div>
           </div>

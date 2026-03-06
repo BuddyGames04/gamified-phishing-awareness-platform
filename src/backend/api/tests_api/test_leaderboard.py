@@ -25,7 +25,7 @@ class TestLeaderboard(APITestCase):
             correct=5,
             incorrect=0,
             points=500,
-            completed_at=timezone.now(),  # important: leaderboard likely filters completed runs
+            completed_at=timezone.now(),  
         )
         LevelRun.objects.create(
             user_id="u1",

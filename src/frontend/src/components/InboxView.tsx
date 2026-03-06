@@ -72,6 +72,9 @@ export const InboxView: React.FC<Props> = ({
   const [elapsedMs, setElapsedMs] = useState(0);
   const startedAtRef = useRef<number | null>(null);
 
+  const [finalTimeMs, setFinalTimeMs] = useState<number | null>(null);
+  const [finalScore, setFinalScore] = useState<number | null>(null);
+
   const calcScore = useCallback(() => {
     const total = runTotal || 0;
     if (total <= 0) return 0;
@@ -167,6 +170,9 @@ export const InboxView: React.FC<Props> = ({
 
         setRunCompleted(false);
         setRunId(null);
+
+        setFinalTimeMs(null);
+        setFinalScore(null);
 
         if (mode === 'simulation' || mode === 'pvp') {
           try {
@@ -306,12 +312,21 @@ export const InboxView: React.FC<Props> = ({
               ? Date.now() - startedAtRef.current
               : elapsedMs;
 
+          const scoreNow = Math.round(
+            nextCorrect + nextIncorrect > 0
+              ? (nextCorrect / (nextCorrect + nextIncorrect)) * 1000
+              : 0
+          );
+
+          setFinalTimeMs(clientMs);
+          setFinalScore(scoreNow);
+
           setRunCompleted(true);
           completeLevelRun(runId, {
             correct: nextCorrect,
             incorrect: nextIncorrect,
             client_duration_ms: clientMs,
-            points: calcScore(),
+            points: scoreNow,
           } as any).catch((e) => console.error('Failed to complete level run', e));
         }
       }
@@ -413,9 +428,6 @@ export const InboxView: React.FC<Props> = ({
             <>
               <div className="arcade-score-pill">
                 Time: <strong>{Math.floor(elapsedMs / 1000)}s</strong>
-              </div>
-              <div className="arcade-score-pill">
-                Score: <strong>{calcScore()}</strong>
               </div>
             </>
           )}
@@ -587,13 +599,15 @@ export const InboxView: React.FC<Props> = ({
 
       {showCompleteModal && (mode === 'simulation' || mode === 'pvp') && (
         <LevelCompleteModal
-          title={
-            mode === 'pvp' ? 'PVP level complete' : `Level ${level ?? ''} complete`
-          }
+          title={mode === 'pvp' ? 'PVP level complete' : `Level ${level ?? ''} complete`}
           subtitle="Results:"
           correct={runCorrect}
           incorrect={runIncorrect}
           total={runTotal}
+          timeSeconds={
+            finalTimeMs != null ? Math.floor(finalTimeMs / 1000) : Math.floor(elapsedMs / 1000)
+          }
+          score={finalScore != null ? finalScore : calcScore()}
           hints={getHintLines(runHintRuleIds)}
           onReplay={() => setRunKey((k) => k + 1)}
           onExit={onExit}

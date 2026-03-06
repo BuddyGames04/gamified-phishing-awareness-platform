@@ -14,6 +14,8 @@ interface Props {
 
   // NEW
   hints?: HintLine[];
+  timeSeconds?: number;
+  score?: number;
 }
 
 const LevelCompleteModal: React.FC<Props> = ({
@@ -25,6 +27,8 @@ const LevelCompleteModal: React.FC<Props> = ({
   onReplay,
   onExit,
   hints,
+  score,
+  timeSeconds,
 }) => {
   const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
 
@@ -47,6 +51,13 @@ const LevelCompleteModal: React.FC<Props> = ({
           <div>
             <strong>Accuracy:</strong> {accuracy}%
           </div>
+          {typeof timeSeconds === 'number' && (
+            <div><strong>Time:</strong> {timeSeconds}s</div>
+          )}
+
+          {typeof score === 'number' && (
+            <div><strong>Score:</strong> {score}</div>
+          )}
         </div>
 
         {/* NEW: Hints */}
