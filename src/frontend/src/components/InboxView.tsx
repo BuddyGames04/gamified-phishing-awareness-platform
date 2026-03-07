@@ -97,8 +97,8 @@ export const InboxView: React.FC<Props> = ({
   }, []);
 
   const triggerIncomingWave = useCallback(
-    async (removedId?: number) => {
-      if (mode === 'pvp' && !pvpLevelId) return;
+    async (removedId?: number): Promise<number> => {
+      if (mode === 'pvp' && !pvpLevelId) return 0;
 
       setWaveTriggered(true);
 
@@ -113,6 +113,8 @@ export const InboxView: React.FC<Props> = ({
               wave: true,
             } as any);
 
+      let unseenCount = 0;
+
       setEmails((prev) => {
         const existingIds = new Set(prev.map((e) => e.id));
 
@@ -121,6 +123,8 @@ export const InboxView: React.FC<Props> = ({
           if (existingIds.has(e.id)) return false;
           return true;
         });
+
+        unseenCount = unseen.length;
 
         unseen.forEach((e) => seenEmailIdsRef.current.add(e.id));
         setIncomingQueue(unseen);
@@ -134,6 +138,8 @@ export const InboxView: React.FC<Props> = ({
         const remaining = removedId ? prev.filter((e) => e.id !== removedId) : prev;
         return unseen.length > 0 ? [...unseen, ...remaining] : remaining;
       });
+
+      return unseenCount;
     },
     [mode, scenarioId, level, pvpLevelId]
   );
@@ -229,6 +235,33 @@ export const InboxView: React.FC<Props> = ({
     return () => clearTimeout(timer);
   }, [runKey, mode, waveTriggered, triggerIncomingWave]);
 
+  const finalizeRun = useCallback(
+    (nextCorrect: number, nextIncorrect: number) => {
+      const clientMs =
+        startedAtRef.current != null ? Date.now() - startedAtRef.current : elapsedMs;
+
+      const scoreNow = Math.round(
+        nextCorrect + nextIncorrect > 0
+          ? (nextCorrect / (nextCorrect + nextIncorrect)) * 1000
+          : 0
+      );
+
+      setFinalTimeMs(clientMs);
+      setFinalScore(scoreNow);
+      setShowCompleteModal(true);
+
+      if ((mode === 'simulation' || mode === 'pvp') && runId && !runCompleted) {
+        setRunCompleted(true);
+        completeLevelRun(runId, {
+          correct: nextCorrect,
+          incorrect: nextIncorrect,
+          client_duration_ms: clientMs,
+        } as any).catch((e) => console.error('Failed to complete level run', e));
+      }
+    },
+    [elapsedMs, mode, runId, runCompleted]
+  );
+
   const handleDecision = async (isPhishGuess: boolean) => {
     if (!selected) return;
 
@@ -279,16 +312,24 @@ export const InboxView: React.FC<Props> = ({
     const removedId = selected.id;
 
     const isFinalEmail = emails.length === 1;
-    if (
-      (mode === 'simulation' || mode === 'pvp') &&
-      isFinalEmail &&
-      !waveTriggered &&
-      isHighLevel(level)
-    ) {
+    const shouldTriggerFinalWave =
+      mode === 'pvp'
+        ? isFinalEmail && !waveTriggered
+        : isFinalEmail && !waveTriggered && isHighLevel(level);
+
+    if ((mode === 'simulation' || mode === 'pvp') && shouldTriggerFinalWave) {
+      const nextCorrect = isCorrect ? runCorrect + 1 : runCorrect;
+      const nextIncorrect = !isCorrect ? runIncorrect + 1 : runIncorrect;
+
       try {
-        await triggerIncomingWave(removedId);
+        const added = await triggerIncomingWave(removedId);
+
+        if (added === 0) {
+          finalizeRun(nextCorrect, nextIncorrect);
+        }
       } catch (e) {
         console.error('triggerIncomingWave failed', e);
+        finalizeRun(nextCorrect, nextIncorrect);
       }
 
       setSelected(null);
@@ -301,34 +342,9 @@ export const InboxView: React.FC<Props> = ({
       const next = prev.filter((e) => e.id !== removedId);
 
       if (next.length === 0) {
-        setShowCompleteModal(true);
-
-        if ((mode === 'simulation' || mode === 'pvp') && runId && !runCompleted) {
-          const nextCorrect = isCorrect ? runCorrect + 1 : runCorrect;
-          const nextIncorrect = !isCorrect ? runIncorrect + 1 : runIncorrect;
-
-          const clientMs =
-            startedAtRef.current != null
-              ? Date.now() - startedAtRef.current
-              : elapsedMs;
-
-          const scoreNow = Math.round(
-            nextCorrect + nextIncorrect > 0
-              ? (nextCorrect / (nextCorrect + nextIncorrect)) * 1000
-              : 0
-          );
-
-          setFinalTimeMs(clientMs);
-          setFinalScore(scoreNow);
-
-          setRunCompleted(true);
-          completeLevelRun(runId, {
-            correct: nextCorrect,
-            incorrect: nextIncorrect,
-            client_duration_ms: clientMs,
-            points: scoreNow,
-          } as any).catch((e) => console.error('Failed to complete level run', e));
-        }
+        const nextCorrect = isCorrect ? runCorrect + 1 : runCorrect;
+        const nextIncorrect = !isCorrect ? runIncorrect + 1 : runIncorrect;
+        finalizeRun(nextCorrect, nextIncorrect);
       }
 
       return next;

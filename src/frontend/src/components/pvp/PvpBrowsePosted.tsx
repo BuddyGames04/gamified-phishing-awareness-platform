@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { fetchPvpPostedLevels, PvpLevel } from '../../api';
+import ScenarioIntroModal from '../ScenarioIntroModal';
 
 type Props = {
   onBack: () => void;
@@ -9,6 +10,7 @@ type Props = {
 const PvpBrowsePosted: React.FC<Props> = ({ onBack, onPlay }) => {
   const [levels, setLevels] = useState<PvpLevel[]>([]);
   const [err, setErr] = useState<string | null>(null);
+  const [activeLevel, setActiveLevel] = useState<PvpLevel | null>(null);
 
   useEffect(() => {
     fetchPvpPostedLevels()
@@ -58,7 +60,7 @@ const PvpBrowsePosted: React.FC<Props> = ({ onBack, onPlay }) => {
               </div>
             </div>
 
-            <button className="btn btn-ok" onClick={() => onPlay(lvl.id)}>
+            <button className="btn btn-ok" onClick={() => setActiveLevel(lvl)}>
               Play
             </button>
           </div>
@@ -67,6 +69,21 @@ const PvpBrowsePosted: React.FC<Props> = ({ onBack, onPlay }) => {
           <div style={{ opacity: 0.8 }}>No posted levels yet.</div>
         )}
       </div>
+
+      {activeLevel && (
+        <ScenarioIntroModal
+          scenario={activeLevel.scenario}
+          level={1}
+          levelTitle={activeLevel.title}
+          levelBriefing={activeLevel.briefing}
+          onClose={() => setActiveLevel(null)}
+          onStart={() => {
+            const id = activeLevel.id;
+            setActiveLevel(null);
+            onPlay(id);
+          }}
+        />
+      )}
     </div>
   );
 };

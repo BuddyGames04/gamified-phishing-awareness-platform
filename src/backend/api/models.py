@@ -138,7 +138,11 @@ class LevelRun(models.Model):
     mode = models.CharField(
         max_length=20,
         default="simulation",
-        choices=[("arcade", "Arcade"), ("simulation", "Simulation")],
+        choices=[
+            ("arcade", "Arcade"),
+            ("simulation", "Simulation"),
+            ("pvp", "PVP"),
+        ]
     )
 
     # Optional but strongly recommended: tie to Level for clean aggregation
@@ -147,6 +151,13 @@ class LevelRun(models.Model):
     )
     scenario = models.ForeignKey(
         Scenario, null=True, blank=True, on_delete=models.SET_NULL, related_name="runs"
+    )
+    pvp_level = models.ForeignKey(
+        "api.PvpLevel",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="runs",
     )
     level_number = models.IntegerField(
         default=1
@@ -175,6 +186,7 @@ class LevelRun(models.Model):
         self.correct = int(correct)
         self.incorrect = int(incorrect)
         self.completed_at = timezone.now()
+        self.emails_total = max(int(self.emails_total or 0), self.correct + self.incorrect)
 
         # Server duration: prefer explicit duration_ms if provided, else compute
         if duration_ms is not None:
@@ -198,6 +210,7 @@ class LevelRun(models.Model):
                 "correct",
                 "incorrect",
                 "completed_at",
+                "emails_total",
                 "duration_ms",
                 "client_duration_ms",
                 "points",

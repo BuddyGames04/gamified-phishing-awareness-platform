@@ -30,7 +30,8 @@ const LevelCompleteModal: React.FC<Props> = ({
   score,
   timeSeconds,
 }) => {
-  const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+  const safeTotal = Math.max(total, correct + incorrect);
+  const accuracy = safeTotal > 0 ? Math.round((correct / safeTotal) * 100) : 0;
 
   return (
     <div className="level-complete-backdrop" role="dialog" aria-modal="true">
@@ -40,7 +41,7 @@ const LevelCompleteModal: React.FC<Props> = ({
 
         <div className="stats">
           <div>
-            <strong>Total:</strong> {total}
+            <strong>Total:</strong> {safeTotal}
           </div>
           <div>
             <strong>Correct:</strong> {correct}

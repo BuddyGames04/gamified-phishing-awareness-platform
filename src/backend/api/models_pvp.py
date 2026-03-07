@@ -99,23 +99,38 @@ class PvpEmail(models.Model):
     def sync_shadow_email(self):
         from .models import Email
 
-        shadow, _ = Email.objects.update_or_create(
-            mode="pvp",
-            pvp_level=self.level,
+        if self.shadow_email_id:
+            shadow = self.shadow_email
+            shadow.sender_name = self.sender_name
+            shadow.sender_email = self.sender_email
+            shadow.subject = self.subject
+            shadow.body = self.body
+            shadow.is_phish = self.is_phish
+            shadow.difficulty = self.difficulty
+            shadow.category = self.category
+            shadow.links = self.links or []
+            shadow.attachments = self.attachments or []
+            shadow.mode = "pvp"
+            shadow.pvp_level = self.level
+            shadow.save()
+            return shadow
+
+        shadow = Email.objects.create(
+            sender_name=self.sender_name,
             sender_email=self.sender_email,
             subject=self.subject,
-            defaults=dict(
-                sender_name=self.sender_name,
-                body=self.body,
-                is_phish=self.is_phish,
-                difficulty=self.difficulty,
-                category=self.category,
-                links=self.links or [],
-                attachments=self.attachments or [],
-            ),
+            body=self.body,
+            is_phish=self.is_phish,
+            difficulty=self.difficulty,
+            category=self.category,
+            links=self.links or [],
+            attachments=self.attachments or [],
+            mode="pvp",
+            pvp_level=self.level,
         )
         self.shadow_email = shadow
         self.save(update_fields=["shadow_email"])
+        return shadow
 
     class Meta:
         ordering = ["is_wave", "sort_order", "id"]

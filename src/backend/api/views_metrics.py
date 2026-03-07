@@ -15,7 +15,7 @@ from .models import (
     LevelRun,
     Scenario,
 )
-from .models_pvp import PvpLevel  # needed for creator metrics
+from .models_pvp import PvpLevel
 from .serializers_metrics import (
     CompleteRunSerializer,
     DecisionCreateSerializer,
@@ -85,22 +85,28 @@ class StartLevelRunView(APIView):
         scenario_id = data.get("scenario_id")
         level_number = data["level_number"]
         emails_total = data["emails_total"]
+        pvp_level_id = data.get("pvp_level_id")
 
         scenario = None
         level = None
+        pvp_level = None
 
-        if scenario_id is not None:
+        if mode == "simulation" and scenario_id is not None:
             scenario = Scenario.objects.filter(id=scenario_id).first()
             if scenario:
                 level = Level.objects.filter(
                     scenario=scenario, number=level_number
                 ).first()
 
+        if mode == "pvp" and pvp_level_id is not None:
+            pvp_level = PvpLevel.objects.filter(id=pvp_level_id).first()
+
         run = LevelRun.objects.create(
             user_id=user_id,
             mode=mode,
             scenario=scenario,
             level=level,
+            pvp_level=pvp_level,
             level_number=level_number,
             emails_total=emails_total,
         )
