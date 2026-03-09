@@ -53,11 +53,15 @@ const LevelCompleteModal: React.FC<Props> = ({
             <strong>Accuracy:</strong> {accuracy}%
           </div>
           {typeof timeSeconds === 'number' && (
-            <div><strong>Time:</strong> {timeSeconds}s</div>
+            <div>
+              <strong>Time:</strong> {timeSeconds}s
+            </div>
           )}
 
           {typeof score === 'number' && (
-            <div><strong>Score:</strong> {score}</div>
+            <div>
+              <strong>Score:</strong> {score}
+            </div>
           )}
         </div>
 

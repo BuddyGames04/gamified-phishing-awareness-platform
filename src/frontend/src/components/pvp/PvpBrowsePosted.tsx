@@ -49,7 +49,7 @@ const PvpBrowsePosted: React.FC<Props> = ({ onBack, onPlay }) => {
               gap: 12,
             }}
           >
-            <div>
+            <div style={{ flex: 1, textAlign: 'left' }}>
               <div style={{ fontWeight: 700 }}>{lvl.title}</div>
               <div style={{ fontSize: 13, opacity: 0.85 }}>
                 {lvl.scenario?.company_name} — {lvl.scenario?.role_title}

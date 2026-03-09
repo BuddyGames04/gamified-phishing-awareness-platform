@@ -343,7 +343,10 @@ export type LevelPreview = {
   scenario: Scenario;
 };
 
-export async function fetchLevel(level: number, scenarioId?: number): Promise<LevelPreview> {
+export async function fetchLevel(
+  level: number,
+  scenarioId?: number
+): Promise<LevelPreview> {
   const qs = new URLSearchParams();
   qs.set('level', String(level));
   if (scenarioId != null) qs.set('scenario_id', String(scenarioId));

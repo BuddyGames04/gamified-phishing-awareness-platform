@@ -3,14 +3,7 @@ import '../styles/MenuScreens.css';
 
 interface Props {
   navigate: (
-    screen:
-      | 'menu'
-      | 'inbox'
-      | 'arcade'
-      | 'levels'
-      | 'pvp'
-      | 'info'
-      | 'leaderboard'
+    screen: 'menu' | 'inbox' | 'arcade' | 'levels' | 'pvp' | 'info' | 'leaderboard'
   ) => void;
 }
 

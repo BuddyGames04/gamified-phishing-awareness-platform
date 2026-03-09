@@ -58,7 +58,7 @@ function containsQueryKmp(haystack: string, needle: string): boolean {
   return false;
 }
 
-// 2) Merge sort 
+// 2) Merge sort
 function mergeSort<T>(arr: T[], cmp: (a: T, b: T) => number): T[] {
   if (arr.length <= 1) return arr.slice();
 
@@ -245,7 +245,8 @@ const Leaderboard: React.FC<Props> = ({ onBack }) => {
             <div>
               <h1 className="screen-title">Leaderboard</h1>
               <p className="screen-subtitle">
-                FYI - Server aggregates. Client demonstrates filter/search + merge sort / bubble sort.
+                FYI - Server aggregates. Client demonstrates filter/search + merge sort
+                / bubble sort.
               </p>
             </div>
           </div>
@@ -316,7 +317,9 @@ const Leaderboard: React.FC<Props> = ({ onBack }) => {
                 value={limit}
                 min={5}
                 max={500}
-                onChange={(e) => setLimit(clampInt(parseInt(e.target.value || '50', 10), 5, 500))}
+                onChange={(e) =>
+                  setLimit(clampInt(parseInt(e.target.value || '50', 10), 5, 500))
+                }
                 style={{ width: 90 }}
               />
             </label>
@@ -397,25 +400,60 @@ const Leaderboard: React.FC<Props> = ({ onBack }) => {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ textAlign: 'left', opacity: 0.9 }}>
-                  <th style={{ padding: '10px 8px', borderBottom: '1px solid rgba(255,255,255,0.12)' }}>
+                  <th
+                    style={{
+                      padding: '10px 8px',
+                      borderBottom: '1px solid rgba(255,255,255,0.12)',
+                    }}
+                  >
                     #
                   </th>
-                  <th style={{ padding: '10px 8px', borderBottom: '1px solid rgba(255,255,255,0.12)' }}>
+                  <th
+                    style={{
+                      padding: '10px 8px',
+                      borderBottom: '1px solid rgba(255,255,255,0.12)',
+                    }}
+                  >
                     Username
                   </th>
-                  <th style={{ padding: '10px 8px', borderBottom: '1px solid rgba(255,255,255,0.12)' }}>
+                  <th
+                    style={{
+                      padding: '10px 8px',
+                      borderBottom: '1px solid rgba(255,255,255,0.12)',
+                    }}
+                  >
                     Score
                   </th>
-                  <th style={{ padding: '10px 8px', borderBottom: '1px solid rgba(255,255,255,0.12)' }}>
+                  <th
+                    style={{
+                      padding: '10px 8px',
+                      borderBottom: '1px solid rgba(255,255,255,0.12)',
+                    }}
+                  >
                     Runs
                   </th>
-                  <th style={{ padding: '10px 8px', borderBottom: '1px solid rgba(255,255,255,0.12)' }}>
+                  <th
+                    style={{
+                      padding: '10px 8px',
+                      borderBottom: '1px solid rgba(255,255,255,0.12)',
+                    }}
+                  >
                     Correct
                   </th>
-                  <th style={{ padding: '10px 8px', borderBottom: '1px solid rgba(255,255,255,0.12)' }}>
+                  <th
+                    style={{
+                      padding: '10px 8px',
+                      borderBottom: '1px solid rgba(255,255,255,0.12)',
+                    }}
+                  >
                     Incorrect
                   </th>
-                  <th style={{ padding: '10px 8px', borderBottom: '1px solid rgba(255,255,255,0.12)' }}>
+                  <th
+                    style={{
+                      padding: '10px 8px',
+                      borderBottom: '1px solid rgba(255,255,255,0.12)',
+                    }}
+                  >
                     Avg time
                   </th>
                 </tr>
@@ -444,25 +482,62 @@ const Leaderboard: React.FC<Props> = ({ onBack }) => {
                         }}
                         title={isFound ? 'Matched by linear search' : undefined}
                       >
-                        <td style={{ padding: '10px 8px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                        <td
+                          style={{
+                            padding: '10px 8px',
+                            borderBottom: '1px solid rgba(255,255,255,0.06)',
+                          }}
+                        >
                           {idx + 1}
                         </td>
-                        <td style={{ padding: '10px 8px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                          <span title={String(r.user_id ?? '')}>{slicePreview(String(r.user_id ?? ''), 24)}</span>
+                        <td
+                          style={{
+                            padding: '10px 8px',
+                            borderBottom: '1px solid rgba(255,255,255,0.06)',
+                          }}
+                        >
+                          <span title={String(r.user_id ?? '')}>
+                            {slicePreview(String(r.user_id ?? ''), 24)}
+                          </span>
                         </td>
-                        <td style={{ padding: '10px 8px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                        <td
+                          style={{
+                            padding: '10px 8px',
+                            borderBottom: '1px solid rgba(255,255,255,0.06)',
+                          }}
+                        >
                           <strong>{safeNum(r.score, 0)}</strong>
                         </td>
-                        <td style={{ padding: '10px 8px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                        <td
+                          style={{
+                            padding: '10px 8px',
+                            borderBottom: '1px solid rgba(255,255,255,0.06)',
+                          }}
+                        >
                           {safeNum(r.runs, 0)}
                         </td>
-                        <td style={{ padding: '10px 8px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                        <td
+                          style={{
+                            padding: '10px 8px',
+                            borderBottom: '1px solid rgba(255,255,255,0.06)',
+                          }}
+                        >
                           {safeNum(r.correct, 0)}
                         </td>
-                        <td style={{ padding: '10px 8px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                        <td
+                          style={{
+                            padding: '10px 8px',
+                            borderBottom: '1px solid rgba(255,255,255,0.06)',
+                          }}
+                        >
                           {safeNum(r.incorrect, 0)}
                         </td>
-                        <td style={{ padding: '10px 8px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                        <td
+                          style={{
+                            padding: '10px 8px',
+                            borderBottom: '1px solid rgba(255,255,255,0.06)',
+                          }}
+                        >
                           {fmtMs(r.avg_duration_ms ?? null)}
                         </td>
                       </tr>
@@ -475,10 +550,14 @@ const Leaderboard: React.FC<Props> = ({ onBack }) => {
 
           {/* Tiny footer note */}
           <div style={{ marginTop: 10, fontSize: 12, opacity: 0.75 }}>
-            Client-side demo: filter uses {useKmp ? 'KMP' : 'includes'}; prefix mode uses{' '}
-            <code>slice()</code>; sorting uses{' '}
-            {sortAlgo === 'merge' ? 'merge sort' : sortAlgo === 'bubble' ? 'bubble sort' : 'native sort'}; “Find exact user”
-            uses linear search.
+            Client-side demo: filter uses {useKmp ? 'KMP' : 'includes'}; prefix mode
+            uses <code>slice()</code>; sorting uses{' '}
+            {sortAlgo === 'merge'
+              ? 'merge sort'
+              : sortAlgo === 'bubble'
+                ? 'bubble sort'
+                : 'native sort'}
+            ; “Find exact user” uses linear search.
           </div>
         </div>
       </div>

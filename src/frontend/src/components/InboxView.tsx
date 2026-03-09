@@ -615,13 +615,17 @@ export const InboxView: React.FC<Props> = ({
 
       {showCompleteModal && (mode === 'simulation' || mode === 'pvp') && (
         <LevelCompleteModal
-          title={mode === 'pvp' ? 'PVP level complete' : `Level ${level ?? ''} complete`}
+          title={
+            mode === 'pvp' ? 'PVP level complete' : `Level ${level ?? ''} complete`
+          }
           subtitle="Results:"
           correct={runCorrect}
           incorrect={runIncorrect}
           total={runTotal}
           timeSeconds={
-            finalTimeMs != null ? Math.floor(finalTimeMs / 1000) : Math.floor(elapsedMs / 1000)
+            finalTimeMs != null
+              ? Math.floor(finalTimeMs / 1000)
+              : Math.floor(elapsedMs / 1000)
           }
           score={finalScore != null ? finalScore : calcScore()}
           hints={getHintLines(runHintRuleIds)}

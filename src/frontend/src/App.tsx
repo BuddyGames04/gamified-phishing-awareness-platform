@@ -11,7 +11,6 @@ import PvpRoot from './components/pvp/PvpRoot';
 import InfoView from './components/InfoView';
 import Leaderboard from './components/Leaderboard';
 
-
 type Screen =
   | 'menu'
   | 'inbox'
@@ -134,9 +133,7 @@ const App: React.FC = () => {
           </div>
         </div>
       )}
-      {screen === 'leaderboard' && (
-        <Leaderboard onBack={() => setScreen('menu')} />
-      )}
+      {screen === 'leaderboard' && <Leaderboard onBack={() => setScreen('menu')} />}
       {screen === 'pvp' && (
         <PvpRoot
           onExitPvp={() => setScreen('menu')}
