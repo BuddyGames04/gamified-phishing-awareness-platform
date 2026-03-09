@@ -45,7 +45,7 @@ const PvpBrowsePosted: React.FC<Props> = ({ onBack, onPlay }) => {
               padding: 12,
               display: 'flex',
               justifyContent: 'space-between',
-              alignItems: 'center',
+              alignItems: 'flex-start',
               gap: 12,
             }}
           >
