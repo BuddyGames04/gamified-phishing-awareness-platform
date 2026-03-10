@@ -432,6 +432,22 @@ export async function publishPvpLevel(levelId: number): Promise<PvpLevel> {
   return res.json();
 }
 
+export async function updatePvpLevel(
+  levelId: number,
+  params: { title?: string; briefing?: string; scenario_id?: number; visibility?: PvpVisibility }
+): Promise<PvpLevel> {
+  const res = await authFetch(`${API_BASE}/pvp/levels/${levelId}/`, {
+    method: 'PATCH',
+    headers: {},
+    body: JSON.stringify(params),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to update PVP level: ${text}`);
+  }
+  return res.json();
+}
+
 export async function deletePvpLevel(levelId: number): Promise<void> {
   const res = await authFetch(`${API_BASE}/pvp/levels/${levelId}/`, {
     method: 'DELETE',
@@ -481,6 +497,56 @@ export async function createPvpEmail(params: {
     throw new Error(`Failed to create PVP email: ${text}`);
   }
   return res.json();
+}
+
+export async function fetchPvpLevelEmails(levelId: number): Promise<PvpEmail[]> {
+  const res = await authFetch(`${API_BASE}/pvp/levels/${levelId}/emails/`, {
+    method: 'GET',
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to fetch PVP level emails: ${text}`);
+  }
+  return res.json();
+}
+
+export async function updatePvpEmail(
+  levelId: number,
+  emailId: number,
+  params: {
+    sender_name?: string;
+    sender_email?: string;
+    subject?: string;
+    body?: string;
+    is_phish?: boolean;
+    difficulty?: number;
+    category?: string | null;
+    links?: string[];
+    attachments?: string[];
+    is_wave?: boolean;
+    sort_order?: number;
+  }
+): Promise<PvpEmail> {
+  const res = await authFetch(`${API_BASE}/pvp/levels/${levelId}/emails/${emailId}/`, {
+    method: 'PATCH',
+    headers: {},
+    body: JSON.stringify(params),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to update PVP email: ${text}`);
+  }
+  return res.json();
+}
+
+export async function deletePvpEmail(levelId: number, emailId: number): Promise<void> {
+  const res = await authFetch(`${API_BASE}/pvp/levels/${levelId}/emails/${emailId}/`, {
+    method: 'DELETE',
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to delete PVP email: ${text}`);
+  }
 }
 
 export async function fetchPvpEmails(params: {

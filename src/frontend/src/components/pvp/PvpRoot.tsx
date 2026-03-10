@@ -3,9 +3,11 @@ import PvpMenu from './PvpMenu';
 import PvpBrowsePosted from './PvpBrowsePosted';
 import PvpMyLevels from './PvpMyLevels';
 import PvpCreateLevel from './PvpCreateLevel';
+import PvpEditLevel from './PvpEditLevel';
 import InboxView from '../InboxView';
+import { PvpLevel } from '../../api';
 
-type Screen = 'menu' | 'posted' | 'mine' | 'create' | 'play';
+type Screen = 'menu' | 'posted' | 'mine' | 'create' | 'edit' | 'play';
 
 type Props = {
   onExitPvp: () => void;
@@ -17,6 +19,7 @@ type Props = {
 const PvpRoot: React.FC<Props> = ({ onExitPvp, userId, username, onOpenMenu }) => {
   const [screen, setScreen] = useState<Screen>('menu');
   const [playingLevelId, setPlayingLevelId] = useState<number | null>(null);
+  const [editingLevel, setEditingLevel] = useState<PvpLevel | null>(null);
 
   const play = (levelId: number) => {
     setPlayingLevelId(levelId);
@@ -62,7 +65,29 @@ const PvpRoot: React.FC<Props> = ({ onExitPvp, userId, username, onOpenMenu }) =
     return (
       <>
         {PvpHamburgerButton}
-        <PvpMyLevels onBack={() => setScreen('menu')} onPlay={play} />
+        <PvpMyLevels
+          onBack={() => setScreen('menu')}
+          onPlay={play}
+          onEdit={(level) => {
+            setEditingLevel(level);
+            setScreen('edit');
+          }}
+        />
+      </>
+    );
+  }
+
+  if (screen === 'edit' && editingLevel) {
+    return (
+      <>
+        {PvpHamburgerButton}
+        <PvpEditLevel
+          level={editingLevel}
+          onBack={() => {
+            setEditingLevel(null);
+            setScreen('mine');
+          }}
+        />
       </>
     );
   }

@@ -135,6 +135,27 @@ class CompleteLevelRunView(APIView):
             client_duration_ms=ser.validated_data.get("client_duration_ms"),
         )
 
+        # Keep denormalized PVP stats in sync for fast listing endpoints.
+        if run.mode == "pvp" and run.pvp_level_id:
+            agg = LevelRun.objects.filter(
+                mode="pvp", pvp_level_id=run.pvp_level_id, completed_at__isnull=False
+            ).aggregate(
+                plays=Count("id"),
+                total_correct=Sum("correct"),
+                total_incorrect=Sum("incorrect"),
+            )
+
+            plays = int(agg.get("plays") or 0)
+            total_correct = int(agg.get("total_correct") or 0)
+            total_incorrect = int(agg.get("total_incorrect") or 0)
+            attempts = total_correct + total_incorrect
+            avg_accuracy = (total_correct / attempts) if attempts > 0 else 0.0
+
+            PvpLevel.objects.filter(id=run.pvp_level_id).update(
+                plays=plays,
+                avg_accuracy=avg_accuracy,
+            )
+
         return Response({"ok": True, "run_id": run.id})
 
 

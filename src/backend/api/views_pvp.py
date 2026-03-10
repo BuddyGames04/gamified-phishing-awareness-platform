@@ -1,12 +1,12 @@
 # src/backend/api/views_pvp.py
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Count, Q, Sum
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .models import Email
+from .models import Email, LevelRun
 from .models_pvp import PvpEmail, PvpLevel, PvpScenario
 from .serializers import EmailSerializer
 from .serializers_pvp import (
@@ -59,14 +59,50 @@ def pvp_scenarios_detail(request, scenario_id: int):
 # -------------------------
 
 
+def _hydrate_level_stats_from_runs(levels):
+    """Populate plays/avg_accuracy from completed PVP runs for response accuracy."""
+    level_ids = [lvl.id for lvl in levels]
+    if not level_ids:
+        return levels
+
+    runs = (
+        LevelRun.objects.filter(
+            mode="pvp", pvp_level_id__in=level_ids, completed_at__isnull=False
+        )
+        .values("pvp_level_id")
+        .annotate(
+            plays=Count("id"),
+            total_correct=Sum("correct"),
+            total_incorrect=Sum("incorrect"),
+        )
+    )
+
+    by_level = {row["pvp_level_id"]: row for row in runs}
+    for lvl in levels:
+        row = by_level.get(lvl.id)
+        if not row:
+            lvl.plays = 0
+            lvl.avg_accuracy = 0.0
+            continue
+
+        total_correct = int(row.get("total_correct") or 0)
+        total_incorrect = int(row.get("total_incorrect") or 0)
+        attempts = total_correct + total_incorrect
+        lvl.plays = int(row.get("plays") or 0)
+        lvl.avg_accuracy = (total_correct / attempts) if attempts > 0 else 0.0
+
+    return levels
+
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def pvp_levels_mine(request):
-    qs = (
+    qs = list(
         PvpLevel.objects.filter(owner=request.user)
         .select_related("scenario")
         .order_by("-created_at")
     )
+    qs = _hydrate_level_stats_from_runs(qs)
     return Response(PvpLevelSerializer(qs, many=True).data)
 
 
@@ -74,11 +110,12 @@ def pvp_levels_mine(request):
 @permission_classes([IsAuthenticated])
 def pvp_levels_posted(request):
     # Auth-only for now. If you want public later, remove permission decorator.
-    qs = (
+    qs = list(
         PvpLevel.objects.filter(visibility="posted")
         .select_related("scenario")
         .order_by("-created_at")
     )
+    qs = _hydrate_level_stats_from_runs(qs)
     return Response(PvpLevelSerializer(qs, many=True).data)
 
 

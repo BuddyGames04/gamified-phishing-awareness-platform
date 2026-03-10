@@ -1,18 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { fetchPvpMyLevels, publishPvpLevel, PvpLevel } from '../../api';
+import {
+  fetchPvpMyLevels,
+  publishPvpLevel,
+  PvpLevel,
+} from '../../api';
 
 type Props = {
   onBack: () => void;
   onPlay: (levelId: number) => void;
+  onEdit: (level: PvpLevel) => void;
 };
 
-const PvpMyLevels: React.FC<Props> = ({ onBack, onPlay }) => {
+const PvpMyLevels: React.FC<Props> = ({ onBack, onPlay, onEdit }) => {
   const [levels, setLevels] = useState<PvpLevel[]>([]);
   const [err, setErr] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
 
   const refresh = () => {
-    fetchPvpMyLevels()
+    return fetchPvpMyLevels()
       .then(setLevels)
       .catch((e) => setErr(String(e)));
   };
@@ -82,6 +87,11 @@ const PvpMyLevels: React.FC<Props> = ({ onBack, onPlay }) => {
               <button className="btn btn-ok" onClick={() => onPlay(lvl.id)}>
                 Play
               </button>
+              {lvl.visibility !== 'posted' && (
+                <button className="btn" onClick={() => onEdit(lvl)}>
+                  Edit
+                </button>
+              )}
               {lvl.visibility !== 'posted' && (
                 <button
                   className="btn btn-danger"
