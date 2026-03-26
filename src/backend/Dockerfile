@@ -1,31 +1,23 @@
-# Base image
 FROM python:3.12-slim
 
-# Prevents Python from writing pyc files & output buffering
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Set workdir
 WORKDIR /app
 
-# Install system dependencies (for psycopg + build tools + pg_isready)
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy dependency file
 COPY requirements.txt .
 
-# Install Python dependencies
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Copy backend source
 COPY . .
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
-# Expose Django’s default port
 EXPOSE 8000
 CMD ["/entrypoint.sh"]

@@ -1,6 +1,5 @@
 @import './variables.css';
 
-/* Shared shell for menu-like screens */
 .screen-shell {
   min-height: calc(100vh - 20px);
   background: #ffffff;
@@ -157,7 +156,6 @@
   white-space: nowrap;
 }
 
-/* Level select specific */
 .levels-layout {
   display: grid;
   grid-template-columns: 1fr 320px;
@@ -268,7 +266,6 @@
   font-weight: 700;
 }
 
-/* Small shared buttons for menu screens */
 .ms-btn {
   border: 1px solid #d1d5db;
   background: #ffffff;
@@ -285,7 +282,6 @@
   color: var(--color-text-main);
 }
 
-/* Blue level buttons (simple + punchy) */
 .level-button-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -325,7 +321,6 @@
   transform: translateY(0px);
 }
 
-/* Consistent hamburger trigger button */
 .hamburger-btn {
   width: 42px;
   height: 42px;
@@ -353,7 +348,6 @@
   transform: translateY(0);
 }
 
-/* Auth */
 .auth-form {
   display: grid;
   gap: 12px;

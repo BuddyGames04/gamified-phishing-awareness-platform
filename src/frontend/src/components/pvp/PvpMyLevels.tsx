@@ -1,9 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  fetchPvpMyLevels,
-  publishPvpLevel,
-  PvpLevel,
-} from '../../api';
+import { fetchPvpMyLevels, publishPvpLevel, PvpLevel } from '../../api';
 
 type Props = {
   onBack: () => void;

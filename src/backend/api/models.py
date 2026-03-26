@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 
-from .models_pvp import PvpEmail, PvpLevel, PvpScenario  # noqa
+from .models_pvp import PvpEmail, PvpLevel, PvpScenario        
 
 
 class Scenario(models.Model):
@@ -145,7 +145,6 @@ class LevelRun(models.Model):
         ]
     )
 
-    # Optional but strongly recommended: tie to Level for clean aggregation
     level = models.ForeignKey(
         Level, null=True, blank=True, on_delete=models.SET_NULL, related_name="runs"
     )
@@ -161,7 +160,7 @@ class LevelRun(models.Model):
     )
     level_number = models.IntegerField(
         default=1
-    )  # keep the global number for convenience
+    )                                          
 
     emails_total = models.IntegerField(default=0)
     correct = models.IntegerField(default=0)
@@ -170,7 +169,6 @@ class LevelRun(models.Model):
     started_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)
 
-    # timing + score (used later; not necessarily shown to users)
     duration_ms = models.IntegerField(default=0)
     client_duration_ms = models.IntegerField(null=True, blank=True)
     points = models.IntegerField(default=0)
@@ -188,17 +186,14 @@ class LevelRun(models.Model):
         self.completed_at = timezone.now()
         self.emails_total = max(int(self.emails_total or 0), self.correct + self.incorrect)
 
-        # Server duration: prefer explicit duration_ms if provided, else compute
         if duration_ms is not None:
             self.duration_ms = max(0, int(duration_ms))
         else:
             server_ms = int((self.completed_at - self.started_at).total_seconds() * 1000)
             self.duration_ms = max(0, server_ms)
 
-        # Client duration
         self.client_duration_ms = None if client_duration_ms is None else int(client_duration_ms)
 
-        # Points: prefer explicit points if provided, else compute
         if points is not None:
             self.points = int(points)
         else:

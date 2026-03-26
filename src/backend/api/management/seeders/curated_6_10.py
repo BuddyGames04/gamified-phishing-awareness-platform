@@ -6,12 +6,6 @@ from api.management.seeders.common import domain_for_company, slugify_company
 
 
 def curated_levels_6_10(scenario_by_company) -> list[dict[str, Any]]:
-    """
-    Levels 6–10: fully curated (handmade), no procedural generation.
-    Intentional inconsistency in level length:
-      - L6–7: 6–8 base emails, 1–2 wave
-      - L8–10: 9–12 base emails, 2–3 wave
-    """
 
     def get(company_name: str):
         try:
@@ -58,9 +52,6 @@ def curated_levels_6_10(scenario_by_company) -> list[dict[str, Any]]:
         docs_spoof = f"{slug}-docs.com"
         finance_spoof = f"{slug}-finance.com"
 
-        # ------------------------
-        # LEVEL 6 (6 base, 1 wave)
-        # ------------------------
         if level_no == 6:
             defs.append(
                 dict(
@@ -165,9 +156,6 @@ def curated_levels_6_10(scenario_by_company) -> list[dict[str, Any]]:
             )
             continue
 
-        # ------------------------
-        # LEVEL 7 (8 base, 2 wave)
-        # ------------------------
         if level_no == 7:
             defs.append(
                 dict(
@@ -299,9 +287,6 @@ def curated_levels_6_10(scenario_by_company) -> list[dict[str, Any]]:
             )
             continue
 
-        # ------------------------
-        # LEVEL 8 (10 base, 2 wave)
-        # ------------------------
         if level_no == 8:
             defs.append(
                 dict(
@@ -460,9 +445,6 @@ def curated_levels_6_10(scenario_by_company) -> list[dict[str, Any]]:
             )
             continue
 
-        # ------------------------
-        # LEVEL 9 (11 base, 3 wave)
-        # ------------------------
         if level_no == 9:
             defs.append(
                 dict(
@@ -638,9 +620,6 @@ def curated_levels_6_10(scenario_by_company) -> list[dict[str, Any]]:
             )
             continue
 
-        # ------------------------
-        # LEVEL 10 (12 base, 3 wave)
-        # ------------------------
         defs.append(
             dict(
                 scenario=scenario,

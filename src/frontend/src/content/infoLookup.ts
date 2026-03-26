@@ -22,7 +22,6 @@ export function getHintLines(
     if (rule) {
       out.push({ id, title: rule.title, summary: rule.summary });
     } else {
-      // Fallback if backend sends an unknown id
       out.push({ id, title: id, summary: '' });
     }
   }

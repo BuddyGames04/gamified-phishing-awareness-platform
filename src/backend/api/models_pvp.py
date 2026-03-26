@@ -41,7 +41,6 @@ class PvpLevel(models.Model):
         max_length=20, choices=VISIBILITY_CHOICES, default="unlisted"
     )
 
-    # optional: later for leaderboards
     plays = models.IntegerField(default=0)
     avg_accuracy = models.FloatField(default=0.0)
 
@@ -60,7 +59,7 @@ class PvpEmail(models.Model):
     body = models.TextField()
 
     is_phish = models.BooleanField(default=False)
-    difficulty = models.IntegerField(default=1)  # keep 1..5 like your system
+    difficulty = models.IntegerField(default=1)                              
     category = models.CharField(max_length=100, blank=True, null=True)
 
     links = models.JSONField(default=list, blank=True)
@@ -86,7 +85,6 @@ class PvpEmail(models.Model):
         has_links = len(links) > 0
         has_attachments = len(attachments) > 0
 
-        # XOR requirement
         if has_links and has_attachments:
             raise ValidationError(
                 "Email must have either links or attachments, not both."

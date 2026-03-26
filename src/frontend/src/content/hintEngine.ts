@@ -43,10 +43,6 @@ function rootDomain(d: string): string {
   return parts.slice(-2).join('.');
 }
 
-/**
- * Rules that are good educational content but NOT actionable inside our game UI,
- * so we never surface them as hints.
- */
 const DISALLOWED_HINT_RULE_IDS = new Set<string>([
   'about.core-loop',
   'about.arcade',
@@ -55,16 +51,11 @@ const DISALLOWED_HINT_RULE_IDS = new Set<string>([
   'phish.definition',
   'phish.social-engineering',
   'phish.not-just-email',
-  // user called these out:
   'intermediate.login-path',
   'intermediate.secondary-channel',
   'adversary.defender-habit',
 ]);
 
-/**
- * For SIMULATION mode only:
- * Return up to 4 hint rule IDs to show in the end-of-level modal.
- */
 export function getSimulationHintRuleIds(email: Email): string[] {
   const rules: string[] = [];
 
@@ -74,10 +65,8 @@ export function getSimulationHintRuleIds(email: Email): string[] {
   const links = Array.isArray(email.links) ? email.links : [];
   const atts = Array.isArray(email.attachments) ? email.attachments : [];
 
-  // Urgency / pressure (very common + useful)
   if (URGENCY_RE.test(subject) || URGENCY_RE.test(body)) rules.push('basic.urgency');
 
-  // Sender inconsistency / domain weirdness
   if (
     senderDom &&
     /(\bsecure\b|\blogin\b|\bverify\b|\bsupport\b|\balerts\b)/i.test(senderDom)
@@ -85,43 +74,35 @@ export function getSimulationHintRuleIds(email: Email): string[] {
     rules.push('basic.sender');
   }
 
-  // Links (including mismatch)
   if (links.length > 0) {
     rules.push('basic.links');
     const linkHost = hostnameOfUrl(String(links[0] || ''));
     if (senderDom && linkHost && rootDomain(senderDom) !== rootDomain(linkHost)) {
-      // mismatch is a strong tell
       rules.push('basic.sender');
     }
-    // Subtle link patterns (subdomain traps etc.)
     if (linkHost && linkHost.split('.').length >= 4) {
       rules.push('advanced.subtle-links');
     }
   }
 
-  // Attachments
   const bodyMentionsAttachment =
     /\battach(ed|ment|ments)?\b/i.test(body) || /\bopen attachment\b/i.test(subject);
   if (atts.length > 0 || bodyMentionsAttachment) {
     rules.push('basic.attachments');
     if (atts.some((a) => RISKY_EXT_RE.test(String(a || '')))) {
-      // still covered by attachments rule; keep it simple for now
+    void 0;
     }
   }
 
-  // Writing / tone
   if (GENERIC_GREETING_RE.test(body)) rules.push('basic.language');
 
-  // Reply chain spoofing
   if (REPLY_CHAIN_RE.test(body) || /^re:\s/i.test(subject) || /^fw:\s/i.test(subject)) {
     rules.push('intermediate.reply-chain');
   }
 
-  // Workplace context / consistency (very relevant to simulator)
   rules.push('intermediate.workflow');
   rules.push('intermediate.consistency');
 
-  // Advanced patterns
   if (PAYMENT_RE.test(subject) || PAYMENT_RE.test(body)) rules.push('advanced.bec');
   if (
     MFA_RE.test(subject) ||
@@ -132,10 +113,8 @@ export function getSimulationHintRuleIds(email: Email): string[] {
     rules.push('advanced.mfa-fatigue');
   }
 
-  // Long email “credibility padding”
   if (subject.length + body.length > 900) rules.push('advanced.long-email');
 
-  // De-dupe, filter disallowed, cap
   const seen = new Set<string>();
   const out: string[] = [];
   for (const r of rules) {
@@ -146,6 +125,5 @@ export function getSimulationHintRuleIds(email: Email): string[] {
     }
   }
 
-  // Keep the hints tight
   return out.slice(0, 4);
 }

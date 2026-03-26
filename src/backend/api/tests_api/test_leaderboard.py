@@ -63,7 +63,6 @@ class TestLeaderboard(APITestCase):
         self.assertEqual(res.status_code, 200, res.data)
         rows = res.data["rows"]
 
-        # highest score first
         if len(rows) >= 2:
             self.assertGreaterEqual(rows[0]["score"], rows[1]["score"])
 

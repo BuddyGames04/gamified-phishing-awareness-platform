@@ -434,7 +434,12 @@ export async function publishPvpLevel(levelId: number): Promise<PvpLevel> {
 
 export async function updatePvpLevel(
   levelId: number,
-  params: { title?: string; briefing?: string; scenario_id?: number; visibility?: PvpVisibility }
+  params: {
+    title?: string;
+    briefing?: string;
+    scenario_id?: number;
+    visibility?: PvpVisibility;
+  }
 ): Promise<PvpLevel> {
   const res = await authFetch(`${API_BASE}/pvp/levels/${levelId}/`, {
     method: 'PATCH',

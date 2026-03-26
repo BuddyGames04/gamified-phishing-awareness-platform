@@ -3,10 +3,9 @@ from rest_framework.test import APITestCase, APIClient
 
 class TestAuthSmoke(APITestCase):
     def setUp(self):
-        self.client = APIClient()  # no credentials
+        self.client = APIClient()                  
 
     def test_leaderboard_requires_auth(self):
-        # If leaderboard is public, change expected code to 200.
         res = self.client.get("/api/leaderboard/?mode=overall&sort=desc")
         self.assertIn(res.status_code, (401, 403), getattr(res, "data", None))
 

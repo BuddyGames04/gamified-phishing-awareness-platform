@@ -1,4 +1,3 @@
-// src/frontend/src/components/InfoView.tsx
 import React, { useMemo, useState } from 'react';
 import '../styles/MenuScreens.css';
 import '../styles/InboxView.css';

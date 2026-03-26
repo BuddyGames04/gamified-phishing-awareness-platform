@@ -36,7 +36,6 @@ const emptyEmail = (): EmailDraft => ({
 const PvpCreateLevel: React.FC<Props> = ({ onBack, onCreatedAndPlay }) => {
   const [step, setStep] = useState<Step>('scenario');
 
-  // scenarios
   const [scenarios, setScenarios] = useState<PvpScenario[]>([]);
   const [useExistingScenario, setUseExistingScenario] = useState(true);
   const [selectedScenarioId, setSelectedScenarioId] = useState<number | null>(null);
@@ -52,14 +51,12 @@ const PvpCreateLevel: React.FC<Props> = ({ onBack, onCreatedAndPlay }) => {
     responsibilitiesText: '', // one per line
   });
 
-  // level
   const [levelForm, setLevelForm] = useState({
     title: '',
     briefing: '',
     visibility: 'unlisted' as PvpVisibility,
   });
 
-  // emails
   const [emails, setEmails] = useState<EmailDraft[]>([
     emptyEmail(),
     emptyEmail(),
@@ -98,15 +95,12 @@ const PvpCreateLevel: React.FC<Props> = ({ onBack, onCreatedAndPlay }) => {
 
       if (e.payloadType === 'attachment') {
         const v = e.payloadValue.trim();
-        // disallow spaces (you can auto-normalise too)
         if (/\s/.test(v))
           return 'Attachment filename cannot contain spaces (use underscores)';
-        // basic filename.ext check
         if (!/^[A-Za-z0-9._-]+\.[A-Za-z0-9]{2,8}$/.test(v))
           return 'Attachment must look like a filename (e.g. invoice.pdf)';
       }
 
-      // XOR enforced by payloadType + payloadValue, so we just ensure it exists.
       if (e.payloadType === 'link') {
         try {
           const u = new URL(e.payloadValue.trim());
@@ -123,7 +117,6 @@ const PvpCreateLevel: React.FC<Props> = ({ onBack, onCreatedAndPlay }) => {
 
   const canProceedScenario = useMemo(() => {
     if (useExistingScenario) return !!selectedScenarioId;
-    // new scenario required fields
     return (
       scenarioForm.name.trim() &&
       scenarioForm.company_name.trim() &&
@@ -152,7 +145,6 @@ const PvpCreateLevel: React.FC<Props> = ({ onBack, onCreatedAndPlay }) => {
     setErr(null);
     let createdLevel: any = null;
     try {
-      // Step A: scenario id
       let scenarioId: number;
 
       if (useExistingScenario) {
@@ -178,7 +170,6 @@ const PvpCreateLevel: React.FC<Props> = ({ onBack, onCreatedAndPlay }) => {
         scenarioId = createdScenario.id;
       }
 
-      // Step B: create level
       createdLevel = await createPvpLevel({
         scenario_id: scenarioId,
         title: levelForm.title,
@@ -186,9 +177,6 @@ const PvpCreateLevel: React.FC<Props> = ({ onBack, onCreatedAndPlay }) => {
         visibility: 'unlisted', // always start unlisted
       });
 
-      // Step C: create emails
-      // sort_order: base first, wave later. We'll auto-assign:
-      // base sort: 0.. ; wave sort: 100.. (matches your simulator convention, but backend PVP uses is_wave)
       let baseIdx = 0;
       let waveIdx = 0;
 
@@ -228,7 +216,7 @@ const PvpCreateLevel: React.FC<Props> = ({ onBack, onCreatedAndPlay }) => {
         try {
           await deletePvpLevel(createdLevel.id);
         } catch {
-          /* ignore cleanup errors */
+        void 0;
         }
       }
       setErr(String(e?.message ?? e));

@@ -23,9 +23,6 @@ urlpatterns = [
     path("arcade/next/", views_arcade.get_arcade_next, name="arcade_next"),
     path("arcade/attempt/", views_arcade.post_arcade_attempt, name="arcade_attempt"),
     path("level/", views.get_level),
-    # --------------------
-    # PVP
-    # --------------------
     path("pvp/scenarios/mine/", views_pvp.pvp_scenarios_mine),
     path("pvp/scenarios/", views_pvp.pvp_scenarios_create),
     path("pvp/scenarios/<int:scenario_id>/", views_pvp.pvp_scenarios_detail),

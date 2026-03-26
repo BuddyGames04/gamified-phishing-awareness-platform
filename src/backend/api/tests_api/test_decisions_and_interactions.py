@@ -9,7 +9,6 @@ class TestDecisionsAndInteractions(APITestCase):
         self.client, self.user = make_authed_client()
 
     def test_create_interaction_event(self):
-        # Assumes /api/interaction/ exists and accepts: user_id, email_id, event_type, value
         res = self.client.post(
             "/api/interaction/",
             {
@@ -26,7 +25,6 @@ class TestDecisionsAndInteractions(APITestCase):
         )
 
     def test_create_decision_event(self):
-        # create a run (some implementations require run_id nullable; your frontend passes run_id)
         run = LevelRun.objects.create(
             user_id=self.user.username,
             mode="simulation",

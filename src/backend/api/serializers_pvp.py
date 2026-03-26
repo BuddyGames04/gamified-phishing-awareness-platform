@@ -5,7 +5,6 @@ from rest_framework import serializers
 
 from .models_pvp import PvpEmail, PvpLevel, PvpScenario
 
-# allow letters/numbers/._- and require an extension like ".pdf"
 FILENAME_RE = re.compile(r"^[A-Za-z0-9._-]+\.[A-Za-z0-9]{2,8}$")
 
 
@@ -93,7 +92,6 @@ class PvpEmailSerializer(serializers.ModelSerializer):
                 xs = [xs]
             return [str(x).strip() for x in xs if str(x).strip()]
 
-        # ---- normalise basic fields (only if provided) ----
         if "sender_name" in attrs:
             attrs["sender_name"] = tidy_space(attrs.get("sender_name"))
             if len(attrs["sender_name"]) < 2:
@@ -119,7 +117,6 @@ class PvpEmailSerializer(serializers.ModelSerializer):
             cat = attrs.get("category")
             attrs["category"] = tidy_space(cat) if cat else None
 
-        # ---- difficulty ----
         if "difficulty" in attrs:
             try:
                 d = int(attrs["difficulty"])
@@ -133,7 +130,6 @@ class PvpEmailSerializer(serializers.ModelSerializer):
                 )
             attrs["difficulty"] = d
 
-        # ---- list fields (PATCH-safe: only touch if present) ----
         if "links" in attrs:
             attrs["links"] = tidy_list(attrs.get("links"))
 
@@ -142,7 +138,6 @@ class PvpEmailSerializer(serializers.ModelSerializer):
                 f.replace(" ", "_") for f in tidy_list(attrs.get("attachments"))
             ]
 
-        # ---- determine final state for XOR (PATCH-safe) ----
         links = attrs.get("links", None)
         attachments = attrs.get("attachments", None)
 
@@ -175,7 +170,6 @@ class PvpEmailSerializer(serializers.ModelSerializer):
                 }
             )
 
-        # ---- link validation ----
         if has_links:
             if len(final_links) > 5:
                 raise serializers.ValidationError({"links": "Maximum 5 links allowed."})
@@ -188,7 +182,6 @@ class PvpEmailSerializer(serializers.ModelSerializer):
                 ):
                     raise serializers.ValidationError({"links": f"Invalid URL: {u}"})
 
-        # ---- attachment validation ----
         if has_attachments:
             if len(final_attachments) > 5:
                 raise serializers.ValidationError(

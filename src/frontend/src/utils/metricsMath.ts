@@ -4,7 +4,6 @@ export function clamp01(x: number) {
 }
 
 export function asPct01(v: number) {
-  // supports either 0..1 or 0..100
   if (!Number.isFinite(v)) return 0;
   return v <= 1 ? v : v / 100;
 }
@@ -15,16 +14,11 @@ export function mean(xs: number[]) {
   return clean.reduce((a, b) => a + b, 0) / clean.length;
 }
 
-/**
- * Linear regression slope over equally spaced x = 0..n-1.
- * Returns slope in "units per run" (here: pct points per run if input is 0..1 accuracy).
- */
 export function slopePerRun(values: number[]) {
   const ys = values.map(asPct01);
   const n = ys.length;
   if (n < 2) return 0;
 
-  // x = 0..n-1
   const xMean = (n - 1) / 2;
   const yMean = mean(ys);
 
@@ -42,7 +36,6 @@ export function slopePerRun(values: number[]) {
 }
 
 export function formatPp(v01: number) {
-  // v01 is in 0..1 space; format as percentage points
   const pp = v01 * 100;
   const sign = pp > 0 ? '+' : '';
   return `${sign}${pp.toFixed(1)}pp`;

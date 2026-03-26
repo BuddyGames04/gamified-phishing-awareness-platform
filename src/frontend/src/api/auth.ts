@@ -12,9 +12,7 @@ export async function login(username: string, password: string) {
     try {
       const data = await res.json();
       detail = data?.error || data?.detail || detail;
-    } catch (e) {
-      // Ignore JSON parse errors
-    }
+    } catch (e) { void 0; }
     throw new Error(detail);
   }
 
@@ -36,9 +34,7 @@ export async function register(username: string, password: string) {
     try {
       const data = await res.json();
       detail = data?.error || data?.detail || detail;
-    } catch (e) {
-      // Ignore JSON parse errors
-    }
+    } catch (e) { void 0; }
     throw new Error(detail);
   }
 

@@ -30,7 +30,6 @@ const App: React.FC = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const [username, setUsername] = useState<string | null>(() => {
-    // Restore session if token exists
     const token = localStorage.getItem('authToken');
     const storedUser = localStorage.getItem('username');
     return token && storedUser ? storedUser : null;
@@ -50,7 +49,6 @@ const App: React.FC = () => {
     setScreen('menu');
   };
 
-  // Require auth for the app
   if (!username) {
     return (
       <div className="App">

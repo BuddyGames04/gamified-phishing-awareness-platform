@@ -12,7 +12,6 @@ interface Props {
   onReplay: () => void;
   onExit: () => void;
 
-  // NEW
   hints?: HintLine[];
   timeSeconds?: number;
   score?: number;

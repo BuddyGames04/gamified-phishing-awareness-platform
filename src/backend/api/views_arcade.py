@@ -11,14 +11,11 @@ from .models import Email, ArcadeAttempt, ArcadeState
 from .serializers import EmailSerializer
 
 
-RECENT_WINDOW = 25  # don’t repeat last N
+RECENT_WINDOW = 25                       
 TARGET_MIN = 1.0
-TARGET_MAX = 5.0  # Email.difficulty is 1..5
+TARGET_MAX = 5.0                            
 
 
-# -------------------------
-# Hint analysis regex rules
-# -------------------------
 URGENCY_RE = re.compile(
     r"\b("
     r"urgent|immediately|asap|verify now|action required|final warning|account locked|"
@@ -41,8 +38,6 @@ RISKY_EXT_RE = re.compile(
     re.IGNORECASE,
 )
 
-# Arcade hints: only these rules are shown in Arcade mode
-# (Excludes educational-only and intermediate/advanced rules)
 ARCADE_ALLOWED_HINTS = {
     "basic.sender",
     "basic.urgency",
@@ -54,9 +49,6 @@ ARCADE_ALLOWED_HINTS = {
 }
 
 
-# -------------------------
-# Helper functions
-# -------------------------
 
 def _domain_of_email(addr: str) -> str:
     addr = (addr or "").strip().lower()
@@ -74,7 +66,6 @@ def _domain_of_url(u: str) -> str:
 
 
 def _url_has_userinfo(u: str) -> bool:
-    # classic https://legit.com@evil.com trick – username/password is split out
     try:
         p = urlparse((u or "").strip())
         return bool(p.username) or bool(p.password)
@@ -93,9 +84,6 @@ def _root_domain(d: str) -> str:
 
 
 def _pick_arcade_hint_rule_ids(email) -> list[str]:
-    """
-    Return 1–3 beginner-friendly rule IDs explaining likely red flags.
-    """
     rules: list[str] = []
 
     sender_dom = _domain_of_email(getattr(email, "sender_email", ""))
@@ -106,32 +94,25 @@ def _pick_arcade_hint_rule_ids(email) -> list[str]:
     links = getattr(email, "links", None) or []
     atts = getattr(email, "attachments", None) or []
 
-    # Sender identity (only warn when it's actually a phishing message)
     if is_phish and sender_dom and any(x in sender_dom for x in ["secure", "login", "verify", "support", "alerts"]):
         rules.append("basic.sender")
 
-    # Urgency
     if URGENCY_RE.search(subject) or URGENCY_RE.search(body):
         rules.append("basic.urgency")
 
-    # Generic greeting
     if GENERIC_GREETING_RE.search(body):
         rules.append("basic.language")
 
-    # Credential bait
     if CRED_RE.search(subject) or CRED_RE.search(body):
         rules.append("intermediate.login-path")
 
-    # Links
     if links:
         rules.append("basic.links")
         u0 = str(links[0])
 
-        # userinfo trick
         if _url_has_userinfo(u0):
             rules.append("advanced.subtle-links")
 
-        # sender vs link domain mismatch (check root domains)
         link_dom = _domain_of_url(u0)
         if sender_dom and link_dom:
             if _root_domain(sender_dom) != _root_domain(link_dom):
@@ -140,13 +121,11 @@ def _pick_arcade_hint_rule_ids(email) -> list[str]:
                 if "basic.links" not in rules:
                     rules.append("basic.links")
 
-    # Attachments
     if atts:
         rules.append("basic.attachments")
         if any(RISKY_EXT_RE.search(str(a or "")) for a in atts):
-            pass  # still covered by attachments rule
+            pass                                     
 
-    # De-duplicate preserving order
     seen = set()
     out: list[str] = []
     for r in rules:
@@ -154,13 +133,9 @@ def _pick_arcade_hint_rule_ids(email) -> list[str]:
             out.append(r)
             seen.add(r)
 
-    # Filter against arcade-compatible hints only
     return [r for r in out if r in ARCADE_ALLOWED_HINTS][:3]
 
 
-# -------------------------
-# Email picker
-# -------------------------
 
 def _pick_email(user_id: str, target_d: int):
     recent_ids = list(
@@ -187,9 +162,6 @@ def _pick_email(user_id: str, target_d: int):
     return Email.objects.filter(mode="arcade").order_by("?").first()
 
 
-# -------------------------
-# API Endpoints
-# -------------------------
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
@@ -232,7 +204,6 @@ def post_arcade_attempt(request):
     state.clamp(TARGET_MIN, TARGET_MAX)
     target_before = state.difficulty_float
 
-    # Staircase update
     state.total += 1
     if was_correct:
         state.correct += 1
@@ -258,20 +229,15 @@ def post_arcade_attempt(request):
         email_difficulty=email.difficulty,
     )
 
-    # -------------------------
-    # Hint logic
-    # -------------------------
 
     hint_rule_ids = []
     hint_title = None
 
     if not was_correct:
-        # Missed a phish
         if email.is_phish and not bool(guess_is_phish):
             hint_title = "Hint: what you might have missed"
             hint_rule_ids = _pick_arcade_hint_rule_ids(email)
 
-        # False alarm
         elif (not email.is_phish) and bool(guess_is_phish):
             hint_title = "Hint: avoiding false alarms"
             hint_rule_ids = ["intermediate.workflow", "intermediate.secondary-channel"]

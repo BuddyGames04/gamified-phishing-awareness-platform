@@ -12,6 +12,6 @@ export async function playWaveChime() {
     if (!audio) primeWaveAudio();
     await audio?.play();
   } catch {
-    // ignore (autoplay restrictions, user muted, etc.)
+  void 0;
   }
 }

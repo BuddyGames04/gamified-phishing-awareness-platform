@@ -11,23 +11,17 @@ type Props = {
   onBack?: () => void;
 };
 
-// -----------------------------
-// Algorithms showcase
-// -----------------------------
 
-// 0) Simple "string slicing" helper for display + for optional prefix filter
 function slicePreview(s: string, max = 18): string {
   const t = String(s ?? '');
   if (t.length <= max) return t;
   return `${t.slice(0, max)}…`; // string slicing
 }
 
-// 1) String match (simple)
 function containsQuerySimple(haystack: string, needle: string): boolean {
   return haystack.toLowerCase().includes(needle.toLowerCase());
 }
 
-// 1b) KMP (Knuth Morris Pratt flex)
 function buildKmpTable(pattern: string): number[] {
   const p = pattern.toLowerCase();
   const table = new Array(p.length).fill(0);
@@ -58,7 +52,6 @@ function containsQueryKmp(haystack: string, needle: string): boolean {
   return false;
 }
 
-// 2) Merge sort
 function mergeSort<T>(arr: T[], cmp: (a: T, b: T) => number): T[] {
   if (arr.length <= 1) return arr.slice();
 
@@ -71,7 +64,6 @@ function mergeSort<T>(arr: T[], cmp: (a: T, b: T) => number): T[] {
   let j = 0;
 
   while (i < left.length && j < right.length) {
-    // stable: <= takes from left first on ties
     if (cmp(left[i], right[j]) <= 0) out.push(left[i++]);
     else out.push(right[j++]);
   }
@@ -82,7 +74,6 @@ function mergeSort<T>(arr: T[], cmp: (a: T, b: T) => number): T[] {
   return out;
 }
 
-// 2b) Bubble sort (educational - slow on purpose)
 function bubbleSort<T>(arr: T[], cmp: (a: T, b: T) => number): T[] {
   const out = arr.slice();
   const n = out.length;
@@ -102,7 +93,6 @@ function bubbleSort<T>(arr: T[], cmp: (a: T, b: T) => number): T[] {
   return out;
 }
 
-// inear search to find a specific user id
 function linearSearchUserIndex(rows: LeaderboardRow[], userId: string): number {
   const target = (userId ?? '').trim().toLowerCase();
   if (!target) return -1;
@@ -112,9 +102,6 @@ function linearSearchUserIndex(rows: LeaderboardRow[], userId: string): number {
   return -1;
 }
 
-// -----------------------------
-// Helpers
-// -----------------------------
 
 function fmtMs(ms: number | null): string {
   if (ms == null) return '—';
@@ -142,13 +129,10 @@ const Leaderboard: React.FC<Props> = ({ onBack }) => {
   const [q, setQ] = useState('');
   const [useKmp, setUseKmp] = useState(false);
 
-  // sorting algorithm toggles
   const [sortAlgo, setSortAlgo] = useState<'merge' | 'bubble' | 'native'>('merge');
 
-  // extra “string slicing” / prefix filter toggle
   const [prefixOnly, setPrefixOnly] = useState(false);
 
-  // simple search demo: find exact username & highlight
   const [findUser, setFindUser] = useState('');
   const [foundIndex, setFoundIndex] = useState<number>(-1);
 
@@ -156,7 +140,6 @@ const Leaderboard: React.FC<Props> = ({ onBack }) => {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-  // Server fetch: aggregated per mode
   useEffect(() => {
     let cancelled = false;
 
@@ -173,7 +156,6 @@ const Leaderboard: React.FC<Props> = ({ onBack }) => {
         if (!cancelled) {
           const next = Array.isArray(res?.rows) ? res.rows : [];
           setRows(next);
-          // reset “found” when dataset changes
           setFoundIndex(-1);
         }
       } catch (e: any) {
@@ -192,7 +174,6 @@ const Leaderboard: React.FC<Props> = ({ onBack }) => {
   const filteredAndSorted = useMemo(() => {
     const query = q.trim();
 
-    // Filter: query match on user_id
     const matcher = useKmp ? containsQueryKmp : containsQuerySimple;
 
     const filtered = !query
@@ -200,14 +181,12 @@ const Leaderboard: React.FC<Props> = ({ onBack }) => {
       : rows.filter((r) => {
           const id = String(r.user_id ?? '');
           if (prefixOnly) {
-            // string slicing: compare start segment only (prefix match)
             const n = query.length;
             return id.slice(0, n).toLowerCase() === query.toLowerCase();
           }
           return matcher(id, query);
         });
 
-    // Sort comparator (primary score, secondary user_id)
     const dir = sortDir === 'asc' ? 1 : -1;
 
     const cmp = (a: LeaderboardRow, b: LeaderboardRow) => {
@@ -215,7 +194,6 @@ const Leaderboard: React.FC<Props> = ({ onBack }) => {
       const sb = safeNum(b.score, 0);
       if (sa !== sb) return (sa - sb) * dir;
 
-      // tie-breaker for determinism
       const ua = String(a.user_id ?? '').toLowerCase();
       const ub = String(b.user_id ?? '').toLowerCase();
       if (ua < ub) return -1;
@@ -228,7 +206,6 @@ const Leaderboard: React.FC<Props> = ({ onBack }) => {
     return mergeSort(filtered, cmp);
   }, [rows, q, sortDir, useKmp, sortAlgo, prefixOnly]);
 
-  // update “found index” when user searches exact username OR list changes
   useEffect(() => {
     const idx = linearSearchUserIndex(filteredAndSorted, findUser);
     setFoundIndex(idx);

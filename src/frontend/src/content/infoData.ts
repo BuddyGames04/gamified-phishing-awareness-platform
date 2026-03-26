@@ -1,4 +1,3 @@
-// src/frontend/src/content/infoData.ts
 
 export type InfoRule = {
   id: string; // e.g. "links.mismatch"

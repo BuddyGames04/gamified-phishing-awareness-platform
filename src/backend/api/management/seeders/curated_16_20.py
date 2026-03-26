@@ -1,4 +1,3 @@
-# src/backend/api/management/seeders/curated_16_20.py
 from __future__ import annotations
 
 from typing import Any
@@ -7,15 +6,6 @@ from api.management.seeders.common import domain_for_company, slugify_company
 
 
 def curated_levels_16_20(scenario_by_company) -> list[dict[str, Any]]:
-    """
-    Levels 16–20: endgame realism under breach conditions.
-    - Company has suffered a data breach
-    - Sophos email protection degraded (higher phish volume)
-    - Highly targeted spear phish: 1–2 max per level
-    - 22–28 base emails
-    - 3 wave injections
-    - Threads overlap across IT/Sec/Legal/Finance/HR/Facilities/External vendors
-    """
 
     def get(company_name: str):
         try:
@@ -150,14 +140,11 @@ def curated_levels_16_20(scenario_by_company) -> list[dict[str, Any]]:
         links = list(kwargs.get("links") or [])
         attachments = list(kwargs.get("attachments") or [])
 
-        # XOR policy (matches your existing helper):
-        # if both present, keep attachments and clear links
         if links and attachments:
             links = []
             kwargs["links"] = []
             kwargs["attachments"] = attachments
 
-        # if neither present, generate a default internal thread link
         if not links and not attachments:
             dom = kwargs.get("dom", "internal")
             slug = kwargs.get("slug", "thread")
@@ -176,8 +163,6 @@ def curated_levels_16_20(scenario_by_company) -> list[dict[str, Any]]:
         slug = slugify_company(scenario.company_name)
         mgr_email = f"{clean_mgr_name(scenario.line_manager_name)}@{dom}"
 
-        # Spoof domains
-        # Keep these *less cartoonish* than early levels; still separate from internal domain.
         sharepoint_spoof = f"{slug}-sharepoint.com"
         helpdesk_spoof = f"{slug}-helpdesk.com"
         docs_spoof = f"{slug}-docs.com"
@@ -186,7 +171,7 @@ def curated_levels_16_20(scenario_by_company) -> list[dict[str, Any]]:
         hr_spoof = f"{slug}-hr.com"
         vendorhub_spoof = f"{slug}-vendorhub.com"
         bank_spoof = f"{slug}-banking.com"
-        incident_spoof = f"{slug}-incident.com"  # spear-friendly look
+        incident_spoof = f"{slug}-incident.com"                       
 
         finance_portal = f"https://{dom}/finance"
         hr_portal = f"https://{dom}/hr"
@@ -196,9 +181,6 @@ def curated_levels_16_20(scenario_by_company) -> list[dict[str, Any]]:
         docs_portal = f"https://{dom}/portal/docs"
         incident_portal = f"https://{dom}/security/incident"
 
-        # -------------------------
-        # LEVEL 16 (NB)
-        # -------------------------
         if level_no == 16:
             defs.append(
                 dict(
@@ -394,7 +376,6 @@ def curated_levels_16_20(scenario_by_company) -> list[dict[str, Any]]:
                             ],
                             attachments=[],
                         ),
-                        # ---- spear phish (1 max for level 16) ----
                         e(
                             sender_name="Incident Response Portal",
                             sender_email=f"no-reply@{incident_spoof}",
@@ -412,7 +393,6 @@ def curated_levels_16_20(scenario_by_company) -> list[dict[str, Any]]:
                             ],
                             attachments=[],
                         ),
-                        # additional realistic noise
                         e(
                             sender_name="Comms Team",
                             sender_email=f"comms@{dom}",
@@ -501,9 +481,6 @@ def curated_levels_16_20(scenario_by_company) -> list[dict[str, Any]]:
             )
             continue
 
-        # -------------------------
-        # LEVEL 17 (RS)
-        # -------------------------
         if level_no == 17:
             defs.append(
                 dict(
@@ -658,7 +635,6 @@ def curated_levels_16_20(scenario_by_company) -> list[dict[str, Any]]:
                             links=[],
                             attachments=[],
                         ),
-                        # spear phish (1 max for level 17) — mimics incident update + access review
                         e(
                             sender_name="Security Incident Updates",
                             sender_email=f"no-reply@{incident_spoof}",
@@ -675,7 +651,6 @@ def curated_levels_16_20(scenario_by_company) -> list[dict[str, Any]]:
                             ],
                             attachments=[],
                         ),
-                        # additional realistic phish noise (non-spear)
                         e(
                             sender_name="IT Admin",
                             sender_email=f"admin@{helpdesk_spoof}",
@@ -792,9 +767,6 @@ def curated_levels_16_20(scenario_by_company) -> list[dict[str, Any]]:
             )
             continue
 
-        # -------------------------
-        # LEVEL 18 (HL)
-        # -------------------------
         if level_no == 18:
             defs.append(
                 dict(
@@ -951,7 +923,6 @@ def curated_levels_16_20(scenario_by_company) -> list[dict[str, Any]]:
                             ],
                             attachments=[],
                         ),
-                        # ---- spear phish 1 (carrier slot) ----
                         e(
                             sender_name="Carrier Portal Notifications",
                             sender_email=f"no-reply@{slug}-tracking.com",
@@ -968,7 +939,6 @@ def curated_levels_16_20(scenario_by_company) -> list[dict[str, Any]]:
                             ],
                             attachments=[],
                         ),
-                        # ---- spear phish 2 (bank change evidence) ----
                         e(
                             sender_name="Finance Controls",
                             sender_email=f"controls@{finance_spoof}",
@@ -986,7 +956,6 @@ def curated_levels_16_20(scenario_by_company) -> list[dict[str, Any]]:
                             ],
                             attachments=[],
                         ),
-                        # additional phish noise (non-spear)
                         e(
                             sender_name="IT Wi-Fi Team",
                             sender_email=f"no-reply@{helpdesk_spoof}",
@@ -1099,9 +1068,6 @@ def curated_levels_16_20(scenario_by_company) -> list[dict[str, Any]]:
             )
             continue
 
-        # -------------------------
-        # LEVEL 19 (KU)
-        # -------------------------
         if level_no == 19:
             defs.append(
                 dict(
@@ -1223,7 +1189,6 @@ def curated_levels_16_20(scenario_by_company) -> list[dict[str, Any]]:
                             links=[f"https://{dom}/events/EV-1041/vip-schedule"],
                             attachments=[],
                         ),
-                        # spear phish 1: guest list / facilities portal spoof
                         e(
                             sender_name="University SharePoint",
                             sender_email=f"no-reply@{sharepoint_spoof}",
@@ -1237,7 +1202,6 @@ def curated_levels_16_20(scenario_by_company) -> list[dict[str, Any]]:
                             ],
                             attachments=[],
                         ),
-                        # optional spear phish 2 (keep to 2 max): payroll adjustment referencing HR reminders
                         e(
                             sender_name="HR Portal Notifications",
                             sender_email=f"no-reply@{payroll_spoof}",
@@ -1249,7 +1213,6 @@ def curated_levels_16_20(scenario_by_company) -> list[dict[str, Any]]:
                             links=[f"http://{payroll_spoof}/pay/verify?case=PAY-11802"],
                             attachments=[],
                         ),
-                        # additional realism / noise
                         e(
                             sender_name="IT Service Desk",
                             sender_email=f"support@{dom}",
@@ -1366,9 +1329,6 @@ def curated_levels_16_20(scenario_by_company) -> list[dict[str, Any]]:
             )
             continue
 
-        # -------------------------
-        # LEVEL 20 (NB) — FINAL
-        # -------------------------
         defs.append(
             dict(
                 scenario=scenario,
@@ -1596,7 +1556,6 @@ def curated_levels_16_20(scenario_by_company) -> list[dict[str, Any]]:
                         ],
                         attachments=[],
                     ),
-                    # ---- spear phish 1 (banking verification) ----
                     e(
                         sender_name="Banking Alerts",
                         sender_email=f"alerts@{bank_spoof}",
@@ -1608,7 +1567,6 @@ def curated_levels_16_20(scenario_by_company) -> list[dict[str, Any]]:
                         links=[f"http://{bank_spoof}/reauth/release?case=BC-9470"],
                         attachments=[],
                     ),
-                    # ---- spear phish 2 (audit/legal doc request) ----
                     e(
                         sender_name="Legal Ops",
                         sender_email=f"legal@{docs_spoof}",
@@ -1623,7 +1581,6 @@ def curated_levels_16_20(scenario_by_company) -> list[dict[str, Any]]:
                         links=[f"http://{docs_spoof}/ack/evidence?ref=INC-2026-04"],
                         attachments=[],
                     ),
-                    # extra non-spear phish noise
                     e(
                         sender_name="IT SSO Team",
                         sender_email=f"no-reply@{helpdesk_spoof}",

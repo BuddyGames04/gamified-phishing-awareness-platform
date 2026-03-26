@@ -39,8 +39,6 @@ def seed_emails(apps, schema_editor):
         attachments=[],
     )
 
-    # Add the rest here
-    # and add some links/attachments to the phishy ones)
 
 
 class Migration(migrations.Migration):

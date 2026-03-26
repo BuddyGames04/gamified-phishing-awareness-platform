@@ -6,12 +6,6 @@ from api.management.seeders.common import domain_for_company, slugify_company
 
 
 def curated_levels_11_15(scenario_by_company) -> list[dict[str, Any]]:
-    """
-    Levels 11–15: high realism, high volume, multi-thread pressure.
-    - 18–24 base emails
-    - 2–3 wave injections
-    - Phish uses context (payroll, HR, supplier, legal, IT, banking, personal), not obvious red flags
-    """
 
     def get(company_name: str):
         try:

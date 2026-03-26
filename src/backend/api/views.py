@@ -16,7 +16,7 @@ from .serializers import (
 
 @api_view(["GET"])
 def get_emails(request):
-    mode = request.query_params.get("mode")  # arcade|simulation
+    mode = request.query_params.get("mode")                     
     limit = int(request.query_params.get("limit", "20"))
 
     if mode == "simulation":

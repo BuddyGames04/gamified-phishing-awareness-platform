@@ -113,7 +113,11 @@ const PvpEditLevel: React.FC<Props> = ({ level, onBack }) => {
   );
 
   const canSave =
-    !!title.trim() && emailsValid && countValid && !loading && level.visibility !== 'posted';
+    !!title.trim() &&
+    emailsValid &&
+    countValid &&
+    !loading &&
+    level.visibility !== 'posted';
 
   const emptyEmail = (): EditableEmailDraft => ({
     sender_name: '',
@@ -232,9 +236,12 @@ const PvpEditLevel: React.FC<Props> = ({ level, onBack }) => {
           <div>
             <div style={{ fontWeight: 800 }}>Emails Builder</div>
             <div style={{ fontSize: 13, opacity: 0.85 }}>
-              Total: <strong>{totals.total}</strong> • Waves: <strong>{totals.waves}</strong>{' '}
+              Total: <strong>{totals.total}</strong> • Waves:{' '}
+              <strong>{totals.waves}</strong>{' '}
               {!countValid && (
-                <span style={{ color: 'salmon', marginLeft: 8 }}>Must be 5-20 emails</span>
+                <span style={{ color: 'salmon', marginLeft: 8 }}>
+                  Must be 5-20 emails
+                </span>
               )}
             </div>
           </div>
@@ -268,7 +275,11 @@ const PvpEditLevel: React.FC<Props> = ({ level, onBack }) => {
         )}
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-          <button className="btn btn-danger" disabled={!canSave || busy} onClick={saveAll}>
+          <button
+            className="btn btn-danger"
+            disabled={!canSave || busy}
+            onClick={saveAll}
+          >
             {busy ? 'Saving...' : 'Save changes'}
           </button>
         </div>

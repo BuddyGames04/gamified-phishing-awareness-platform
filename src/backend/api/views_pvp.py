@@ -1,4 +1,3 @@
-# src/backend/api/views_pvp.py
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
 from django.db.models import Count, Q, Sum
@@ -15,9 +14,6 @@ from .serializers_pvp import (
     PvpScenarioSerializer,
 )
 
-# -------------------------
-# Scenarios (owned CRUD)
-# -------------------------
 
 
 @api_view(["GET"])
@@ -54,13 +50,9 @@ def pvp_scenarios_detail(request, scenario_id: int):
     return Response(PvpScenarioSerializer(obj).data)
 
 
-# -------------------------
-# Levels (owned CRUD + publish)
-# -------------------------
 
 
 def _hydrate_level_stats_from_runs(levels):
-    """Populate plays/avg_accuracy from completed PVP runs for response accuracy."""
     level_ids = [lvl.id for lvl in levels]
     if not level_ids:
         return levels
@@ -109,7 +101,6 @@ def pvp_levels_mine(request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def pvp_levels_posted(request):
-    # Auth-only for now. If you want public later, remove permission decorator.
     qs = list(
         PvpLevel.objects.filter(visibility="posted")
         .select_related("scenario")
@@ -133,7 +124,6 @@ def pvp_levels_create(request):
     except (PvpScenario.DoesNotExist, ValueError):
         return Response({"detail": "Scenario not found"}, status=404)
 
-    # IMPORTANT: always start unlisted; publishing must go through /publish/
     data["visibility"] = "unlisted"
 
     ser = PvpLevelSerializer(data=data)
@@ -154,7 +144,6 @@ def pvp_levels_detail(request, level_id: int):
         return Response({"detail": "Level not found"}, status=404)
 
     if request.method == "DELETE":
-        # delete shadow Email rows for all emails in this level
         shadow_ids = list(
             PvpEmail.objects.filter(level=lvl)
             .exclude(shadow_email__isnull=True)
@@ -165,7 +154,6 @@ def pvp_levels_detail(request, level_id: int):
             Email.objects.filter(id__in=shadow_ids).delete()
         return Response(status=204)
 
-    # Block visibility changes to posted here — must use /publish/
     if "visibility" in request.data and str(request.data.get("visibility")) == "posted":
         return Response({"detail": "Use /publish/ to post a level."}, status=400)
 
@@ -176,7 +164,6 @@ def pvp_levels_detail(request, level_id: int):
 
 
 def _validate_publish_constraints(level: PvpLevel):
-    # email count 5..20 total
     total = PvpEmail.objects.filter(level=level).count()
     if total < 5 or total > 20:
         return f"Level must have 5–20 emails (currently {total})."
@@ -206,15 +193,11 @@ def pvp_levels_publish(request, level_id: int):
     return Response(PvpLevelSerializer(lvl).data)
 
 
-# -------------------------
-# Emails (CRUD inside a level)
-# -------------------------
 
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def pvp_level_emails_list(request, level_id: int):
-    # owner-only list (even if posted)
     try:
         lvl = PvpLevel.objects.get(id=level_id, owner=request.user)
     except PvpLevel.DoesNotExist:
@@ -277,22 +260,11 @@ def pvp_level_emails_detail(request, level_id: int, email_id: int):
     return Response(PvpEmailSerializer(em).data)
 
 
-# -------------------------
-# Play endpoint (InboxView) — returns shadow Email rows
-# -------------------------
 
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def pvp_play_emails(request):
-    """
-    Returns real Email rows (shadow copies) so the frontend can reuse the existing
-    EmailSerializer shape without special-casing PVP.
-
-    Rules:
-    - Can play if the level is posted OR the requester is the owner.
-    - Supports ?wave=true|false and ?limit=N.
-    """
     level_id = request.query_params.get("level_id")
     if not level_id:
         return Response({"detail": "level_id required"}, status=400)
@@ -311,7 +283,6 @@ def pvp_play_emails(request):
         "on",
     )
 
-    # Can play if posted OR owner
     lvl = (
         PvpLevel.objects.select_related("scenario")
         .filter(id=lvl_id_int)
@@ -321,12 +292,10 @@ def pvp_play_emails(request):
     if not lvl:
         return Response({"detail": "Level not found"}, status=404)
 
-    # PvpEmail rows in the correct order for this wave state
     pvp_qs = PvpEmail.objects.filter(level=lvl, is_wave=wave_true).order_by(
         "sort_order", "id"
     )[:limit]
 
-    # Ensure shadow emails exist and preserve order
     shadow_ids: list[int] = []
     for pe in pvp_qs:
         sid = getattr(pe, "shadow_email_id", None)

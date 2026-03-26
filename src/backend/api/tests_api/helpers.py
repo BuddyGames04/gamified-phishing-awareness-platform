@@ -9,9 +9,6 @@ else:
     User = get_user_model()
 
 def make_authed_client(username: str = "testuser", password: str = "pass1234") -> Tuple[APIClient, User]:
-    """
-    Creates a Django user + DRF token and returns an APIClient with Authorization header set.
-    """
     user = User.objects.create_user(username=username, password=password)
     token, _ = Token.objects.get_or_create(user=user)
 
