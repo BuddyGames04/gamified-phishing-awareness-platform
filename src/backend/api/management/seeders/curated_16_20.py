@@ -171,7 +171,7 @@ def curated_levels_16_20(scenario_by_company) -> list[dict[str, Any]]:
         hr_spoof = f"{slug}-hr.com"
         vendorhub_spoof = f"{slug}-vendorhub.com"
         bank_spoof = f"{slug}-banking.com"
-        incident_spoof = f"{slug}-incident.com"                       
+        incident_spoof = f"{slug}-incident.com"
 
         finance_portal = f"https://{dom}/finance"
         hr_portal = f"https://{dom}/hr"
